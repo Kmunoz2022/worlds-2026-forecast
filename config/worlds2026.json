@@ -1,0 +1,156 @@
+{
+  "_notes": [
+    "Teams confirmed 2026-09-30; seeds, Play-In and CBLOL #2 (FURIA) confirmed 2026-10-13. Format from web search (Play-In double-elim Bo5, 1 advances; 16-team Swiss, 3 wins in / 3 losses out, Bo1 except Bo3 for qualification/elimination matches, no same-region round 1; 8-team single-elim Bo5 knockouts).",
+    "Play-In confirmed 2026-10-13: Cloud9, Karmine Corp, MVK, FURIA. Round 1: C9 vs KC, FURIA vs MVK; grand final = winners' bracket winner vs losers' bracket winner.",
+    "UNCONFIRMED: Swiss pools (built from seeds following the 2025 pool structure). Edit here when the draw is out, then rerun scripts/simulate_worlds.py.",
+    "cblol_2nd lists the candidates for the CBLOL #2 slot; the simulator runs one scenario per candidate.",
+    "roster_overrides: Worlds lineup changes the data can't see yet. TES top laner 369 returns (announced; added 2026-10-13); ZUIAN played Apr-Sep."
+  ],
+  "teams": {
+    "Gen.G": {
+      "teamid": "oe:team:50f58982d91a36557ec8aec52ab014f",
+      "region": "LCK",
+      "seed": 1
+    },
+    "Hanwha Life Esports": {
+      "teamid": "oe:team:3a1d18f46bcb3716ebcfcf4ef068934",
+      "region": "LCK",
+      "seed": 2
+    },
+    "T1": {
+      "teamid": "oe:team:ce499dea30cfce118f4fe85da0227e8",
+      "region": "LCK",
+      "seed": 3
+    },
+    "Dplus KIA": {
+      "teamid": "oe:team:ef69efa6acebe94107f0cf1ba716806",
+      "region": "LCK",
+      "seed": 4
+    },
+    "Anyone's Legend": {
+      "teamid": "oe:team:ed28f87f0cfdba0a2a8f183cebae73a",
+      "region": "LPL",
+      "seed": 1
+    },
+    "Bilibili Gaming": {
+      "teamid": "oe:team:d356a144644879dabb5f34cd99c886d",
+      "region": "LPL",
+      "seed": 2
+    },
+    "Top Esports": {
+      "teamid": "oe:team:fcec508e780bbd1ad493852640f5b36",
+      "region": "LPL",
+      "seed": 3
+    },
+    "Invictus Gaming": {
+      "teamid": "oe:team:53a258f289c26d94431c0496a54e151",
+      "region": "LPL",
+      "seed": 4
+    },
+    "G2 Esports": {
+      "teamid": "oe:team:7d6673d3a9d00363c6bebc1a630da6e",
+      "region": "LEC",
+      "seed": 1
+    },
+    "Movistar KOI": {
+      "teamid": "oe:team:4acc40654379b4da680be1bd3129dfa",
+      "region": "LEC",
+      "seed": 2
+    },
+    "Karmine Corp": {
+      "teamid": "oe:team:f3aa9bbd924ce3af42ac53f8326bc7c",
+      "region": "LEC",
+      "seed": 3
+    },
+    "Team Liquid": {
+      "teamid": "oe:team:8eb884e168f28402ce685bedebb5250",
+      "region": "LCS",
+      "seed": 1
+    },
+    "LYON": {
+      "teamid": "oe:team:da1143bf9a245b78a8dc86417de85b3",
+      "region": "LCS",
+      "seed": 2
+    },
+    "Cloud9": {
+      "teamid": "oe:team:fc8e90107dabb9a35c490b0d86adea0",
+      "region": "LCS",
+      "seed": 3
+    },
+    "Team Secret Whales": {
+      "teamid": "oe:team:740de582f50775c516c77ed7b923fd5",
+      "region": "LCP",
+      "seed": 1
+    },
+    "CTBC Flying Oyster": {
+      "teamid": "oe:team:0916b3c324c8577b0c6344f3e067f62",
+      "region": "LCP",
+      "seed": 2
+    },
+    "MVK Esports": {
+      "teamid": "oe:team:bc3824b0bbb8139d16109178faa4822",
+      "region": "LCP",
+      "seed": 3
+    },
+    "LØS": {
+      "teamid": "oe:team:ea65e6cc48a9be50fc5334369a5fca5",
+      "region": "CBLOL",
+      "seed": 1
+    },
+    "FURIA": {
+      "teamid": "oe:team:87e3e1e75839f75a10bbc66e894d806",
+      "region": "CBLOL",
+      "seed": 2
+    }
+  },
+  "cblol_2nd": [
+    "FURIA"
+  ],
+  "play_in": [
+    "Cloud9",
+    "Karmine Corp",
+    "MVK Esports",
+    "CBLOL_2ND"
+  ],
+  "play_in_round1": [
+    [
+      "Cloud9",
+      "Karmine Corp"
+    ],
+    [
+      "CBLOL_2ND",
+      "MVK Esports"
+    ]
+  ],
+  "swiss_pools": {
+    "1": [
+      "Gen.G",
+      "Anyone's Legend",
+      "G2 Esports",
+      "Team Liquid"
+    ],
+    "2": [
+      "Team Secret Whales",
+      "LØS",
+      "Hanwha Life Esports",
+      "Bilibili Gaming"
+    ],
+    "3": [
+      "Movistar KOI",
+      "LYON",
+      "T1",
+      "Top Esports"
+    ],
+    "4": [
+      "CTBC Flying Oyster",
+      "Dplus KIA",
+      "Invictus Gaming",
+      "PLAY_IN_WINNER"
+    ]
+  },
+  "roster_overrides": {
+    "Top Esports": {
+      "top": "369"
+    }
+  }
+}

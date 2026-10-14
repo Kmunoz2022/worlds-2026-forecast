@@ -1,0 +1,30 @@
+{
+  "full": {
+    "k": 12.65625,
+    "k_cross": 67.5,
+    "k_league": 36.0,
+    "k_new_mult": 1.5,
+    "new_games": 10,
+    "side": 15.0,
+    "regress": 0.5625,
+    "minor_gap": 100.0,
+    "league_regress": 0.0,
+    "major_minor_weight": 0.0
+  },
+  "plain": {
+    "k": 12,
+    "k_cross": 12,
+    "k_league": 0,
+    "k_new_mult": 1,
+    "new_games": 10,
+    "side": 10,
+    "regress": 0,
+    "minor_gap": 0,
+    "league_regress": 0.0,
+    "major_minor_weight": 1.0
+  },
+  "objective": {
+    "full": 0.6173719748611299,
+    "plain": 0.6959983610094223
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "_notes": [
+    "Tournament facts the game data can't give us, filled in as they happen (see docs/DECISIONS.md).",
+    "knockout_teams: the 8 Swiss qualifiers (config team names). placements: final placement per team, e.g. 1, 2, 3 (semis), 5 (quarters), 9-16 by Swiss record, 17+ Play-In.",
+    "finals_mvp: {\"player\": ..., \"role\": \"Top|Jungle|Mid|Bot|Support\"}. finished: true once the final is played."
+  ],
+  "knockout_teams": [],
+  "placements": {},
+  "finals_mvp": null,
+  "finished": false
+}

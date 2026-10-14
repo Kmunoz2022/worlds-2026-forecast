@@ -1,0 +1,24 @@
+# Python
+.venv/
+__pycache__/
+*.pyc
+
+# Raw data: Oracle's Elixir CSVs (~460 MB) and everything rebuilt from them
+Data/*.csv
+Data/processed/
+
+# Local secrets and machine-specific settings
+config/local.json
+
+# Live state written while scripts/live.py runs
+site/live/live.json
+*.tmp
+
+# OS / editor
+.DS_Store
+.vscode/
+
+# Private working notes (full decision log, assistant notes and skills); not published
+notes/
+CLAUDE.md
+.claude/

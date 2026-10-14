@@ -1,0 +1,709 @@
+{
+  "locked_at": "2026-10-14T15:30:34Z",
+  "note": "Submitted Crystal Ball picks. Locked by LoL Esports before Worlds; never regenerate or edit (DECISIONS D40).",
+  "sims": 5000,
+  "games_mean": 99.6718,
+  "sample": {
+    "games": 625,
+    "weighted_games": 1381.0,
+    "newest_patch": "16.20",
+    "newest_patch_games": 84,
+    "patches": {
+      "16.16": 179,
+      "16.17": 307,
+      "16.18": 55,
+      "16.20": 84
+    },
+    "from": "2026-08-19",
+    "to": "2026-10-14"
+  },
+  "rosters": {
+    "Gen.G": {
+      "top": "Kiin",
+      "jng": "Canyon",
+      "mid": "Chovy",
+      "bot": "Ruler",
+      "sup": "Duro"
+    },
+    "Hanwha Life Esports": {
+      "top": "Zeus",
+      "jng": "Kanavi",
+      "mid": "Zeka",
+      "bot": "Gumayusi",
+      "sup": "Delight"
+    },
+    "T1": {
+      "top": "Doran",
+      "jng": "Oner",
+      "mid": "Faker",
+      "bot": "Peyz",
+      "sup": "Keria"
+    },
+    "Dplus KIA": {
+      "top": "Siwoo",
+      "jng": "Lucid",
+      "mid": "ShowMaker",
+      "bot": "Smash",
+      "sup": "Career"
+    },
+    "Anyone's Legend": {
+      "top": "Breathe",
+      "jng": "Tarzan",
+      "mid": "Shanks",
+      "bot": "Hope",
+      "sup": "Kael"
+    },
+    "Bilibili Gaming": {
+      "top": "Bin",
+      "jng": "Xun",
+      "mid": "Knight",
+      "bot": "Viper",
+      "sup": "ON"
+    },
+    "Top Esports": {
+      "top": "369",
+      "jng": "Tian",
+      "mid": "Creme",
+      "bot": "JackeyLove",
+      "sup": "Zhuo"
+    },
+    "Invictus Gaming": {
+      "top": "TheShy",
+      "jng": "Wei",
+      "mid": "Rookie",
+      "bot": "JiaQi",
+      "sup": "Meiko"
+    },
+    "G2 Esports": {
+      "top": "BrokenBlade",
+      "jng": "SkewMond",
+      "mid": "Caps",
+      "bot": "Hans Sama",
+      "sup": "Labrov"
+    },
+    "Movistar KOI": {
+      "top": "Myrwn",
+      "jng": "Elyoya",
+      "mid": "Jojopyun",
+      "bot": "Supa",
+      "sup": "Alvaro"
+    },
+    "Karmine Corp": {
+      "top": "Canna",
+      "jng": "Yike",
+      "mid": "kyeahoo",
+      "bot": "Caliste",
+      "sup": "Busio"
+    },
+    "Team Liquid": {
+      "top": "Morgan",
+      "jng": "Josedeodo",
+      "mid": "Quid",
+      "bot": "Yeon",
+      "sup": "CoreJJ"
+    },
+    "LYON": {
+      "top": "Dhokla",
+      "jng": "Inspired",
+      "mid": "Saint",
+      "bot": "Berserker",
+      "sup": "Isles"
+    },
+    "Cloud9": {
+      "top": "Thanatos",
+      "jng": "Blaber",
+      "mid": "Loki",
+      "bot": "Tactical",
+      "sup": "Vulcan"
+    },
+    "Team Secret Whales": {
+      "top": "Pun",
+      "jng": "Hizto",
+      "mid": "Dire",
+      "bot": "Eddie",
+      "sup": "Bie"
+    },
+    "CTBC Flying Oyster": {
+      "top": "Rest",
+      "jng": "Shad0w",
+      "mid": "Pout",
+      "bot": "Doggo",
+      "sup": "Kino"
+    },
+    "MVK Esports": {
+      "top": "Kratos",
+      "jng": "Gury",
+      "mid": "Chika",
+      "bot": "Harky",
+      "sup": "SiuLoong"
+    },
+    "LØS": {
+      "top": "Zest",
+      "jng": "Curse",
+      "mid": "Feisty",
+      "bot": "Duduhh",
+      "sup": "Ackerman"
+    },
+    "FURIA": {
+      "top": "Guigo",
+      "jng": "Tatu",
+      "mid": "Tutsz",
+      "bot": "Ayu",
+      "sup": "JoJo"
+    }
+  },
+  "roster_overrides": {
+    "Top Esports": {
+      "top": "369"
+    }
+  },
+  "questions": [
+    {
+      "id": "champ_wr",
+      "question": "Which champion will have the highest Win Rate (min 5 games played)?",
+      "pick": "Ashe",
+      "pick_p": 0.0372,
+      "options": [
+        {
+          "label": "Ashe",
+          "p": 0.0372
+        },
+        {
+          "label": "Camille",
+          "p": 0.0291
+        },
+        {
+          "label": "Seraphine",
+          "p": 0.0289
+        },
+        {
+          "label": "Qiyana",
+          "p": 0.0267
+        },
+        {
+          "label": "Alistar",
+          "p": 0.0242
+        },
+        {
+          "label": "Annie",
+          "p": 0.0211
+        },
+        {
+          "label": "Viktor",
+          "p": 0.0211
+        },
+        {
+          "label": "Wukong",
+          "p": 0.0191
+        }
+      ],
+      "method": "Simulated champion games and wins: pick rates from recent top-tier drafts (newest patch weighted 10x), win rates shrunk toward 50%. Usually won by a champion with only 5-8 games, so every option is a long shot.",
+      "detail": {
+        "Ashe": {
+          "recent_wr": 0.595
+        },
+        "Camille": {
+          "recent_wr": 0.584
+        },
+        "Seraphine": {
+          "recent_wr": 0.582
+        },
+        "Qiyana": {
+          "recent_wr": 0.563
+        },
+        "Alistar": {
+          "recent_wr": 0.557
+        },
+        "Annie": {
+          "recent_wr": 0.548
+        },
+        "Viktor": {
+          "recent_wr": 0.542
+        },
+        "Wukong": {
+          "recent_wr": 0.547
+        }
+      },
+      "why": "The win-rate leader is almost always a champion that plays only 5-8 games and barely loses, so luck decides most of it and no champion is above 4%. Ashe has one of the best win rates in recent top-tier games (60% after adjusting for small samples) and is picked often enough to reach 5 games in 75% of simulated Worlds. Camille (58%, reaches 5 games 63%). Seraphine (58%, reaches 5 games 86%)."
+    },
+    {
+      "id": "champ_deaths",
+      "question": "Which champion will have the highest average Deaths per Game (min 5 games played)?",
+      "pick": "Camille",
+      "pick_p": 0.1637,
+      "options": [
+        {
+          "label": "Camille",
+          "p": 0.1637
+        },
+        {
+          "label": "Nautilus",
+          "p": 0.0842
+        },
+        {
+          "label": "Aphelios",
+          "p": 0.0802
+        },
+        {
+          "label": "Thresh",
+          "p": 0.0632
+        },
+        {
+          "label": "Kha'Zix",
+          "p": 0.0439
+        },
+        {
+          "label": "Vi",
+          "p": 0.0368
+        },
+        {
+          "label": "Pyke",
+          "p": 0.0305
+        },
+        {
+          "label": "Leona",
+          "p": 0.0283
+        }
+      ],
+      "method": "Same simulated champion games; deaths per game resampled from each champion's recent games.",
+      "detail": {
+        "Camille": {
+          "avg_deaths": 4.49
+        },
+        "Nautilus": {
+          "avg_deaths": 4.07
+        },
+        "Aphelios": {
+          "avg_deaths": 4.24
+        },
+        "Thresh": {
+          "avg_deaths": 4.26
+        },
+        "Kha'Zix": {
+          "avg_deaths": 4.31
+        },
+        "Vi": {
+          "avg_deaths": 3.69
+        },
+        "Pyke": {
+          "avg_deaths": 4.77
+        },
+        "Leona": {
+          "avg_deaths": 3.8
+        }
+      },
+      "why": "Camille dies 4.5 times per game in recent top-tier and newest-patch games, the most of any champion that's picked often enough to reach 5 games (it does in 63% of simulations). Divers and engage supports die most because they start fights. Next: Nautilus 4.1 deaths, Aphelios 4.2 deaths."
+    },
+    {
+      "id": "kda",
+      "question": "Which pro will finish with the highest average KDA?",
+      "pick": "Knight (Bilibili Gaming, Mid)",
+      "pick_p": 0.293,
+      "options": [
+        {
+          "label": "Knight (Bilibili Gaming, Mid)",
+          "p": 0.293
+        },
+        {
+          "label": "Zeka (Hanwha Life Esports, Mid)",
+          "p": 0.11
+        },
+        {
+          "label": "Smash (Dplus KIA, Bot)",
+          "p": 0.0836
+        },
+        {
+          "label": "Ruler (Gen.G, Bot)",
+          "p": 0.0702
+        },
+        {
+          "label": "Chovy (Gen.G, Mid)",
+          "p": 0.0674
+        },
+        {
+          "label": "Vulcan (Cloud9, Support)",
+          "p": 0.0594
+        },
+        {
+          "label": "Career (Dplus KIA, Support)",
+          "p": 0.047
+        },
+        {
+          "label": "Kael (Anyone's Legend, Support)",
+          "p": 0.0404
+        }
+      ],
+      "method": "Each simulated game draws the team's own recent game with the same result (win or loss) against a Worlds-level opponent and adds its players' stats. Teams that go deep play more games, which matters a lot. No minimum games assumed.",
+      "why": "Knight has a typical Worlds KDA of 6.9 in the simulation, over about 12 games (Bilibili Gaming advances from Swiss 82% of the time). KDA leaders come from winning teams, since losses wreck KDA, and mids and bot laners die least. A deep run helps, but a short hot streak can also top the list. Next: Zeka (Hanwha Life Esports, 5.6 over ~13 games), Smash (Dplus KIA, 5.4 over ~13 games)."
+    },
+    {
+      "id": "dmg",
+      "question": "Which pro will finish with the highest average Damage per Game?",
+      "pick": "Peyz (T1, Bot)",
+      "pick_p": 0.2326,
+      "options": [
+        {
+          "label": "Peyz (T1, Bot)",
+          "p": 0.2326
+        },
+        {
+          "label": "Viper (Bilibili Gaming, Bot)",
+          "p": 0.1182
+        },
+        {
+          "label": "JiaQi (Invictus Gaming, Bot)",
+          "p": 0.0802
+        },
+        {
+          "label": "Caliste (Karmine Corp, Bot)",
+          "p": 0.0762
+        },
+        {
+          "label": "Knight (Bilibili Gaming, Mid)",
+          "p": 0.0504
+        },
+        {
+          "label": "Gumayusi (Hanwha Life Esports, Bot)",
+          "p": 0.0488
+        },
+        {
+          "label": "Smash (Dplus KIA, Bot)",
+          "p": 0.0474
+        },
+        {
+          "label": "Berserker (LYON, Bot)",
+          "p": 0.0454
+        }
+      ],
+      "method": "Each simulated game draws the team's own recent game with the same result (win or loss) against a Worlds-level opponent and adds its players' stats. Teams that go deep play more games, which matters a lot. No minimum games assumed.",
+      "why": "Peyz has a typical Worlds damage per game of 28,195 in the simulation, over about 13 games (T1 advances from Swiss 87% of the time). Bot laners and mids deal the most damage, and longer games mean more damage, so a carry on a team that plays long, close series is the best bet. Next: Viper (Bilibili Gaming, 27,617 over ~12 games), JiaQi (Invictus Gaming, 26,510 over ~10 games)."
+    },
+    {
+      "id": "kp",
+      "question": "Which pro will finish with the highest average Kill Participation?",
+      "pick": "JoJo (FURIA, Support)",
+      "pick_p": 0.1578,
+      "options": [
+        {
+          "label": "JoJo (FURIA, Support)",
+          "p": 0.1578
+        },
+        {
+          "label": "Kael (Anyone's Legend, Support)",
+          "p": 0.0932
+        },
+        {
+          "label": "Ackerman (LØS, Support)",
+          "p": 0.06
+        },
+        {
+          "label": "Alvaro (Movistar KOI, Support)",
+          "p": 0.0596
+        },
+        {
+          "label": "Meiko (Invictus Gaming, Support)",
+          "p": 0.0584
+        },
+        {
+          "label": "Isles (LYON, Support)",
+          "p": 0.053
+        },
+        {
+          "label": "Vulcan (Cloud9, Support)",
+          "p": 0.0486
+        },
+        {
+          "label": "Kino (CTBC Flying Oyster, Support)",
+          "p": 0.0412
+        }
+      ],
+      "method": "Each simulated game draws the team's own recent game with the same result (win or loss) against a Worlds-level opponent and adds its players' stats. Teams that go deep play more games, which matters a lot. No minimum games assumed.",
+      "why": "JoJo has a typical Worlds kill participation of 80% in the simulation, over about 13 games (FURIA reaches the Swiss stage 14% of the time). That's the highest typical number of any player: supports join most of their team's kills, and in FURIA's games against strong opponents he's in almost all of them. The Play-In is all best-of-fives, so FURIA plays about as many games as a Swiss team. Teams that rarely get kills tend to produce the leader: Atlen (CTBC) led in 2022, Harp (DetonatioN) in 2023. The risk is that his numbers come from CBLOL; against Worlds teams it could be lower, which is why the steadier pick from a stronger team is next on the list. Next: Kael (Anyone's Legend, 78% over ~10 games), Ackerman (LØS, 73% over ~7 games)."
+    },
+    {
+      "id": "peyz_guma",
+      "question": "Peyz vs Gumayusi: Who will finish with more total Kills?",
+      "pick": "Peyz",
+      "pick_p": 0.6891,
+      "options": [
+        {
+          "label": "Peyz",
+          "p": 0.6891
+        },
+        {
+          "label": "Gumayusi",
+          "p": 0.3109
+        }
+      ],
+      "method": "Total kills over the simulated tournament. Expected: Peyz 76, Gumayusi 56. T1 and HLE go about equally deep; Peyz averages more kills per game in 2026.",
+      "why": "T1 and HLE are expected to play a similar number of games (13 vs 13), so kills per game decides it. Peyz averages more kills in T1's games than Gumayusi does in HLE's, which adds up to about 76 vs 56 expected. Gumayusi wins it mainly if HLE goes much deeper than T1."
+    },
+    {
+      "id": "faker_700",
+      "question": "Will Faker reach 700 career Worlds Kills this year? (616 entering)",
+      "pick": "No",
+      "pick_p": 0.9736,
+      "options": [
+        {
+          "label": "No",
+          "p": 0.9736
+        },
+        {
+          "label": "Yes",
+          "p": 0.0264
+        }
+      ],
+      "method": "Needs 84 kills this Worlds. Simulated: 47 on average, 90th percentile 71. He'd need a deep run with many long series and a high kill rate.",
+      "why": "Faker needs 84 kills at this Worlds. He'd get there only with a near-record number of games and a high kill rate: T1 plays about 13 games on average, giving 47 kills expected, and even in T1's best 10% of runs he gets about 71."
+    },
+    {
+      "id": "teemo",
+      "question": "Will Teemo be picked at least once?",
+      "pick": "No",
+      "pick_p": 0.9582,
+      "options": [
+        {
+          "label": "No",
+          "p": 0.9582
+        },
+        {
+          "label": "Yes",
+          "p": 0.0418
+        }
+      ],
+      "method": "Teemo was picked 8 times in 19,691 pro games since 2025 (all leagues), and 1 times at Worlds/MSI/EWC/FST since 2022 (a 2022 Play-In game). It isn't in recent top-tier drafts.",
+      "why": "Teemo has 8 picks in 19,691 pro games since 2025 across every league, none in recent top-tier play, and one at a Worlds since 2022 (a 2022 Play-In game). Fearless draft makes teams dig deeper into the champion pool, but not that deep."
+    },
+    {
+      "id": "unique",
+      "question": "How many unique champions will be picked?",
+      "pick": "0-99",
+      "pick_p": 0.3179,
+      "options": [
+        {
+          "label": "0-99",
+          "p": 0.3179
+        },
+        {
+          "label": "100-104",
+          "p": 0.2545
+        },
+        {
+          "label": "105-109",
+          "p": 0.2165
+        },
+        {
+          "label": "110-114",
+          "p": 0.1318
+        },
+        {
+          "label": "115-119",
+          "p": 0.0569
+        },
+        {
+          "label": "120+",
+          "p": 0.0225
+        }
+      ],
+      "method": "Fit on Fearless-draft-era international events (games vs unique champions): EWC 2025 33 games/75, EWC 2026 232 games/118, FST 2025 35 games/84, FST 2026 45 games/95, MSI 2025 80 games/107, MSI 2026 71 games/101, WLDs 2025 84 games/95. Median forecast 104 over ~100 games.",
+      "median": 103.6,
+      "why": "With Fearless draft a champion can't be reused within a series, so recent international events picked around 100 different champions in 70-100 games (Worlds 2025: 95 in 84 games; MSI 2026: 101 in 71). Worlds 2026 should run about 100 games, so the most likely count is about 104. 0-99 is the single most likely answer only because it's the widest range; 100 or more is more likely overall (68%)."
+    },
+    {
+      "id": "len32",
+      "question": "Will more games finish before or after the 32 minute mark?",
+      "pick": "Before 32:00",
+      "pick_p": 0.6158,
+      "options": [
+        {
+          "label": "Before 32:00",
+          "p": 0.6158
+        },
+        {
+          "label": "After 32:00",
+          "p": 0.3842
+        }
+      ],
+      "method": "Share of games under 32:00 at Worlds since 2022 and MSI since 2024 (half weight): MSI 2024 67%, MSI 2025 52%, MSI 2026 51%, WLDs 2022 60%, WLDs 2023 62%, WLDs 2024 48%, WLDs 2025 49%. Weighted average 52%, with each year back counting half as much (game length follows the meta; the last two Worlds both ran slightly long). Player-stat simulation gives {ps['under32_majority']:.0%} for 'before' as a cross-check.",
+      "why": "Recent Worlds-level events land close to half and half: Worlds 2024 and 2025 had 48-49% of games end before 32:00, while MSI 2026 had 51% and Worlds 2022-23 had 60%+. Weighted toward recent years the estimate is 52% before, so 'before' is a lean, not a lock."
+    },
+    {
+      "id": "kills15",
+      "question": "Will we see any pro get at least 15 kills in a single game?",
+      "pick": "No",
+      "pick_p": 0.5081,
+      "options": [
+        {
+          "label": "Yes",
+          "p": 0.4919
+        },
+        {
+          "label": "No",
+          "p": 0.5081
+        }
+      ],
+      "method": "Happened in 3.5 of 544.5 weighted games at Worlds since 2022 and MSI since 2024 (MSI at half weight), 0.6% per game, over ~100 games. EWC and domestic leagues have more mismatches, so they're left out.",
+      "why": "Fifteen kills in one game needs a long, bloody stomp. It happened in only 1 of about 430 Worlds games since 2022, but 5 times at MSI since 2024. Over about 100 games that adds up to roughly a coin flip."
+    },
+    {
+      "id": "cs450",
+      "question": "Will we see any pro reach a CS of at least 450 in a single game?",
+      "pick": "Yes",
+      "pick_p": 0.9747,
+      "options": [
+        {
+          "label": "Yes",
+          "p": 0.9747
+        },
+        {
+          "label": "No",
+          "p": 0.0253
+        }
+      ],
+      "method": "Happened in 21 of 544.5 weighted games at Worlds since 2022 and MSI since 2024 (MSI at half weight), 3.9% per game, over ~100 games. EWC and domestic leagues have more mismatches, so they're left out.",
+      "why": "450 CS needs a long game and a farming carry. Every Worlds since 2022 had 2-6 such games, about 4% of games, so over ~100 games it's nearly certain."
+    },
+    {
+      "id": "mvp_role",
+      "question": "What will be the role of the Finals MVP winner?",
+      "pick": "Mid",
+      "pick_p": 0.4063,
+      "options": [
+        {
+          "label": "Mid",
+          "p": 0.4063
+        },
+        {
+          "label": "Jungle",
+          "p": 0.2695
+        },
+        {
+          "label": "Bot",
+          "p": 0.1932
+        },
+        {
+          "label": "Support",
+          "p": 0.1026
+        },
+        {
+          "label": "Top",
+          "p": 0.0284
+        }
+      ],
+      "method": "Half from history (Finals MVPs 2017-2024: mid 4, jungle 3, bot 1), half from the simulation (best KDA on the winning team in the simulated final). Most likely individual MVPs in the simulation: Ruler 14%, Chovy 13%, Canyon 9%, Zeka 7%, Duro 6%.",
+      "why": "Mid players won 4 of the 8 Finals MVPs from 2017 to 2024 and junglers 3. Gen.G is the title favourite, and the simulation's most likely individual MVPs are Ruler 14%, Chovy 13%, Canyon 9%. Ruler would make it 'Bot', but across all the likely winners mid is still the best single answer."
+    },
+    {
+      "id": "regions_ko",
+      "question": "How many different regions will be represented in Knockouts?",
+      "pick": "4",
+      "pick_p": 0.496,
+      "options": [
+        {
+          "label": "4",
+          "p": 0.496
+        },
+        {
+          "label": "3",
+          "p": 0.3938
+        },
+        {
+          "label": "5",
+          "p": 0.0894
+        },
+        {
+          "label": "2",
+          "p": 0.0192
+        },
+        {
+          "label": "6",
+          "p": 0.0016
+        }
+      ],
+      "method": "Distinct regions among the 8 Swiss qualifiers in each simulated tournament.",
+      "why": "LCK and LPL are nearly certain to have a team in knockouts. The count comes down to how many of LEC, LCS, CBLOL and LCP also get one: LCK 100%, LPL 100%, LEC 72%, LCS 60%, CBLOL 22%, LCP 13%."
+    },
+    {
+      "id": "lcs_ko",
+      "question": "Will a team from LCS reach Knockouts?",
+      "pick": "Yes",
+      "pick_p": 0.597,
+      "options": [
+        {
+          "label": "Yes",
+          "p": 0.597
+        },
+        {
+          "label": "No",
+          "p": 0.403
+        }
+      ],
+      "method": "Any of Team Liquid, LYON or Cloud9 (via the Play-In) going 3-x in Swiss.",
+      "why": "Three LCS teams get a shot: Team Liquid advances 45% of the time, LYON 20%, and Cloud9 5% (it must win the Play-In first). At least one of them makes it in about 60% of simulations."
+    },
+    {
+      "id": "hle_t1",
+      "question": "Which team will place higher: HLE or T1?",
+      "pick": "T1",
+      "pick_p": 0.4478,
+      "options": [
+        {
+          "label": "T1",
+          "p": 0.4478
+        },
+        {
+          "label": "HLE",
+          "p": 0.4312
+        },
+        {
+          "label": "Same placement",
+          "p": 0.121
+        }
+      ],
+      "method": "Placement by stage reached (Swiss exits ranked by wins). 'Same placement' is both out in the same round, e.g. both losing quarterfinals; check how Riot scores ties.",
+      "why": "This is close to a coin flip. T1 and HLE are rated almost the same and both are heavy favourites to advance (T1 87%, HLE 86%); T1 reaches semis 63% vs HLE 63%. About 1 time in 8 they go out in the same round."
+    },
+    {
+      "id": "shortest",
+      "question": "Which team will win the shortest game (duration)?",
+      "pick": "Hanwha Life Esports",
+      "pick_p": 0.1882,
+      "options": [
+        {
+          "label": "Hanwha Life Esports",
+          "p": 0.1882
+        },
+        {
+          "label": "Gen.G",
+          "p": 0.1844
+        },
+        {
+          "label": "T1",
+          "p": 0.092
+        },
+        {
+          "label": "Dplus KIA",
+          "p": 0.0918
+        },
+        {
+          "label": "Bilibili Gaming",
+          "p": 0.0664
+        },
+        {
+          "label": "Karmine Corp",
+          "p": 0.054
+        },
+        {
+          "label": "Invictus Gaming",
+          "p": 0.0534
+        },
+        {
+          "label": "Anyone's Legend",
+          "p": 0.0492
+        }
+      ],
+      "method": "Each simulated game's length comes from how lopsided it is (games won by big favourites are shorter: 36.2 -6.8 x the winner's pre-game chance, in minutes), plus each team's own pace in 2026 and random variation copied from real international games. Teams that are heavy favourites in several games, and teams that play many games, get the most chances. Fastest teams this year (minutes vs expected): Hanwha Life Esports -1.1, Team Secret Whales -0.9, Top Esports -0.7, CTBC Flying Oyster -0.6.",
+      "why": "The shortest game is usually a heavy favourite stomping a much weaker team, so the best bets are strong teams that play several mismatches. Hanwha Life Esports plays 1.1 minutes faster than expected this year and is a big favourite in most of its Swiss games; Gen.G is the biggest favourite of all (-0.1 min pace). Fastest teams in 2026: Hanwha Life Esports 1.1 min faster, Team Secret Whales 0.9 min faster, Top Esports 0.7 min faster."
+    }
+  ]
+}

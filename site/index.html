@@ -1,0 +1,694 @@
+<meta charset="utf-8">
+<title>Worlds 2026 Forecast</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Saira+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+:root {
+  --paper: #f3f4f1;
+  --surface: #ffffff;
+  --surface-2: #f8f9f7;
+  --ink: #15181d;
+  --ink-2: #47505c;
+  --muted: #7c8591;
+  --rule: #e1e3df;
+  --axis: #c3c6c0;
+  --gold: #a8781f;
+  --gold-soft: #f3e8d2;
+  --seq: #2a78d6;
+  --s1: #2a78d6; --s2: #eb6834; --s3: #1baf7a; --s4: #eda100; --s5: #e87ba4; --s6: #008300;
+  --win: #006300;
+  --loss: #c03a3a;
+  --warn: #a8670f;
+  --ring: #ffffff;
+  --display: "Saira Condensed", "Arial Narrow", "Roboto Condensed", sans-serif;
+  --body: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --paper: #111317; --surface: #1b1e23; --surface-2: #20242a;
+    --ink: #f2f3f1; --ink-2: #c3c8cf; --muted: #8b939e;
+    --rule: #2c3038; --axis: #3b4049;
+    --gold: #d9a441; --gold-soft: #3a2f1a;
+    --seq: #3987e5;
+    --s1: #3987e5; --s2: #d95926; --s3: #199e70; --s4: #c98500; --s5: #d55181; --s6: #008300;
+    --win: #2fbf4f; --loss: #ef6b6b; --warn: #e0a43a; --ring: #1b1e23;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --paper: #111317; --surface: #1b1e23; --surface-2: #20242a;
+  --ink: #f2f3f1; --ink-2: #c3c8cf; --muted: #8b939e;
+  --rule: #2c3038; --axis: #3b4049;
+  --gold: #d9a441; --gold-soft: #3a2f1a;
+  --seq: #3987e5;
+  --s1: #3987e5; --s2: #d95926; --s3: #199e70; --s4: #c98500; --s5: #d55181; --s6: #008300;
+  --win: #2fbf4f; --loss: #ef6b6b; --warn: #e0a43a; --ring: #1b1e23;
+}
+
+* { box-sizing: border-box; }
+body { background: var(--paper); color: var(--ink); font: 15px/1.55 var(--body); }
+.wrap { max-width: 1120px; margin: 0 auto; padding-inline: 20px; }
+h1, h2, h3 { font-family: var(--display); letter-spacing: .01em; text-wrap: balance; margin: 0; line-height: 1.1; }
+h2 { font-size: 30px; font-weight: 700; }
+h3 { font-size: 20px; font-weight: 600; }
+p { margin: 0; max-width: 68ch; }
+a { color: inherit; }
+.num { font-variant-numeric: tabular-nums; }
+.muted { color: var(--muted); }
+.small { font-size: 13px; }
+
+/* top bar */
+.top { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--paper); border-bottom: 1px solid var(--rule); }
+.top .wrap { display: flex; flex-wrap: wrap; align-items: end; gap: 6px 28px; padding-block: 14px 0; }
+.brand { display: grid; gap: 2px; padding-bottom: 10px; }
+.brand h1 { font-size: 26px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; }
+.brand h1 b { color: var(--gold); font-weight: 700; }
+.brand .meta { font-size: 12px; color: var(--muted); }
+nav { display: flex; gap: 2px; overflow-x: auto; scrollbar-width: none; margin-left: auto; }
+nav a { font: 600 15px/1 var(--display); text-transform: uppercase; letter-spacing: .06em; text-decoration: none; color: var(--ink-2); padding: 10px 12px 12px; border-bottom: 3px solid transparent; white-space: nowrap; }
+nav a:hover { color: var(--ink); }
+nav a[aria-current="page"] { color: var(--ink); border-bottom-color: var(--gold); }
+nav a:focus-visible, button:focus-visible, select:focus-visible, tr:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+
+main { padding-block: 28px 64px; }
+section.page { display: grid; gap: 28px; }
+.lede { display: grid; gap: 8px; }
+.lede p { color: var(--ink-2); }
+.panel { background: var(--surface); border: 1px solid var(--rule); border-radius: 6px; padding: 20px; display: grid; gap: 14px; min-width: 0; align-content: start; }
+.panel-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 6px 16px; }
+.note { font-size: 13px; color: var(--muted); max-width: 80ch; }
+
+/* region chip */
+.chip { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; letter-spacing: .04em; color: var(--ink-2); white-space: nowrap; }
+.chip::before { content: ""; width: 8px; height: 8px; border-radius: 2px; background: var(--rc); }
+.team { display: inline-flex; flex-direction: column; gap: 1px; min-width: 0; }
+.team .nm { font-weight: 600; }
+
+/* pick'em */
+.picks { display: grid; grid-template-columns: 2fr 2fr 5fr; gap: 14px; }
+.pick-group { display: grid; gap: 8px; align-content: start; }
+.pick-group h3 { font-size: 16px; text-transform: uppercase; letter-spacing: .08em; color: var(--ink-2); }
+.pick-list { display: grid; gap: 8px; }
+.pick-group.adv .pick-list { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
+.pick { background: var(--surface); border: 1px solid var(--rule); border-radius: 6px; padding: 12px 14px; display: grid; gap: 4px; }
+.pick .p { font: 700 28px/1 var(--display); }
+.pick .p small { font: 500 12px var(--body); color: var(--muted); margin-left: 4px; }
+@media (max-width: 820px) { .picks { grid-template-columns: 1fr 1fr; } .pick-group.adv { grid-column: 1 / -1; } }
+
+/* tables */
+.tbl-wrap { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; font-variant-numeric: tabular-nums; }
+th { font: 600 12px/1.2 var(--body); text-transform: uppercase; letter-spacing: .06em; color: var(--muted); text-align: right; padding: 8px 8px; border-bottom: 1px solid var(--axis); white-space: nowrap; vertical-align: bottom; }
+td { padding: 7px 7px; border-bottom: 1px solid var(--rule); text-align: right; white-space: nowrap; }
+th:first-child, td:first-child, th.l, td.l { text-align: left; }
+td.l { white-space: normal; min-width: 130px; }
+.team { align-items: flex-start; }
+th.grp { text-align: center; border-bottom: none; padding-bottom: 0; color: var(--ink-2); }
+td.heat { background: color-mix(in oklab, var(--seq) var(--h), var(--surface)); min-width: 52px; }
+td.sep, th.sep { border-left: 1px solid var(--axis); }
+.tag { font: 600 10px/1 var(--body); letter-spacing: .06em; text-transform: uppercase; color: var(--gold); background: var(--gold-soft); border-radius: 3px; padding: 3px 5px; margin-left: 6px; vertical-align: 2px; }
+.bar-cell { display: flex; align-items: center; gap: 8px; justify-content: flex-end; }
+.bar-cell .track { width: 90px; height: 8px; background: var(--rule); border-radius: 4px; overflow: hidden; flex: none; }
+.bar-cell .fill { display: block; height: 100%; background: var(--s1); border-radius: 0 4px 4px 0; }
+.bar-cell .track { display: block; }
+tr.sel td { background: var(--gold-soft); }
+tr.clickable { cursor: pointer; }
+tr.clickable:hover td { background: var(--surface-2); }
+.form { font-family: var(--body); font-size: 12px; font-weight: 600; letter-spacing: .02em; text-align: left; }
+.form .w { color: var(--win); } .form .l { color: var(--loss); }
+
+/* play-in */
+.grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; }
+.match { display: grid; gap: 12px; }
+.vs { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 12px; }
+.vs .side { display: grid; gap: 2px; }
+.vs .side:last-child { text-align: right; justify-items: end; }
+.vs .big { font: 700 34px/1 var(--display); }
+.vs .mid { font: 600 13px var(--display); color: var(--muted); text-transform: uppercase; letter-spacing: .1em; }
+.splitbar { display: flex; height: 10px; gap: 2px; }
+.splitbar span { border-radius: 4px; }
+
+/* bars chart (generic horizontal) */
+.hbars { display: grid; gap: 6px; }
+.hbar { display: grid; grid-template-columns: minmax(110px, 160px) 1fr 52px; gap: 10px; align-items: center; font-size: 14px; }
+.hbar .track { height: 12px; border-radius: 0 4px 4px 0; position: relative; }
+.hbar .fill { height: 100%; border-radius: 0 4px 4px 0; }
+.hbar .v { text-align: right; font-variant-numeric: tabular-nums; }
+
+/* matchup */
+.controls { display: flex; flex-wrap: wrap; gap: 12px; align-items: end; }
+.field { display: grid; gap: 4px; }
+.field label { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
+select { font: 500 15px var(--body); color: var(--ink); background: var(--surface); border: 1px solid var(--axis); border-radius: 5px; padding: 8px 10px; min-width: 190px; max-width: 100%; }
+.seg { display: inline-flex; border: 1px solid var(--axis); border-radius: 5px; overflow: hidden; }
+.seg button { font: 600 14px var(--display); letter-spacing: .06em; background: var(--surface); color: var(--ink-2); border: 0; padding: 9px 14px; cursor: pointer; }
+.seg button + button { border-left: 1px solid var(--axis); }
+.seg button[aria-pressed="true"] { background: var(--ink); color: var(--paper); }
+.tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; }
+.tile { background: var(--surface-2); border-radius: 6px; padding: 12px 14px; display: grid; gap: 2px; }
+.tile .k { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
+.tile .v { font: 700 32px/1.05 var(--display); }
+.tile .s { font-size: 13px; color: var(--ink-2); }
+.legend { display: flex; flex-wrap: wrap; gap: 14px; font-size: 13px; color: var(--ink-2); }
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+.legend i { width: 10px; height: 10px; border-radius: 2px; display: inline-block; }
+
+/* charts */
+svg text { fill: var(--muted); font: 12px var(--body); font-variant-numeric: tabular-nums; }
+svg .grid { stroke: var(--rule); stroke-width: 1; }
+svg .base { stroke: var(--axis); stroke-width: 1; }
+.chart { position: relative; }
+.tip { position: fixed; pointer-events: none; z-index: 20; background: var(--ink); color: var(--paper); font-size: 13px; line-height: 1.35; padding: 7px 9px; border-radius: 5px; max-width: 240px; }
+.layout-teams { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: 16px; align-items: start; }
+@media (max-width: 900px) { .layout-teams { grid-template-columns: 1fr; } }
+
+/* tracker status (icon + label, never color alone) */
+.status { display: inline-flex; align-items: center; gap: 6px; font: 600 12px/1 var(--body); padding: 5px 8px; border-radius: 4px; background: var(--surface-2); color: var(--ink-2); white-space: nowrap; }
+.status::before { content: var(--icon); font-weight: 700; color: var(--sc); }
+.st-won { --sc: var(--win); --icon: "\2713"; }
+.st-on-track { --sc: var(--win); --icon: "\25B2"; }
+.st-behind { --sc: var(--warn); --icon: "\25BC"; }
+.st-lost { --sc: var(--loss); --icon: "\2715"; }
+.st-waiting, .st-not-started, .st-tied { --sc: var(--muted); --icon: "\2022"; }
+.track-now { display: grid; gap: 4px; padding: 10px 12px; border: 1px dashed var(--axis); border-radius: 6px; font-size: 14px; }
+.track-now .lead { color: var(--ink-2); font-size: 13px; }
+
+/* crystal ball cards */
+.top3 { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
+.top3 li { display: grid; grid-template-columns: 38px 1fr auto; gap: 8px; align-items: baseline; padding: 6px 10px; background: var(--surface-2); border-radius: 5px; font-size: 14px; }
+.top3 .rk { font: 600 12px var(--display); text-transform: uppercase; letter-spacing: .06em; color: var(--gold); }
+.why { display: grid; gap: 4px; }
+.why .k { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
+.why p { color: var(--ink-2); font-size: 14px; }
+details summary { cursor: pointer; font-size: 13px; font-weight: 600; color: var(--ink-2); }
+details summary:hover { color: var(--ink); }
+
+/* about */
+.prose { display: grid; gap: 22px; }
+.prose section { display: grid; gap: 8px; }
+.prose p { color: var(--ink-2); }
+.prose ul { margin: 0; padding-left: 20px; color: var(--ink-2); display: grid; gap: 4px; max-width: 68ch; }
+.loading { padding: 40px 0; color: var(--muted); }
+@media (prefers-reduced-motion: no-preference) { .fill, .hbar .fill { transition: width .25s ease; } }
+</style>
+
+<header class="top">
+  <div class="wrap">
+    <div class="brand">
+      <h1>Worlds <b>2026</b> Forecast</h1>
+      <div class="meta" id="meta">Loading…</div>
+    </div>
+    <nav id="tabs" aria-label="Sections">
+      <a href="#pickem">Pick'em</a>
+      <a href="#playin">Play-In</a>
+      <a href="#crystal">Crystal Ball</a>
+      <a href="#matchup">Matchup</a>
+      <a href="#teams">Teams</a>
+      <a href="#record">Model record</a>
+      <a href="#about">How it works</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap" id="app"><p class="loading">Loading forecast…</p></main>
+<div class="tip" id="tip" hidden></div>
+
+<script>
+const REGION_VAR = { LCK: "--s1", LPL: "--s2", LEC: "--s3", LCS: "--s4", LCP: "--s5", CBLOL: "--s6" };
+const PAGES = ["pickem", "playin", "crystal", "matchup", "teams", "record", "about"];
+let D = null;
+const state = { a: "Gen.G", b: "Bilibili Gaming", bo: 5, team: "Gen.G" };
+
+const $ = (s, el = document) => el.querySelector(s);
+const esc = s => String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const pct = (p, d = 0) => p == null ? "–" : (p * 100 < 0.5 && p > 0 && d === 0 ? "<1" : (p * 100).toFixed(d)) + "%";
+const teamOf = n => D.teams.find(t => t.name === n);
+const chip = r => `<span class="chip" style="--rc: var(${REGION_VAR[r] || "--muted"})">${esc(r)}</span>`;
+const teamCell = n => { const t = teamOf(n); return `<span class="team"><span class="nm">${esc(n)}</span>${chip(t.region)}</span>`; };
+const fmtDate = s => new Date(s + "T12:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric" });
+
+/* ---------- series maths (beta-binomial, same as src/lolpred/series.py) ---------- */
+function lgamma(x) { // Lanczos
+  const g = 7, c = [0.99999999999980993, 676.5203681218851, -1259.1392167224028, 771.32342877765313,
+    -176.61502916214059, 12.507343278686905, -0.13857109526572012, 9.9843695780195716e-6, 1.5056327351493116e-7];
+  if (x < 0.5) return Math.log(Math.PI / Math.sin(Math.PI * x)) - lgamma(1 - x);
+  x -= 1; let a = c[0]; const t = x + g + 0.5;
+  for (let i = 1; i < g + 2; i++) a += c[i] / (x + i);
+  return 0.5 * Math.log(2 * Math.PI) + (x + 0.5) * Math.log(t) - t + Math.log(a);
+}
+const lbeta = (a, b) => lgamma(a) + lgamma(b) - lgamma(a + b);
+const comb = (n, k) => { let r = 1; for (let i = 1; i <= k; i++) r = r * (n - k + i) / i; return r; };
+function scoreDist(p, bo, kappa = D.meta.kappa) {
+  const w = (bo + 1) / 2, al = p * kappa, be = (1 - p) * kappa, out = [];
+  for (let l = 0; l < w; l++) {
+    const n = comb(w - 1 + l, l);
+    out.push({ a: w, b: l, p: n * Math.exp(lbeta(al + w, be + l) - lbeta(al, be)) });
+    out.push({ a: l, b: w, p: n * Math.exp(lbeta(al + l, be + w) - lbeta(al, be)) });
+  }
+  return out;
+}
+const seriesWin = (p, bo) => scoreDist(p, bo).filter(s => s.a > s.b).reduce((s, x) => s + x.p, 0);
+const gameP = (a, b) => D.game_prob[a][b];
+
+const statusChip = st => `<span class="status st-${st.replace(/ /g, "-")}">${st[0].toUpperCase() + st.slice(1)}</span>`;
+
+/* ---------- tooltip ---------- */
+const tip = $("#tip");
+function showTip(html, ev) {
+  tip.innerHTML = html; tip.hidden = false;
+  const x = Math.min(ev.clientX + 14, window.innerWidth - tip.offsetWidth - 8);
+  const y = Math.max(8, ev.clientY - tip.offsetHeight - 12);
+  tip.style.left = x + "px"; tip.style.top = y + "px";
+}
+const hideTip = () => { tip.hidden = true; };
+
+/* ---------- pages ---------- */
+function pagePickem() {
+  const sim = D.sim, byName = Object.fromEntries(sim.map(r => [r.team, r]));
+  const card = (n, key, label) => `<div class="pick">${teamCell(n)}<div class="p num">${pct(byName[n][key])}<small>${label}</small></div></div>`;
+  const pk = D.pickem;
+  const heat = v => `<td class="heat num" style="--h:${Math.round(Math.min(1, v / 0.5) * 85)}%">${pct(v)}</td>`;
+  const rows = [...sim].sort((a, b) => b.champion - a.champion || b.qualify - a.qualify).map(r => `
+    <tr>
+      <td>${teamCell(r.team)}${r.play_in_win != null ? `<span class="tag" title="Must win the Play-In first; odds include that">Play-In</span>` : ""}</td>
+      ${["3-0", "3-1", "3-2"].map(k => heat(r[k])).join("")}
+      ${["2-3", "1-3", "0-3"].map((k, i) => heat(r[k]).replace('class="heat', i === 0 ? 'class="heat sep' : 'class="heat')).join("")}
+      <td class="sep num">${pct(r.qualify)}</td><td class="num">${pct(r.semis)}</td><td class="num">${pct(r.final)}</td>
+      <td><div class="bar-cell"><span class="num">${pct(r.champion, r.champion < 0.1 ? 1 : 0)}</span><span class="track"><span class="fill" style="width:${Math.max(r.champion / 0.45 * 100, r.champion > 0 ? 1.5 : 0)}%"></span></span></div></td>
+    </tr>`).join("");
+  return `
+  <section class="page" id="pickem">
+    <div class="lede"><h2>Swiss stage pick'em</h2>
+      <p>Our submitted picks, locked on ${fmtDate(D.pickem_locked_at.slice(0, 10))}: the two teams most likely to go 3-0, the two most likely to go 0-3, and the five most likely to advance from the rest. The percentages below are the latest odds and update as results come in.</p></div>
+    <div class="picks">
+      <div class="pick-group"><h3>Go 3-0</h3><div class="pick-list">${pk["3-0"].map(n => card(n, "3-0", "chance of 3-0")).join("")}</div></div>
+      <div class="pick-group"><h3>Go 0-3</h3><div class="pick-list">${pk["0-3"].map(n => card(n, "0-3", "chance of 0-3")).join("")}</div></div>
+      <div class="pick-group adv"><h3>Advance</h3><div class="pick-list">${pk.advance.map(n => card(n, "qualify", "to advance")).join("")}</div></div>
+    </div>
+    <div class="panel">
+      <div class="panel-head"><h3>Every team's Swiss record and title odds</h3><span class="note">Share of simulations. Darker cells are more likely.</span></div>
+      <div class="tbl-wrap"><table>
+        <thead>
+          <tr><th></th><th class="grp" colspan="3">Advance at</th><th class="grp sep" colspan="3">Out at</th><th class="sep"></th><th></th><th></th><th></th></tr>
+          <tr><th>Team</th><th>3-0</th><th>3-1</th><th>3-2</th><th class="sep">2-3</th><th>1-3</th><th>0-3</th><th class="sep">Advance</th><th>Semis</th><th>Final</th><th>Champion</th></tr>
+        </thead>
+        <tbody>${rows}</tbody>
+      </table></div>
+      <p class="note">Play-In teams' odds include having to win the Play-In first. Swiss pools are built from the confirmed seeds following last year's pool structure; the official round-1 draw isn't out yet. The pick'em format is assumed to be Riot's usual 2 / 2 / 5 picks.</p>
+    </div>
+  </section>`;
+}
+
+function seriesBlock(a, b, bo) {
+  const p = gameP(a, b), dist = scoreDist(p, bo), sw = seriesWin(p, bo);
+  const max = Math.max(...dist.map(d => d.p));
+  const order = [...dist].sort((x, y) => (y.a - y.b) - (x.a - x.b));
+  return { p, sw, html: `
+    <div class="vs">
+      <div class="side">${teamCell(a)}<span class="big num">${pct(sw)}</span></div>
+      <div class="mid">Bo${bo}</div>
+      <div class="side">${teamCell(b)}<span class="big num">${pct(1 - sw)}</span></div>
+    </div>
+    <div class="splitbar" role="img" aria-label="${esc(a)} ${pct(sw)}, ${esc(b)} ${pct(1 - sw)}">
+      <span style="width:${sw * 100}%;background:var(--s1)"></span><span style="width:${(1 - sw) * 100}%;background:var(--s2)"></span>
+    </div>
+    <div class="hbars" aria-label="Final score chances">
+      ${order.map(d => `<div class="hbar"><span>${d.a > d.b ? esc(a) : esc(b)} <b class="num">${Math.max(d.a, d.b)}-${Math.min(d.a, d.b)}</b></span>
+        <span class="track"><span class="fill" style="display:block;width:${d.p / max * 100}%;background:var(${d.a > d.b ? "--s1" : "--s2"})"></span></span>
+        <span class="v">${pct(d.p)}</span></div>`).join("")}
+    </div>
+    <p class="note">One game: ${esc(a)} ${pct(p)}.</p>` };
+}
+
+function playinBracket() {
+  // Follow our pick in every match: openers, then winners' final, losers' round, losers' final, grand final.
+  const [[a, b], [c, d]] = D.play_in.round1;
+  const match = (x, y) => { const p = seriesWin(gameP(x, y), 5); return { x, y, p, w: p >= 0.5 ? x : y, l: p >= 0.5 ? y : x }; };
+  const m1 = match(a, b), m2 = match(c, d);
+  const ubf = match(m1.w, m2.w), lb1 = match(m1.l, m2.l);
+  const lbf = match(ubf.l, lb1.w), gf = match(ubf.w, lbf.w);
+  return [
+    ["Opening matches", [m1, m2], "Winners go to the winners' final, losers to the elimination match."],
+    ["Winners' final", [ubf], "Winner goes straight to the grand final."],
+    ["Elimination match", [lb1], "Loser is out (4th)."],
+    ["Losers' final", [lbf], "Winners' final loser vs elimination-match winner. Loser is out (3rd)."],
+    ["Grand final", [gf], "Winner joins the Swiss stage."],
+  ];
+}
+function bracketMatch(mt) {
+  const row = (t, p) => `<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;padding:6px 0;${t === mt.w ? "font-weight:600" : "color:var(--ink-2)"}">
+    <span>${esc(t)}${t === mt.w ? '<span class="tag">Pick</span>' : ""}</span><span class="num">${pct(p)}</span></div>`;
+  const fav = mt.w, favIsX = fav === mt.x;
+  const scores = scoreDist(gameP(mt.x, mt.y), 5).filter(d => favIsX ? d.a > d.b : d.b > d.a)
+    .map(d => ({ s: `${Math.max(d.a, d.b)}-${Math.min(d.a, d.b)}`, p: d.p })).sort((u, v) => u.s.localeCompare(v.s)).reverse();
+  return `<div class="pick" style="gap:0">${row(mt.x, mt.p)}<div style="border-top:1px solid var(--rule)"></div>${row(mt.y, 1 - mt.p)}
+    <span class="note" style="padding-top:6px">${esc(fav)} wins ${scores.map(x => `${x.s} ${pct(x.p)}`).join(" · ")}</span></div>`;
+}
+
+function pagePlayin() {
+  const sim = Object.fromEntries(D.sim.map(r => [r.team, r]));
+  const teams = [...D.play_in.teams].sort((x, y) => sim[y].play_in_win - sim[x].play_in_win);
+  const max = Math.max(...teams.map(t => sim[t].play_in_win));
+  const br = playinBracket();
+  return `
+  <section class="page" id="playin">
+    <div class="lede"><h2>Play-In</h2>
+      <p>Four teams, double elimination, every match best of five. The winners' bracket winner meets the losers' bracket winner in a grand final, and only the winner joins the Swiss stage.</p></div>
+    <div class="panel">
+      <div class="panel-head"><h3>Predicted bracket</h3><span class="note">Our pick in every match, and each team's chance to win that series</span></div>
+      <div class="grid-2" style="grid-template-columns:repeat(auto-fit,minmax(220px,1fr))">
+        ${br.map(([title, ms, note]) => `<div style="display:grid;gap:8px;align-content:start">
+          <h3 style="font-size:16px;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-2)">${title}</h3>
+          ${ms.map(bracketMatch).join("")}<span class="note">${note}</span></div>`).join("")}
+      </div>
+      <p class="note">Each later match assumes our earlier picks came true. If an upset happens, the Matchup tab gives the odds for whoever actually meets.</p>
+    </div>
+    <div class="panel">
+      <div class="panel-head"><h3>Chance to win the Play-In</h3><span class="note">Over every possible path through the bracket</span></div>
+      <div class="hbars">${teams.map(t => `<div class="hbar">${teamCell(t)}
+        <span class="track"><span class="fill" style="display:block;width:${sim[t].play_in_win / max * 100}%;background:var(--s1)"></span></span>
+        <span class="v">${pct(sim[t].play_in_win)}</span></div>`).join("")}</div>
+    </div>
+    <h3>Opening matches in detail</h3>
+    <div class="grid-2">${D.play_in.round1.map(([a, b]) => `<div class="panel match">${seriesBlock(a, b, 5).html}</div>`).join("")}</div>
+  </section>`;
+}
+
+function pageCrystal() {
+  const cb = D.crystal_ball;
+  const groups = [
+    ["Champions", ["champ_wr", "champ_deaths", "teemo", "unique"]],
+    ["Players", ["kda", "dmg", "kp", "peyz_guma", "faker_700", "mvp_role"]],
+    ["Games", ["len32", "kills15", "cs450", "shortest"]],
+    ["Teams", ["regions_ko", "lcs_ko", "hle_t1"]],
+  ];
+  const byId = Object.fromEntries(cb.questions.map(q => [q.id, q]));
+  const T = D.crystal_tracker;
+  const trk = id => T && T.questions[id];
+  const trackBlock = id => {
+    const t = trk(id);
+    if (!t || !T.started) return "";
+    const lead = t.leaders && t.leaders.length ? `<span class="lead">Top now: ${t.leaders.map((l, i) => `${i + 1}. ${esc(l.name)} ${esc(l.value)}${l.games ? ` (${l.games}g)` : ""}`).join(" · ")}</span>` : "";
+    const mine = t.pick_now ? `<span class="lead">Our pick: #${t.pick_now.rank}, ${esc(t.pick_now.value)}</span>` : "";
+    return `<div class="track-now"><b>${esc(t.summary)}</b>${lead}${mine}</div>`;
+  };
+  const counts = {};
+  if (T) Object.values(T.questions).forEach(q => { counts[q.status] = (counts[q.status] || 0) + 1; });
+  const order = ["won", "on track", "behind", "lost", "waiting", "tied", "not started"];
+  const trackerHead = !T ? "" : `<div class="panel">
+      <div class="panel-head"><h3>Tracker</h3><span class="note">${T.started ? `${T.games} Worlds games so far` : "Starts when Worlds games reach the data"}</span></div>
+      <div class="legend" style="gap:10px">${order.filter(k => counts[k]).map(k => `${statusChip(k)} <span class="num">${counts[k]}</span>`).join("")}</div>
+      <p class="note">Picks were locked on ${fmtDate(cb.locked_at.slice(0, 10))} and can't change. The tracker only shows how each one is doing.</p>
+    </div>`;
+  const strength = p => p >= 0.75 ? "Strong pick" : p >= 0.55 ? "Lean" : p >= 0.3 ? "Best guess" : "Long shot";
+  const card = q => {
+    const opts = q.options.slice(0, 6), max = Math.max(...opts.map(o => o.p));
+    const top = q.options.length > 2 ? q.options.slice(0, 3) : [];
+    return `<div class="panel">
+      <div class="panel-head"><h3 style="font-size:18px">${esc(q.question)}</h3>${trk(q.id) ? statusChip(trk(q.id).status) : ""}</div>
+      <div class="pick" style="border-color:var(--gold)">
+        <span class="k" style="font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)">Locked pick · ${strength(q.pick_p)} before Worlds</span>
+        <div class="p">${esc(q.pick)} <small>${pct(q.pick_p)}</small></div>
+      </div>
+      ${trackBlock(q.id)}
+      ${top.length ? `<ol class="top3">${top.map((o, i) => `<li><span class="rk">${["1st", "2nd", "3rd"][i]}</span><span>${esc(o.label)}</span><span class="num">${pct(o.p)}</span></li>`).join("")}</ol>` : ""}
+      <div class="why"><span class="k">Why this pick</span><p>${esc(q.why || "")}</p></div>
+      <details><summary>How it's calculated${q.options.length > 3 ? " · all options" : ""}</summary>
+        <div class="hbars" style="margin-top:10px">${opts.map(o => `<div class="hbar"><span>${esc(o.label)}</span>
+          <span class="track"><span class="fill" style="display:block;width:${o.p / max * 100}%;background:var(${o.label === q.pick ? "--s1" : "--axis"})"></span></span>
+          <span class="v">${pct(o.p)}</span></div>`).join("")}</div>
+        <p class="note" style="margin-top:10px">${esc(q.method)}</p>
+      </details>
+    </div>`;
+  };
+  const ov = Object.entries(cb.roster_overrides || {}).map(([t, r]) => Object.entries(r).map(([pos, p]) => `${p} plays ${pos} for ${t}`).join(", ")).join("; ");
+  return `
+  <section class="page" id="crystal">
+    <div class="lede"><h2>Crystal Ball</h2>
+      <p>Answers to the ${cb.questions.length} Crystal Ball questions, from ${cb.sims.toLocaleString()} simulated tournaments (about ${Math.round(cb.games_mean)} games each). Every simulated game uses the teams' own recent games against Worlds-level opponents, so player stats and game lengths follow who actually plays whom.${ov ? ` Roster change included: ${esc(ov)}.` : ""}</p></div>
+    <div class="panel" style="border-color:var(--gold)">
+      <p>Picks lock before the tournament. The labels show how sure each pick is: a strong pick wins at least 75% of the time, a lean 55-75%, a best guess is the single most likely answer, and a long shot is under 30% even as the favourite. Questions with many answers also show a top 3, so you can trade safety for a less popular pick. Champion questions depend on the Worlds patch, so treat them as long shots. Swiss pools are built from the seeds until the official draw on Oct 23.</p>
+    </div>
+    ${trackerHead}
+    ${groups.map(([g, ids]) => `<h3>${g}</h3><div class="grid-2">${ids.filter(i => byId[i]).map(i => card(byId[i])).join("")}</div>`).join("")}
+  </section>`;
+}
+
+function pageMatchup() {
+  const names = D.teams.map(t => t.name).sort((x, y) => x.localeCompare(y));
+  const opts = sel => names.map(n => `<option${n === sel ? " selected" : ""}>${esc(n)}</option>`).join("");
+  return `
+  <section class="page" id="matchup">
+    <div class="lede"><h2>Matchup</h2><p>Pick any two Worlds teams and a format to see who's favoured and how likely each final score is.</p></div>
+    <div class="panel">
+      <div class="controls">
+        <div class="field"><label for="selA">Team</label><select id="selA">${opts(state.a)}</select></div>
+        <div class="field"><label for="selB">Opponent</label><select id="selB">${opts(state.b)}</select></div>
+        <div class="field"><label>Format</label><div class="seg" role="group" aria-label="Format">
+          ${[1, 3, 5].map(n => `<button type="button" data-bo="${n}" aria-pressed="${state.bo === n}">Bo${n}</button>`).join("")}</div></div>
+      </div>
+      <div id="mu-out" class="match"></div>
+      <p class="note">Probabilities average both sides of the map, since side selection isn't known in advance. Within a series, a matchup's edge varies from series to series, so sweeps are more common than independent coin flips would give.</p>
+    </div>
+  </section>`;
+}
+function renderMatchup() {
+  const out = $("#mu-out"); if (!out) return;
+  if (state.a === state.b) { out.innerHTML = `<p class="muted">Pick two different teams.</p>`; return; }
+  out.innerHTML = seriesBlock(state.a, state.b, state.bo).html;
+}
+
+function pageTeams() {
+  const teams = [...D.teams].sort((a, b) => b.strength - a.strength);
+  const rows = teams.map((t, i) => `
+    <tr class="clickable${t.name === state.team ? " sel" : ""}" data-team="${esc(t.name)}" tabindex="0">
+      <td class="num muted">${i + 1}</td><td class="l">${teamCell(t.name)}</td>
+      <td class="num">${Math.round(t.strength)}</td><td class="num">${pct(t.avg_game_win)}</td>
+      <td class="num">${t.wins}-${t.losses}</td>
+      <td class="form">${[...t.last10].map(c => `<span class="${c === "W" ? "w" : "l"}">${c}</span>`).join("")}</td>
+    </tr>`).join("");
+  return `
+  <section class="page" id="teams">
+    <div class="lede"><h2>Teams</h2><p>Rating = team rating + region strength. Region strength comes only from games between major regions (MSI, Worlds, EWC, First Stand and other international events). Select a team to see its 2026 rating.</p></div>
+    <div class="layout-teams">
+      <div class="panel">
+        <div class="panel-head"><h3>Power ranking</h3></div>
+        <div class="tbl-wrap"><table>
+          <thead><tr><th>#</th><th class="l">Team</th><th>Rating</th><th title="Average single-game win chance against the other 18 Worlds teams">vs field</th><th>2026 W-L</th><th class="l">Last 10</th></tr></thead>
+          <tbody id="team-rows">${rows}</tbody></table></div>
+      </div>
+      <div style="display:grid;gap:16px">
+        <div class="panel">
+          <div class="panel-head"><h3 id="hist-title"></h3><span class="legend"><span><i style="background:var(--s1)"></i>Selected</span><span><i style="background:var(--axis)"></i>Other Worlds teams</span></span></div>
+          <div class="chart" id="hist"></div>
+        </div>
+        <div class="panel">
+          <div class="panel-head"><h3>Region strength</h3><span class="note">Rating points added to every team in the region</span></div>
+          <div class="hbars" id="leagues"></div>
+          <p class="note">International record since 2022 in brackets. LCP started in 2025 and replaced PCS, VCS and LJL as the Pacific league; LCO and LLA no longer exist.</p>
+        </div>
+      </div>
+    </div>
+  </section>`;
+}
+function renderLeagues() {
+  const el = $("#leagues"); if (!el) return;
+  const lg = D.leagues.filter(l => !["LLA", "LCO", "VCS", "PCS", "LJL"].includes(l.league));
+  const lo = Math.min(0, ...lg.map(l => l.offset)), hi = Math.max(...lg.map(l => l.offset));
+  el.innerHTML = lg.map(l => {
+    const zero = (0 - lo) / (hi - lo) * 100, w = Math.abs(l.offset) / (hi - lo) * 100, left = l.offset >= 0 ? zero : zero - w;
+    return `<div class="hbar"><span>${chip(l.league)} <span class="muted small num">(${l.intl_wins}-${l.intl_games - l.intl_wins})</span></span>
+      <span class="track" style="background:linear-gradient(var(--axis),var(--axis)) ${zero}% 0/1px 100% no-repeat">
+        <span class="fill" style="position:absolute;left:${left}%;width:${w}%;background:var(${REGION_VAR[l.league] || "--muted"});border-radius:${l.offset >= 0 ? "0 4px 4px 0" : "4px 0 0 4px"}"></span></span>
+      <span class="v">${l.offset > 0 ? "+" : ""}${Math.round(l.offset)}</span></div>`;
+  }).join("");
+}
+function renderHistory() {
+  const el = $("#hist"); if (!el) return;
+  $("#hist-title").textContent = `${state.team}: rating in 2026`;
+  const W = 520, H = 260, m = { l: 44, r: 14, t: 12, b: 26 };
+  const all = D.teams.map(t => ({ name: t.name, pts: t.history.map(([d, v]) => [new Date(d + "T12:00:00").getTime(), v]) }));
+  const xs = all.flatMap(s => s.pts.map(p => p[0])), ys = all.flatMap(s => s.pts.map(p => p[1]));
+  const x0 = Math.min(...xs), x1 = Math.max(...xs);
+  const y0 = Math.floor(Math.min(...ys) / 100) * 100, y1 = Math.ceil(Math.max(...ys) / 100) * 100;
+  const X = v => m.l + (v - x0) / (x1 - x0) * (W - m.l - m.r), Y = v => H - m.b - (v - y0) / (y1 - y0) * (H - m.t - m.b);
+  const path = pts => pts.map((p, i) => `${i ? "L" : "M"}${X(p[0]).toFixed(1)},${Y(p[1]).toFixed(1)}`).join("");
+  const yt = []; for (let v = y0; v <= y1; v += 100) yt.push(v);
+  const months = []; const d = new Date(x0); d.setDate(1); d.setMonth(d.getMonth() + 1);
+  for (; d.getTime() <= x1; d.setMonth(d.getMonth() + 1)) months.push(d.getTime());
+  const sel = all.find(s => s.name === state.team), last = sel.pts[sel.pts.length - 1];
+  el.innerHTML = `<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="${esc(state.team)} rating over 2026, ending at ${Math.round(last[1])}">
+    ${yt.map(v => `<line class="grid" x1="${m.l}" x2="${W - m.r}" y1="${Y(v)}" y2="${Y(v)}"/><text x="${m.l - 6}" y="${Y(v) + 4}" text-anchor="end">${v}</text>`).join("")}
+    <line class="base" x1="${m.l}" x2="${W - m.r}" y1="${H - m.b}" y2="${H - m.b}"/>
+    ${months.map(t => `<text x="${X(t)}" y="${H - 8}" text-anchor="middle">${new Date(t).toLocaleDateString("en-US", { month: "short" })}</text>`).join("")}
+    ${all.filter(s => s !== sel).map(s => `<path d="${path(s.pts)}" fill="none" stroke="var(--axis)" stroke-width="1"/>`).join("")}
+    <path d="${path(sel.pts)}" fill="none" stroke="var(--s1)" stroke-width="2" stroke-linejoin="round"/>
+    <circle cx="${X(last[0])}" cy="${Y(last[1])}" r="4" fill="var(--s1)" stroke="var(--ring)" stroke-width="2"/>
+    <text x="${X(last[0]) - 8}" y="${Y(last[1]) - 10}" text-anchor="end" style="fill:var(--ink);font-weight:600">${Math.round(last[1])}</text>
+    <line id="xh" class="base" y1="${m.t}" y2="${H - m.b}" visibility="hidden"/>
+    <circle id="xd" r="4" fill="var(--s1)" stroke="var(--ring)" stroke-width="2" visibility="hidden"/>
+    <rect x="${m.l}" y="${m.t}" width="${W - m.l - m.r}" height="${H - m.t - m.b}" fill="transparent" id="hit"/>
+  </svg>`;
+  const svg = $("svg", el), hit = $("#hit", el), xh = $("#xh", el), xd = $("#xd", el);
+  hit.addEventListener("pointermove", ev => {
+    const r = svg.getBoundingClientRect(), vx = (ev.clientX - r.left) / r.width * W;
+    const t = x0 + (vx - m.l) / (W - m.l - m.r) * (x1 - x0);
+    let best = sel.pts[0]; for (const p of sel.pts) if (Math.abs(p[0] - t) < Math.abs(best[0] - t)) best = p;
+    xh.setAttribute("x1", X(best[0])); xh.setAttribute("x2", X(best[0])); xh.setAttribute("visibility", "visible");
+    xd.setAttribute("cx", X(best[0])); xd.setAttribute("cy", Y(best[1])); xd.setAttribute("visibility", "visible");
+    showTip(`<b>${esc(state.team)}</b><br>${new Date(best[0]).toLocaleDateString("en-US", { month: "short", day: "numeric" })}: ${Math.round(best[1])}`, ev);
+  });
+  hit.addEventListener("pointerleave", () => { xh.setAttribute("visibility", "hidden"); xd.setAttribute("visibility", "hidden"); hideTip(); });
+}
+
+function pageRecord() {
+  const mr = D.model_record, ov = Object.fromEntries(mr.overall.map(r => [r.model, r]));
+  const ours = ov["Our model"];
+  const models = ["Our model", "Stronger region", "Elo only", "Coin flip"];
+  const years = [...new Set(mr.by_year.map(r => r.year))];
+  const cell = (y, mdl, k) => mr.by_year.find(r => r.year === y && r.model === mdl)[k];
+  const ig = D.ingame.rows;
+  return `
+  <section class="page" id="record">
+    <div class="lede"><h2>Model record</h2>
+      <p>Every number here is out-of-sample: each Worlds was predicted by a model trained only on games played before it. These are the past four Worlds, ${ours.n} games in total.</p></div>
+    <div class="tiles">
+      <div class="tile"><span class="k">Picked the winner</span><span class="v">${pct(ours.accuracy, 1)}</span><span class="s">of ${ours.n} Worlds games, 2022-2025</span></div>
+      <div class="tile"><span class="k">Log loss</span><span class="v">${ours.log_loss.toFixed(3)}</span><span class="s">lower is better · coin flip ${ov["Coin flip"].log_loss.toFixed(3)}</span></div>
+      <div class="tile"><span class="k">Brier score</span><span class="v">${ours.brier.toFixed(3)}</span><span class="s">lower is better · coin flip ${ov["Coin flip"].brier.toFixed(3)}</span></div>
+    </div>
+    <div style="display:grid;gap:16px">
+      <div class="panel">
+        <div class="panel-head"><h3>Worlds by year</h3><span class="note">Accuracy · log loss</span></div>
+        <div class="tbl-wrap"><table>
+          <thead><tr><th>Model</th>${years.map(y => `<th>${y}</th>`).join("")}<th class="sep">All</th></tr></thead>
+          <tbody>${models.map(mdl => `<tr><td>${mdl === "Our model" ? "<b>Our model</b>" : mdl}</td>
+            ${years.map(y => `<td class="num">${pct(cell(y, mdl, "accuracy"))} <span class="muted">${cell(y, mdl, "log_loss").toFixed(3)}</span></td>`).join("")}
+            <td class="num sep">${pct(ov[mdl].accuracy, 1)} <span class="muted">${ov[mdl].log_loss.toFixed(3)}</span></td></tr>`).join("")}</tbody>
+        </table></div>
+        <p class="note">"Stronger region" always picks the team whose region has the better international record. It's a tough baseline at Worlds, where region strength is the biggest signal. On all ${mr.cross_league[0].n.toLocaleString()} international games since 2023, our model is clearly ahead: ${pct(mr.cross_league[0].accuracy, 1)} vs ${pct(mr.cross_league.find(r => r.model === "Stronger region").accuracy, 1)}.</p>
+      </div>
+      <div class="panel" style="max-width:640px">
+        <div class="panel-head"><h3>Calibration</h3><span class="legend"><span><i style="background:var(--s1)"></i>Our model</span><span><i style="background:var(--axis)"></i>Perfect</span></span></div>
+        <div class="chart" id="calib"></div>
+        <p class="note">When the favourite was given 60-65%, did it win about 60-65% of the time? Points on the line mean yes. Hover a point for the game count.</p>
+      </div>
+    </div>
+    ${record2026()}
+    <div class="panel">
+      <div class="panel-head"><h3>Why not 95%?</h3></div>
+      <p>If the probabilities are right, accuracy can only be as high as the average favourite's chance, which is 66% for these Worlds games. Over a third of them have a favourite under 60%. To pick winners more often, the model needs information that only exists once the game starts:</p>
+      <div class="tbl-wrap"><table>
+        <thead><tr><th>Moment</th><th>Picked the winner</th><th>Games with a 90%+ call</th><th>Those calls right</th></tr></thead>
+        <tbody>${ig.map(r => `<tr><td>${r.minute ? r.minute + " minutes in" : "Before the game"}</td>
+          <td><div class="bar-cell"><span class="num">${pct(r.accuracy, 1)}</span><span class="track"><span class="fill" style="width:${r.accuracy * 100}%"></span></span></div></td>
+          <td class="num">${r.minute ? pct(r.share_over_90) : "–"}</td><td class="num">${r.acc_over_90 != null ? pct(r.acc_over_90, 1) : "–"}</td></tr>`).join("")}</tbody>
+      </table></div>
+      <p class="note">In-game test: ${ig[0].n.toLocaleString()} games from ${D.ingame.test}, using gold, experience, CS and kill differences at each minute mark, trained on ${D.ingame.train}. Live in-game predictions are planned.</p>
+    </div>
+  </section>`;
+}
+function record2026() {
+  const L = D.ledger;
+  if (!L) return "";
+  const done = L.entries.filter(e => e.status === "graded"), open = L.entries.filter(e => e.status === "pending");
+  const s = L.summary;
+  const row = e => `<tr>
+    <td class="l">${esc(e.stage)}</td><td class="l">${esc(e.team_a)} vs ${esc(e.team_b)} <span class="muted">Bo${e.best_of}</span></td>
+    <td class="l"><b>${esc(e.pick)}</b> <span class="muted small">${Object.entries(e.score_dist).filter(([k]) => { const [x, y] = k.split("-").map(Number); return e.pick === e.team_a ? x > y : y > x; }).map(([k, v]) => `${e.pick === e.team_a ? k : k.split("-").reverse().join("-")} ${pct(v)}`).sort().reverse().join(" · ")}</span></td>
+    <td class="num">${pct(Math.max(e.p_series_a, 1 - e.p_series_a))}</td>
+    <td class="l">${e.status === "graded" ? `${esc(e.winner)} ${Math.max(e.a_wins, e.b_wins)}-${Math.min(e.a_wins, e.b_wins)} ${statusChip(e.correct ? "won" : "lost")}` : `<span class="muted">Logged ${esc(e.predicted_at.slice(5, 16).replace("T", " "))} UTC</span>`}</td></tr>`;
+  return `<div class="panel">
+    <div class="panel-head"><h3>Worlds 2026 record</h3><span class="note">Every prediction is saved before the match and graded after</span></div>
+    ${s.series ? `<div class="tiles">
+      <div class="tile"><span class="k">Series picked right</span><span class="v">${s.series_correct}/${s.series}</span></div>
+      <div class="tile"><span class="k">Games picked right</span><span class="v">${pct(s.game_accuracy, 1)}</span><span class="s">${s.games} games</span></div>
+      <div class="tile"><span class="k">Exact score</span><span class="v">${s.scores_exact}/${s.series}</span></div>
+      <div class="tile"><span class="k">Game log loss</span><span class="v">${s.game_log_loss.toFixed(3)}</span><span class="s">coin flip 0.693</span></div>
+    </div>` : `<p class="muted">No Worlds 2026 matches graded yet. ${open.length} predictions are logged and waiting.</p>`}
+    <div class="tbl-wrap"><table>
+      <thead><tr><th class="l">Stage</th><th class="l">Match</th><th class="l">Our pick</th><th>Chance</th><th class="l">Result</th></tr></thead>
+      <tbody>${[...done].reverse().map(row).join("")}${open.map(row).join("")}</tbody>
+    </table></div>
+    <p class="note">For the Play-In, every possible pairing is logged in advance, so later bracket matches have a prediction on record before they're known. Predictions for pairings that never happen stay listed as waiting.</p>
+  </div>`;
+}
+
+function renderCalib() {
+  const el = $("#calib"); if (!el) return;
+  const c = D.model_record.calibration, W = 380, H = 260, m = { l: 44, r: 26, t: 12, b: 34 };
+  const X = v => m.l + (v - 0.5) / 0.5 * (W - m.l - m.r), Y = v => H - m.b - (v - 0.5) / 0.5 * (H - m.t - m.b);
+  const ticks = [0.5, 0.6, 0.7, 0.8, 0.9, 1];
+  el.innerHTML = `<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="Calibration: predicted vs actual favourite win rate">
+    ${ticks.map(v => `<line class="grid" x1="${m.l}" x2="${W - m.r}" y1="${Y(v)}" y2="${Y(v)}"/><text x="${m.l - 6}" y="${Y(v) + 4}" text-anchor="end">${v * 100}%</text><text x="${X(v)}" y="${H - m.b + 16}" text-anchor="middle">${v * 100}%</text>`).join("")}
+    <line class="base" x1="${m.l}" x2="${W - m.r}" y1="${H - m.b}" y2="${H - m.b}"/>
+    <line x1="${X(0.5)}" y1="${Y(0.5)}" x2="${X(1)}" y2="${Y(1)}" stroke="var(--axis)" stroke-width="2"/>
+    <text x="${(m.l + W - m.r) / 2}" y="${H - 2}" text-anchor="middle">Predicted chance for the favourite</text>
+    ${c.map(p => `<circle class="pt" cx="${X(p.predicted)}" cy="${Y(Math.max(0.5, p.actual))}" r="5" fill="var(--s1)" stroke="var(--ring)" stroke-width="2" tabindex="0"
+      data-tip="${p.n} games · predicted ${pct(p.predicted, 1)} · won ${pct(p.actual, 1)}"/>`).join("")}
+  </svg>`;
+  el.querySelectorAll(".pt").forEach(pt => {
+    pt.addEventListener("pointerenter", ev => showTip(pt.dataset.tip, ev));
+    pt.addEventListener("pointerleave", hideTip);
+  });
+}
+
+function pageAbout() {
+  return `
+  <section class="page prose" id="about">
+    <div class="lede"><h2>How it works</h2><p>The full reasoning behind every choice is in the project's decision log. This is the short version.</p></div>
+    <section><h3>The data</h3><p>${D.meta.games_in_data.toLocaleString()} pro games from January 2022 to ${fmtDate(D.meta.data_through)}, from Oracle's Elixir, across about 85 leagues. Only pre-game information is used for predictions: nothing from the game being predicted.</p></section>
+    <section><h3>Team ratings with region strength</h3><p>Each team has an Elo rating that moves after every game, mostly reflecting the last two to three months. On top of that, each region has a strength number that only changes when major regions play each other: MSI, Worlds, EWC, First Stand and other international events. That's what lets an LCK team be compared with an LCS team even though they almost never meet. Games against minor-league teams, like LCS promotion matches, don't move a major region's strength.</p></section>
+    <section><h3>The game model</h3><p>A logistic regression combines the Elo rating, region strength, each region's international record, and recent form (gold spent, towers, dragons, barons, kills, and whether a team has been beating expectations). International games count five times in training, since Worlds is all international. The output is then scaled down slightly because raw predictions were about 10% too confident on international games.</p></section>
+    <section><h3>Series and tournaments</h3><p>Games in a series aren't independent: sweeps happen far more often than coin-flip maths says. Each series draws a slightly different edge for the matchup, which matches real Bo3 and Bo5 score patterns. The tournament is simulated ${D.meta.sims.toLocaleString()} times: Play-In, then Swiss, then knockouts.</p></section>
+    <section><h3>What it doesn't know</h3><ul>
+      <li>Roster news after the last game played. Top Esports' top laner 369 returning is not in the data.</li>
+      <li>The official Swiss round-1 draw and knockout seeding rules. Pools follow last year's structure.</li>
+      <li>Scrim results, patch changes for Worlds, and draft. It doesn't use betting odds.</li>
+    </ul></section>
+    <section><h3>Accuracy</h3><p>On the last four Worlds the model picked ${pct(D.model_record.overall[0].accuracy, 1)} of winners, with well-calibrated probabilities. That's close to the ceiling for pre-game predictions at Worlds, where many matches are near coin flips. See Model record.</p></section>
+  </section>`;
+}
+
+/* ---------- router ---------- */
+const RENDER = { pickem: pagePickem, playin: pagePlayin, crystal: pageCrystal, matchup: pageMatchup, teams: pageTeams, record: pageRecord, about: pageAbout };
+function route() {
+  let id = location.hash.slice(1);
+  if (!PAGES.includes(id)) id = "pickem";
+  document.querySelectorAll("#tabs a").forEach(a => a.setAttribute("aria-current", a.getAttribute("href") === "#" + id ? "page" : "false"));
+  $("#app").innerHTML = RENDER[id]();
+  hideTip();
+  if (id === "matchup") { renderMatchup(); bindMatchup(); }
+  if (id === "teams") { renderHistory(); renderLeagues(); bindTeams(); }
+  if (id === "record") renderCalib();
+}
+function bindMatchup() {
+  $("#selA").addEventListener("change", e => { state.a = e.target.value; renderMatchup(); });
+  $("#selB").addEventListener("change", e => { state.b = e.target.value; renderMatchup(); });
+  document.querySelectorAll(".seg button").forEach(b => b.addEventListener("click", () => {
+    state.bo = +b.dataset.bo;
+    document.querySelectorAll(".seg button").forEach(x => x.setAttribute("aria-pressed", x === b));
+    renderMatchup();
+  }));
+}
+function bindTeams() {
+  const pick = tr => {
+    state.team = tr.dataset.team;
+    document.querySelectorAll("#team-rows tr").forEach(r => r.classList.toggle("sel", r === tr));
+    renderHistory();
+  };
+  document.querySelectorAll("#team-rows tr").forEach(tr => {
+    tr.addEventListener("click", () => pick(tr));
+    tr.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); pick(tr); } });
+  });
+}
+
+fetch("data.json").then(r => r.json()).then(d => {
+  D = d;
+  $("#meta").textContent = `Data through ${fmtDate(D.meta.data_through)} · ${D.meta.sims.toLocaleString()} simulated tournaments`;
+  window.addEventListener("hashchange", route);
+  route();
+}).catch(() => { $("#app").innerHTML = `<p class="loading">The forecast data didn't load. Refresh the page to try again.</p>`; });
+</script>
