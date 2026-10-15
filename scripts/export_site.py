@@ -27,6 +27,38 @@ CONFIG = ROOT / "config" / "worlds2026.json"
 FINAL = "p_LR full (intl x5) +cal"
 LOCKED_CRYSTAL = ROOT / "ledger" / "crystal_ball_locked.json"
 LOCKED_PICKEM = ROOT / "ledger" / "pickem_locked.json"
+LOCKED_EXTRA = ROOT / "ledger" / "crystal_ball_locked_extra.json"
+PERSONAL = ROOT / "ledger" / "crystal_ball_personal.json"
+
+
+def crystal_section():
+    """Locked model picks (presence question first) plus the user's own picks."""
+    cb = json.loads(LOCKED_CRYSTAL.read_text())
+    if LOCKED_EXTRA.exists():
+        cb["questions"] = json.loads(LOCKED_EXTRA.read_text())["questions"] + cb["questions"]
+    personal = json.loads(PERSONAL.read_text()) if PERSONAL.exists() else None
+    cb["personal"] = ({k: v["pick"] for k, v in personal["picks"].items() if v.get("pick")} or None) if personal else None
+    return cb
+
+
+def live_section(cfg, tg):
+    """What the browser needs to run live predictions itself: the live model,
+    a player -> team map (the feed names players, not our teams), and each
+    matchup's pre-game chance with sides known (blue vs red)."""
+    from lolpred.predict import MatchPredictor
+    lm = json.loads((ROOT / "models" / "live_model.json").read_text())
+    pred = MatchPredictor()
+    names = list(cfg["teams"])
+    ids = {n: cfg["teams"][n]["teamid"] for n in names}
+    p_blue = {b: {r: round(pred.game_prob_sided(ids[b], ids[r]), 4) for r in names if r != b} for b in names}
+    recent = tg[(tg["season"] == tg["season"].max()) & tg["teamid"].isin(ids.values())]
+    by_id = {v: k for k, v in ids.items()}
+    pl = pd.read_parquet(PROCESSED_DIR / "player_games.parquet", columns=["playername", "teamid", "date"])
+    pl = pl[(pl["date"] >= "2026-01-01") & pl["teamid"].isin(ids.values())].sort_values("date")
+    players = {p.lower(): by_id[t] for p, t in pl.groupby("playername")["teamid"].last().items()}
+    return {"coef": lm["coef"], "intercept": lm["intercept"], "features": lm["features"], "max_t": 3.0,
+            "players": players, "p_blue": p_blue,
+            "worlds_league_id": "98767975604431411"}
 
 
 def read_json(path):
@@ -124,7 +156,8 @@ def main():
         "leagues": league_section(m, offsets.to_dict()),
         "model_record": model_record(m, preds),
         "ingame": ingame,
-        "crystal_ball": json.loads(LOCKED_CRYSTAL.read_text()),
+        "crystal_ball": crystal_section(),
+        "live": live_section(cfg, tg),
         "crystal_tracker": read_json(PROCESSED_DIR / "crystal_tracker.json"),
         "ledger": read_json(PROCESSED_DIR / "ledger_graded.json"),
     }

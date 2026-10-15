@@ -22,7 +22,7 @@ from lolpred.crystal import (INTL_EVENTS, POSITIONS, LengthModel, TeamPools, cha
                              champion_sim, current_rosters, load_player_games, p_at_least_one,
                              rare_event_rate, simulate_players, unique_champions_model,
                              worlds_like_games)
-from lolpred.draft import champion_rates, load_draft_events  # noqa: E402
+from lolpred.draft import champion_rates, load_draft_events, simulate_leaders  # noqa: E402
 from lolpred.predict import MatchPredictor  # noqa: E402
 from lolpred.splits import worlds_start  # noqa: E402
 from lolpred.tournament import setup_from_config, simulate  # noqa: E402
@@ -68,7 +68,14 @@ def explain(Q, ps, plabel, outcomes, st, cfg, names, kills, pid, need, n_games, 
         return list(np.argsort(-ps[key])[:k])
 
     W = {}
-    c = Q[0]["options"]
+    pq = Q[[q["id"] for q in Q].index("presence")]["options"]
+    W["presence"] = (
+        f"{pq[0]['label']} is picked or banned in {rates.loc[pq[0]['label'], 'presence']:.0%} of recent top-tier drafts "
+        f"(newest-patch games weighted most), the highest of any champion. Backtested on the last four Worlds this method "
+        "was right on the #1 champion only about 1 time in 12: the Worlds leader is usually a power pick from the Worlds "
+        "patch itself (Aatrox went from 30% to 98% in 2022). Next: "
+        + ", ".join(f"{o['label']} ({rates.loc[o['label'], 'presence']:.0%})" for o in pq[1:3]) + ".")
+    c = Q[[q["id"] for q in Q].index("champ_wr")]["options"]
     lead = c[0]["label"]
     W["champ_wr"] = (
         f"The win-rate leader is almost always a champion that plays only 5-8 games and barely loses, so luck "
@@ -77,7 +84,7 @@ def explain(Q, ps, plabel, outcomes, st, cfg, names, kills, pid, need, n_games, 
         f"to reach 5 games in {eligible[lead]:.0%} of simulated Worlds. "
         + " ".join(f"{o['label']} ({wr_mean[o['label']]:.0%}, reaches 5 games {eligible[o['label']]:.0%})."
                    for o in c[1:3]))
-    c = Q[1]["options"]
+    c = Q[[q["id"] for q in Q].index("champ_deaths")]["options"]
     lead = c[0]["label"]
     W["champ_deaths"] = (
         f"{lead} dies {avg_deaths[lead]:.1f} times per game in recent top-tier and newest-patch games, the most of any "
@@ -230,7 +237,13 @@ def main():
     rates, info = champion_rates(ev, end)
     wr_lead, death_lead, wr_mean, avg_deaths, eligible = champion_sim(pg, rates, info["newest_patch"], n_games)
 
+    lead, _ = simulate_leaders(rates, n_games)
+    pres = lead["presence"].sort_values(ascending=False)
     Q = []
+    Q.append(question("presence", "Which champion will have the highest Presence (% of games picked or banned) across all drafts?",
+                      options(pres), "Patch-weighted presence in recent top-tier drafts (games on the newest patch, "
+                      f"{info['newest_patch']}, count 10x), with wide uncertainty because the Worlds patch reshuffles the "
+                      "meta, then the event's ~100 games simulated 20,000 times."))
     Q.append(question("champ_wr", "Which champion will have the highest Win Rate (min 5 games played)?",
                       options(wr_lead), "Simulated champion games and wins: pick rates from recent top-tier drafts "
                       "(newest patch weighted 10x), win rates shrunk toward 50%. Usually won by a champion with "

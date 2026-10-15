@@ -1,0 +1,78 @@
+{
+  "note": "Your own Crystal Ball picks, as submitted on LoL Esports. Fill in each 'pick' with the exact answer text (team, player or champion name, Yes/No, or the range like 100-104). Leave null for any you skipped. Once filled, don't change them.",
+  "submitted_at": null,
+  "picks": {
+    "presence": {
+      "question": "Which champion will have the highest Presence (% of games picked or banned) across all drafts?",
+      "pick": null
+    },
+    "champ_wr": {
+      "question": "Which champion will have the highest Win Rate (min 5 games played)?",
+      "pick": null
+    },
+    "champ_deaths": {
+      "question": "Which champion will have the highest average Deaths per Game (min 5 games played)?",
+      "pick": null
+    },
+    "kda": {
+      "question": "Which pro will finish with the highest average KDA?",
+      "pick": null
+    },
+    "dmg": {
+      "question": "Which pro will finish with the highest average Damage per Game?",
+      "pick": null
+    },
+    "kp": {
+      "question": "Which pro will finish with the highest average Kill Participation?",
+      "pick": null
+    },
+    "peyz_guma": {
+      "question": "Peyz vs Gumayusi: Who will finish with more total Kills?",
+      "pick": null
+    },
+    "faker_700": {
+      "question": "Will Faker reach 700 career Worlds Kills this year? (616 entering)",
+      "pick": null
+    },
+    "teemo": {
+      "question": "Will Teemo be picked at least once?",
+      "pick": null
+    },
+    "unique": {
+      "question": "How many unique champions will be picked?",
+      "pick": null
+    },
+    "len32": {
+      "question": "Will more games finish before or after the 32 minute mark?",
+      "pick": null
+    },
+    "kills15": {
+      "question": "Will we see any pro get at least 15 kills in a single game?",
+      "pick": null
+    },
+    "cs450": {
+      "question": "Will we see any pro reach a CS of at least 450 in a single game?",
+      "pick": null
+    },
+    "mvp_role": {
+      "question": "What will be the role of the Finals MVP winner?",
+      "pick": null
+    },
+    "regions_ko": {
+      "question": "How many different regions will be represented in Knockouts?",
+      "pick": null
+    },
+    "lcs_ko": {
+      "question": "Will a team from LCS reach Knockouts?",
+      "pick": null
+    },
+    "hle_t1": {
+      "question": "Which team will place higher: HLE or T1?",
+      "pick": null
+    },
+    "shortest": {
+      "question": "Which team will win the shortest game (duration)?",
+      "pick": null
+    }
+  }
+}

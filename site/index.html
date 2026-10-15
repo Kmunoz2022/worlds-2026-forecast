@@ -20,6 +20,7 @@
   --loss: #d70015;
   --warn: #c93400;
   --ring: #ffffff;
+  --side-blue: #2a78d6; --side-red: #d70015;
   --glass: rgba(245, 245, 247, 0.72);
   --glass-edge: rgba(0, 0, 0, 0.08);
   --fill: rgba(118, 118, 128, 0.12);       /* segmented-control track */
@@ -40,7 +41,7 @@
     --gold: #0a84ff; --gold-soft: #0b2a4a;
     --seq: #3987e5;
     --s1: #3987e5; --s2: #d95926; --s3: #199e70; --s4: #c98500; --s5: #d55181; --s6: #008300;
-    --win: #30d158; --loss: #ff453a; --warn: #ff9f0a; --ring: #1c1c1e;
+    --win: #30d158; --loss: #ff453a; --warn: #ff9f0a; --ring: #1c1c1e; --side-blue: #3987e5; --side-red: #ff453a;
     --glass: rgba(22, 22, 23, 0.72); --glass-edge: rgba(255, 255, 255, 0.08);
     --fill: rgba(118, 118, 128, 0.24); --thumb: #636366;
     --thumb-shadow: 0 3px 8px rgba(0, 0, 0, 0.35);
@@ -55,7 +56,7 @@
   --gold: #0a84ff; --gold-soft: #0b2a4a;
   --seq: #3987e5;
   --s1: #3987e5; --s2: #d95926; --s3: #199e70; --s4: #c98500; --s5: #d55181; --s6: #008300;
-  --win: #30d158; --loss: #ff453a; --warn: #ff9f0a; --ring: #1c1c1e;
+  --win: #30d158; --loss: #ff453a; --warn: #ff9f0a; --ring: #1c1c1e; --side-blue: #3987e5; --side-red: #ff453a;
   --glass: rgba(22, 22, 23, 0.72); --glass-edge: rgba(255, 255, 255, 0.08);
   --fill: rgba(118, 118, 128, 0.24); --thumb: #636366;
   --thumb-shadow: 0 3px 8px rgba(0, 0, 0, 0.35);
@@ -216,6 +217,14 @@ svg .base { stroke: var(--axis); stroke-width: 1; }
 .track-now .lead { color: var(--ink-2); font-size: 0.8125rem; }
 
 /* crystal ball cards */
+.picks2 { display: grid; gap: 0; background: var(--surface-2); border-radius: var(--radius-s); overflow: hidden; }
+.pick-row { display: grid; grid-template-columns: 3.25rem 1fr auto; gap: 0.625rem; align-items: center; padding: 0.625rem 0.75rem; }
+.pick-row + .pick-row { box-shadow: inset 0 1px 0 var(--rule); }
+.pick-row .who { font-size: 0.75rem; font-weight: 600; color: var(--muted); }
+.pick-row .ans { font: 600 1.125rem/1.2 var(--display); letter-spacing: -0.016em; min-width: 0; }
+.pick-row .ans small { font: 400 0.75rem var(--body); color: var(--muted); letter-spacing: 0; }
+.score-row { display: grid; grid-template-columns: 3.25rem 1fr; gap: 0.625rem; align-items: center; }
+.score-row .who { font-size: 0.8125rem; font-weight: 600; }
 .top3 { list-style: none; margin: 0; padding: 0; display: grid; gap: 0; background: var(--surface-2); border-radius: var(--radius-s); overflow: hidden; }
 .top3 li { display: grid; grid-template-columns: 2.375rem 1fr auto; gap: 0.5rem; align-items: baseline; padding: 0.5rem 0.75rem; font-size: 0.875rem; }
 .top3 li + li { box-shadow: inset 0 1px 0 var(--rule); }
@@ -229,6 +238,22 @@ details summary::before { content: ""; width: 0.4375rem; height: 0.4375rem; bord
   transform: rotate(-45deg); transition: transform .25s ease; margin-right: 0.125rem; }
 details[open] summary::before { transform: rotate(45deg); }
 details summary:active { opacity: 0.6; }
+
+/* today */
+.live-dot { display: inline-block; width: 0.5rem; height: 0.5rem; border-radius: 50%; background: var(--loss); margin-right: 0.5rem; vertical-align: 0.15em; }
+@media (prefers-reduced-motion: no-preference) { .live-dot { animation: live 2s ease-in-out infinite; } }
+@keyframes live { 50% { opacity: 0.35; } }
+.next-list { display: grid; }
+.next-row { display: grid; grid-template-columns: minmax(9rem, 14rem) 1fr; gap: 0.75rem; align-items: center; padding: 0.625rem 0; }
+.next-row + .next-row { box-shadow: inset 0 1px 0 var(--rule); }
+.next-row .when { display: grid; gap: 0.0625rem; }
+.next-row .who { display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: baseline; font-variant-numeric: tabular-nums; }
+.next-row .fav { font-weight: 600; }
+.countdown { color: var(--gold); font-weight: 500; }
+@media (max-width: 560px) { .next-row { grid-template-columns: 1fr; gap: 0.25rem; } }
+.link-card { color: inherit; text-decoration: none; transition: transform .2s ease; -webkit-tap-highlight-color: transparent; }
+.link-card:active { transform: scale(0.985); transition-duration: 60ms; }
+.chev { width: 0.5rem; height: 0.5rem; border-right: 2px solid var(--muted); border-top: 2px solid var(--muted); transform: rotate(45deg); }
 
 /* about */
 .prose { display: grid; gap: 1.375rem; }
@@ -263,6 +288,7 @@ details summary:active { opacity: 0.6; }
     <nav id="tabs" aria-label="Sections">
       <div class="seg-track">
         <span class="seg-thumb" id="thumb" aria-hidden="true"></span>
+        <a href="#today">Today</a>
         <a href="#pickem">Pick'em</a>
         <a href="#playin">Play-In</a>
         <a href="#crystal">Crystal Ball</a>
@@ -280,7 +306,7 @@ details summary:active { opacity: 0.6; }
 
 <script>
 const REGION_VAR = { LCK: "--s1", LPL: "--s2", LEC: "--s3", LCS: "--s4", LCP: "--s5", CBLOL: "--s6" };
-const PAGES = ["pickem", "playin", "crystal", "matchup", "teams", "record", "about"];
+const PAGES = ["today", "pickem", "playin", "crystal", "matchup", "teams", "record", "about"];
 let D = null;
 const state = { a: "Gen.G", b: "Bilibili Gaming", bo: 5, team: "Gen.G" };
 
@@ -405,7 +431,7 @@ function bracketMatch(mt) {
     <span>${esc(t)}${t === mt.w ? '<span class="tag">Pick</span>' : ""}</span><span class="num">${pct(p)}</span></div>`;
   const fav = mt.w, favIsX = fav === mt.x;
   const scores = scoreDist(gameP(mt.x, mt.y), 5).filter(d => favIsX ? d.a > d.b : d.b > d.a)
-    .map(d => ({ s: `${Math.max(d.a, d.b)}-${Math.min(d.a, d.b)}`, p: d.p })).sort((u, v) => u.s.localeCompare(v.s)).reverse();
+    .map(d => ({ s: `${Math.max(d.a, d.b)}-${Math.min(d.a, d.b)}`, p: d.p })).sort((u, v) => u.s.localeCompare(v.s));
   return `<div class="pick" style="gap:0">${row(mt.x, mt.p)}<div style="border-top:1px solid var(--rule)"></div>${row(mt.y, 1 - mt.p)}
     <span class="note" style="padding-top:6px">${esc(fav)} wins ${scores.map(x => `${x.s} ${pct(x.p)}`).join(" · ")}</span></div>`;
 }
@@ -440,44 +466,40 @@ function pagePlayin() {
 }
 
 function pageCrystal() {
-  const cb = D.crystal_ball;
+  const cb = D.crystal_ball, T = D.crystal_tracker, mine = cb.personal;
   const groups = [
-    ["Champions", ["champ_wr", "champ_deaths", "teemo", "unique"]],
+    ["Champions", ["presence", "champ_wr", "champ_deaths", "teemo", "unique"]],
     ["Players", ["kda", "dmg", "kp", "peyz_guma", "faker_700", "mvp_role"]],
     ["Games", ["len32", "kills15", "cs450", "shortest"]],
     ["Teams", ["regions_ko", "lcs_ko", "hle_t1"]],
   ];
   const byId = Object.fromEntries(cb.questions.map(q => [q.id, q]));
-  const T = D.crystal_tracker;
-  const trk = id => T && T.questions[id];
-  const trackBlock = id => {
-    const t = trk(id);
+  const trkModel = id => T && T.model && T.model[id];
+  const trkYou = id => T && T.personal && T.personal[id];
+  const strength = p => p >= 0.75 ? "Strong pick" : p >= 0.55 ? "Lean" : p >= 0.3 ? "Best guess" : "Long shot";
+  const pickRow = (who, pick, t, sub) => `<div class="pick-row">
+      <span class="who">${who}</span>
+      <span class="ans">${esc(pick)}${sub ? ` <small>${sub}</small>` : ""}</span>
+      ${t ? statusChip(t.status) : ""}
+    </div>`;
+  const now = id => {
+    const t = trkModel(id);
     if (!t || !T.started) return "";
     const lead = t.leaders && t.leaders.length ? `<span class="lead">Top now: ${t.leaders.map((l, i) => `${i + 1}. ${esc(l.name)} ${esc(l.value)}${l.games ? ` (${l.games}g)` : ""}`).join(" · ")}</span>` : "";
-    const mine = t.pick_now ? `<span class="lead">Our pick: #${t.pick_now.rank}, ${esc(t.pick_now.value)}</span>` : "";
-    return `<div class="track-now"><b>${esc(t.summary)}</b>${lead}${mine}</div>`;
+    return `<div class="track-now"><b>${esc(t.summary)}</b>${lead}</div>`;
   };
-  const counts = {};
-  if (T) Object.values(T.questions).forEach(q => { counts[q.status] = (counts[q.status] || 0) + 1; });
-  const order = ["won", "on track", "behind", "lost", "waiting", "tied", "not started"];
-  const trackerHead = !T ? "" : `<div class="panel">
-      <div class="panel-head"><h3>Tracker</h3><span class="note">${T.started ? `${T.games} Worlds games so far` : "Starts when Worlds games reach the data"}</span></div>
-      <div class="legend" style="gap:10px">${order.filter(k => counts[k]).map(k => `${statusChip(k)} <span class="num">${counts[k]}</span>`).join("")}</div>
-      <p class="note">Picks were locked on ${fmtDate(cb.locked_at.slice(0, 10))} and can't change. The tracker only shows how each one is doing.</p>
-    </div>`;
-  const strength = p => p >= 0.75 ? "Strong pick" : p >= 0.55 ? "Lean" : p >= 0.3 ? "Best guess" : "Long shot";
   const card = q => {
     const opts = q.options.slice(0, 6), max = Math.max(...opts.map(o => o.p));
     const top = q.options.length > 2 ? q.options.slice(0, 3) : [];
     return `<div class="panel">
-      <div class="panel-head"><h3 style="font-size:18px">${esc(q.question)}</h3>${trk(q.id) ? statusChip(trk(q.id).status) : ""}</div>
-      <div class="pick" style="border-color:var(--gold)">
-        <span class="k" style="font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)">Locked pick · ${strength(q.pick_p)} before Worlds</span>
-        <div class="p">${esc(q.pick)} <small>${pct(q.pick_p)}</small></div>
+      <h3 style="font-size:1.0625rem">${esc(q.question)}</h3>
+      <div class="picks2">
+        ${mine && mine[q.id] ? pickRow("You", mine[q.id], trkYou(q.id)) : ""}
+        ${pickRow("Model", q.pick, trkModel(q.id), `${pct(q.pick_p)} · ${strength(q.pick_p).toLowerCase()}`)}
       </div>
-      ${trackBlock(q.id)}
+      ${now(q.id)}
       ${top.length ? `<ol class="top3">${top.map((o, i) => `<li><span class="rk">${["1st", "2nd", "3rd"][i]}</span><span>${esc(o.label)}</span><span class="num">${pct(o.p)}</span></li>`).join("")}</ol>` : ""}
-      <div class="why"><span class="k">Why this pick</span><p>${esc(q.why || "")}</p></div>
+      <div class="why"><span class="k">Why the model picked it</span><p>${esc(q.why || "")}</p></div>
       <details><summary>How it's calculated${q.options.length > 3 ? " · all options" : ""}</summary>
         <div class="hbars" style="margin-top:10px">${opts.map(o => `<div class="hbar"><span>${esc(o.label)}</span>
           <span class="track"><span class="fill" style="display:block;width:${o.p / max * 100}%;background:var(${o.label === q.pick ? "--s1" : "--axis"})"></span></span>
@@ -486,15 +508,22 @@ function pageCrystal() {
       </details>
     </div>`;
   };
+  const order = ["won", "on track", "tied", "behind", "lost", "waiting", "not started"];
+  const tallyRow = (who, t) => `<div class="score-row"><span class="who">${who}</span>
+      <span class="legend" style="gap:0.5rem">${order.filter(k => t && t[k]).map(k => `${statusChip(k)}<span class="num">${t[k]}</span>`).join("")}</span></div>`;
+  const scoreboard = !T ? "" : `<div class="panel">
+      <div class="panel-head"><h3>Scoreboard</h3><span class="note">${T.started ? `${T.games} Worlds games so far` : "Starts when Worlds games reach the data"}</span></div>
+      ${T.tally.personal ? tallyRow("You", T.tally.personal) : `<p class="note">Your own picks will appear here once they're added to the site.</p>`}
+      ${tallyRow("Model", T.tally.model)}
+      <p class="note">Picks were locked before Worlds and can't change; this only shows how each one is doing. "Won" and "lost" are final; "on track" and "behind" can still change.</p>
+    </div>`;
   const ov = Object.entries(cb.roster_overrides || {}).map(([t, r]) => Object.entries(r).map(([pos, p]) => `${p} plays ${pos} for ${t}`).join(", ")).join("; ");
   return `
   <section class="page" id="crystal">
     <div class="lede"><h2>Crystal Ball</h2>
-      <p>Answers to the ${cb.questions.length} Crystal Ball questions, from ${cb.sims.toLocaleString()} simulated tournaments (about ${Math.round(cb.games_mean)} games each). Every simulated game uses the teams' own recent games against Worlds-level opponents, so player stats and game lengths follow who actually plays whom.${ov ? ` Roster change included: ${esc(ov)}.` : ""}</p></div>
-    <div class="panel" style="border-color:var(--gold)">
-      <p>Picks lock before the tournament. The labels show how sure each pick is: a strong pick wins at least 75% of the time, a lean 55-75%, a best guess is the single most likely answer, and a long shot is under 30% even as the favourite. Questions with many answers also show a top 3, so you can trade safety for a less popular pick. Champion questions depend on the Worlds patch, so treat them as long shots. Swiss pools are built from the seeds until the official draw on Oct 23.</p>
-    </div>
-    ${trackerHead}
+      <p>Your picks and the model's picks for all ${cb.questions.length} questions, tracked as Worlds is played. The model's answers come from ${cb.sims.toLocaleString()} simulated tournaments (about ${Math.round(cb.games_mean)} games each), using each team's recent games against Worlds-level opponents.${ov ? ` Roster change included: ${esc(ov)}.` : ""}</p></div>
+    ${scoreboard}
+    <p class="note">How sure the model was: a strong pick wins at least 75% of the time, a lean 55-75%, a best guess is the single most likely answer, and a long shot is under 30% even as the favourite. Champion questions depend on the Worlds patch, so they're long shots.</p>
     ${groups.map(([g, ids]) => `<h3>${g}</h3><div class="grid-2">${ids.filter(i => byId[i]).map(i => card(byId[i])).join("")}</div>`).join("")}
   </section>`;
 }
@@ -639,7 +668,6 @@ function pageRecord() {
         <p class="note">When the favourite was given 60-65%, did it win about 60-65% of the time? Points on the line mean yes. Hover a point for the game count.</p>
       </div>
     </div>
-    ${record2026()}
     <div class="panel">
       <div class="panel-head"><h3>Why not 95%?</h3></div>
       <p>If the probabilities are right, accuracy can only be as high as the average favourite's chance, which is 66% for these Worlds games. Over a third of them have a favourite under 60%. To pick winners more often, the model needs information that only exists once the game starts:</p>
@@ -660,7 +688,7 @@ function record2026() {
   const s = L.summary;
   const row = e => `<tr>
     <td class="l">${esc(e.stage)}</td><td class="l">${esc(e.team_a)} vs ${esc(e.team_b)} <span class="muted">Bo${e.best_of}</span></td>
-    <td class="l"><b>${esc(e.pick)}</b> <span class="muted small">${Object.entries(e.score_dist).filter(([k]) => { const [x, y] = k.split("-").map(Number); return e.pick === e.team_a ? x > y : y > x; }).map(([k, v]) => `${e.pick === e.team_a ? k : k.split("-").reverse().join("-")} ${pct(v)}`).sort().reverse().join(" · ")}</span></td>
+    <td class="l"><b>${esc(e.pick)}</b> <span class="muted small">${Object.entries(e.score_dist).filter(([k]) => { const [x, y] = k.split("-").map(Number); return e.pick === e.team_a ? x > y : y > x; }).map(([k, v]) => `${e.pick === e.team_a ? k : k.split("-").reverse().join("-")} ${pct(v)}`).sort().join(" · ")}</span></td>
     <td class="num">${pct(Math.max(e.p_series_a, 1 - e.p_series_a))}</td>
     <td class="l">${e.status === "graded" ? `${esc(e.winner)} ${Math.max(e.a_wins, e.b_wins)}-${Math.min(e.a_wins, e.b_wins)} ${statusChip(e.correct ? "won" : "lost")}` : `<span class="muted">Logged ${esc(e.predicted_at.slice(5, 16).replace("T", " "))} UTC</span>`}</td></tr>`;
   return `<div class="panel">
@@ -714,6 +742,301 @@ function pageAbout() {
     <section><h3>Accuracy</h3><p>On the last four Worlds the model picked ${pct(D.model_record.overall[0].accuracy, 1)} of winners, with well-calibrated probabilities. That's close to the ceiling for pre-game predictions at Worlds, where many matches are near coin flips. See Model record.</p></section>
   </section>`;
 }
+
+/* ---------- Today: live predictions in the browser ---------- */
+// The LoL Esports feed allows requests from any website, so the visitor's browser
+// reads it directly. This key is the public one lolesports.com itself sends from
+// every visitor's browser; it isn't a secret.
+const LIVE_KEY = "0TvQnueqKa5mxJntVWt0w4LpLfEkrV1Ta8rQBb9Z";
+const LV = { api: "https://esports-api.lolesports.com/persisted/gw", feed: "https://feed.lolesports.com/livestats/v1" };
+// Testing: ?match=<id>&at=<ISO time> replays a finished match as if it were live.
+const params = new URLSearchParams(location.search);
+const clockOffset = params.get("at") ? Date.parse(params.get("at")) - Date.now() : 0;
+const clock = () => new Date(Date.now() + clockOffset);
+const LIVE = { states: [], ok: null, next: null, timer: 0, polling: false };
+const liveGames = {};
+
+async function lget(url) {
+  const r = await fetch(url, { headers: { "x-api-key": LIVE_KEY } });
+  if (!r.ok) return null;
+  const t = await r.text();
+  return t ? JSON.parse(t) : null;
+}
+const feedTs = d => new Date(Math.floor(d.getTime() / 10000) * 10000).toISOString().replace(/\.\d{3}Z$/, "Z");
+// 10 s of frames starting at d. Asked for a time after a game ended, the feed
+// returns the game's final frames instead, so frames far from d are rejected.
+async function frameWindow(gid, d) {
+  const w = await lget(`${LV.feed}/window/${gid}?startingTime=${feedTs(d)}`);
+  if (!w || !w.frames || !w.frames.length) return null;
+  return Math.abs(new Date(w.frames[0].rfc460Timestamp) - d) <= 40000 ? w : null;
+}
+// The feed has no game clock: step back to before the first frame, then narrow to 10 s.
+// The feed can go silent mid-game (a 12-minute gap in one LCS game), so only
+// 18 minutes without frames counts as "before the game started".
+async function findStart(gid, around) {
+  const step = 180000;
+  let t = around.getTime(), misses = 0;
+  for (let i = 0; i < 40 && misses < 6; i++) {
+    if (await frameWindow(gid, new Date(t - (misses + 1) * step))) { t -= (misses + 1) * step; misses = 0; }
+    else misses++;
+  }
+  let lo = t - step, hi = t;
+  while (hi - lo > 10000) {
+    const mid = lo + (hi - lo) / 2;
+    if (await frameWindow(gid, new Date(mid))) hi = mid; else lo = mid;
+  }
+  for (const x of [lo, hi]) {
+    const w = await frameWindow(gid, new Date(x));
+    if (w) return new Date(w.frames[0].rfc460Timestamp);
+  }
+  return new Date(hi);
+}
+// The feed names players ("TLAW Morgan"), not our teams: vote by player.
+function teamFromPlayers(meta) {
+  const votes = {};
+  for (const p of meta) {
+    const name = (p.summonerName.includes(" ") ? p.summonerName.slice(p.summonerName.indexOf(" ") + 1) : p.summonerName).toLowerCase();
+    const t = D.live.players[name];
+    if (t) votes[t] = (votes[t] || 0) + 1;
+  }
+  const best = Object.entries(votes).sort((a, b) => b[1] - a[1])[0];
+  return best ? best[0] : null;
+}
+// Same model as src/lolpred/live.py: pre-game log-odds plus leads scaled by game time.
+function livePBlue(pre, minute, gold, kills, cs) {
+  const L = D.live, p = Math.min(Math.max(pre, 1e-4), 1 - 1e-4), t = Math.min(minute / 10, L.max_t);
+  const g = gold / 1000, c = cs / 10;
+  const x = [Math.log(p / (1 - p)), g, g * t, kills, kills * t, c, c * t];
+  return 1 / (1 + Math.exp(-(L.intercept + x.reduce((s, v, i) => s + v * L.coef[i], 0))));
+}
+// Same as series_win_prob_live in src/lolpred/series.py.
+function seriesLive(p, bo, aw, bw, pCur) {
+  const w = (bo + 1) / 2, k = D.meta.kappa, al = p * k, be = (1 - p) * k;
+  const rest = (a, b) => {
+    if (a >= w) return 1;
+    if (b >= w) return 0;
+    const q = (al + a) / (al + be + a + b);
+    return q * rest(a + 1, b) + (1 - q) * rest(a, b + 1);
+  };
+  return pCur == null ? rest(aw, bw) : pCur * rest(aw + 1, bw) + (1 - pCur) * rest(aw, bw + 1);
+}
+const TEAM_ALIAS = { hle: "Hanwha Life Esports", gen: "Gen.G", geng: "Gen.G", dk: "Dplus KIA", al: "Anyone's Legend", blg: "Bilibili Gaming",
+  tes: "Top Esports", ig: "Invictus Gaming", g2: "G2 Esports", mkoi: "Movistar KOI", kc: "Karmine Corp", tl: "Team Liquid", tlaw: "Team Liquid",
+  c9: "Cloud9", tsw: "Team Secret Whales", cfo: "CTBC Flying Oyster", mvk: "MVK Esports", los: "LØS", fur: "FURIA" };
+const normName = s => String(s).toLowerCase().replace(/ø/g, "o").replace(/[^a-z0-9]/g, "");
+function ourTeam(t) {
+  const n = normName(t.name), c = normName(t.code || "");
+  for (const x of D.teams) {
+    const o = normName(x.name);
+    if (o === n || n.includes(o) || (o.includes(n) && n.length > 3)) return x.name;
+  }
+  return TEAM_ALIAS[c] || TEAM_ALIAS[n] || null;
+}
+
+async function liveGameState(ev, game, now) {
+  const w = await frameWindow(game.id, new Date(now.getTime() - 20000));
+  if (!w) return null;
+  let G = liveGames[game.id];
+  if (!G) {
+    const m = w.gameMetadata;
+    const blue = teamFromPlayers(m.blueTeamMetadata.participantMetadata), red = teamFromPlayers(m.redTeamMetadata.participantMetadata);
+    if (!blue || !red || blue === red || !D.live.p_blue[blue]) return null;
+    G = liveGames[game.id] = { blue, red, pPre: D.live.p_blue[blue][red], history: [], start: null };
+  }
+  const f = w.frames[w.frames.length - 1];
+  if (!G.start) G.start = await findStart(game.id, new Date(f.rfc460Timestamp));
+  const minute = Math.max(0, (new Date(f.rfc460Timestamp) - G.start) / 60000);
+  if (!G.filled) { G.filled = true; backfill(G, game.id, minute); }
+  const B = f.blueTeam, R = f.redTeam, cs = t => t.participants.reduce((s, p) => s + p.creepScore, 0);
+  const gold = B.totalGold - R.totalGold, kills = B.totalKills - R.totalKills, csd = cs(B) - cs(R);
+  const p = livePBlue(G.pPre, minute, gold, kills, csd);
+  const last = G.history[G.history.length - 1];
+  if (!last || minute - last[0] >= 0.25) G.history.push([minute, p]);
+  const [ta, tb] = ev.match.teams;
+  const aw = (ta.result || {}).gameWins || 0, bw = (tb.result || {}).gameWins || 0;
+  const aIsBlue = ((game.teams || []).find(t => t.id === ta.id) || {}).side === "blue";
+  const A = aIsBlue ? G.blue : G.red, Bt = aIsBlue ? G.red : G.blue, bo = ev.match.strategy.count;
+  const inGame = f.gameState === "in_game";
+  return { gid: game.id, num: game.number, minute, state: f.gameState, blue: G.blue, red: G.red, p, pPre: G.pPre,
+    gold, csd, B, R, history: G.history, league: ev.league.name,
+    series: { A, B: Bt, aw, bw, bo, p: seriesLive(gameP(A, Bt), bo, aw, bw, inGame ? (aIsBlue ? p : 1 - p) : null) } };
+}
+
+// Opened mid-game: fill in the earlier minutes once, in the background, so the
+// chart shows the whole game rather than starting when the page was opened.
+async function backfill(G, gid, upTo) {
+  const pts = [];
+  for (let m = 0.5; m < upTo - 0.5; m += 1) {
+    const w = await frameWindow(gid, new Date(G.start.getTime() + m * 60000));
+    if (!w) continue;
+    const f = w.frames[w.frames.length - 1], B = f.blueTeam, R = f.redTeam;
+    const cs = t => t.participants.reduce((s, p) => s + p.creepScore, 0);
+    const mm = (new Date(f.rfc460Timestamp) - G.start) / 60000;
+    pts.push([mm, livePBlue(G.pPre, mm, B.totalGold - R.totalGold, B.totalKills - R.totalKills, cs(B) - cs(R))]);
+  }
+  G.history = [...pts, ...G.history].sort((a, b) => a[0] - b[0]);
+  renderLive();
+}
+
+async function pollLive() {
+  if (LIVE.polling) return;
+  LIVE.polling = true;
+  try {
+    const now = clock();
+    let events = [];
+    if (params.get("match")) {
+      const d = await lget(`${LV.api}/getEventDetails?hl=en-US&id=${params.get("match")}`);
+      events = d ? [d.data.event] : [];
+    } else {
+      const d = await lget(`${LV.api}/getLive?hl=en-US`);
+      const slugs = (params.get("league") || "worlds").split(",");
+      const live = ((d && d.data.schedule.events) || []).filter(e => e.type === "match" && slugs.includes(e.league.slug));
+      events = (await Promise.all(live.map(e => lget(`${LV.api}/getEventDetails?hl=en-US&id=${e.match.id}`))))
+        .filter(Boolean).map(x => x.data.event);
+    }
+    const states = [];
+    for (const ev of events) for (const g of ev.match.games || []) {
+      if (!params.get("match") && g.state !== "inProgress") continue;
+      const s = await liveGameState(ev, g, now);
+      if (s) states.push(s);
+    }
+    LIVE.states = states;
+    LIVE.ok = true;
+  } catch (e) {
+    LIVE.ok = false;   // e.g. the claude.ai preview, which blocks requests to other sites
+  }
+  LIVE.polling = false;
+  renderLive();
+}
+
+async function loadNext() {
+  try {
+    const d = await lget(`${LV.api}/getSchedule?hl=en-US&leagueId=${D.live.worlds_league_id}`);
+    LIVE.next = ((d && d.data.schedule.events) || [])
+      .filter(e => e.type === "match" && e.state !== "completed")
+      .sort((a, b) => a.startTime.localeCompare(b.startTime)).slice(0, 4);
+  } catch (e) {
+    LIVE.next = null;
+  }
+  renderNext();
+}
+
+function liveChart(h, width) {
+  // Drawn at the card's real width so labels stay at their normal size.
+  const W = Math.max(280, Math.round(width)), H = 160, m = { l: 40, r: 10, t: 10, b: 22 };
+  const xmax = Math.max(30, ...h.map(p => p[0]));
+  const X = v => m.l + v / xmax * (W - m.l - m.r), Y = v => H - m.b - v * (H - m.t - m.b);
+  const path = h.map((p, i) => `${i ? "L" : "M"}${X(p[0]).toFixed(1)},${Y(p[1]).toFixed(1)}`).join("");
+  const last = h[h.length - 1];
+  return `<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" style="max-width:100%;height:auto" role="img" aria-label="Blue side win chance over the game">
+    ${[0, .5, 1].map(v => `<line class="grid" x1="${m.l}" x2="${W - m.r}" y1="${Y(v)}" y2="${Y(v)}"/><text x="${m.l - 6}" y="${Y(v) + 4}" text-anchor="end">${v * 100}%</text>`).join("")}
+    ${[0, 10, 20, 30, 40].filter(v => v <= xmax).map(v => `<text x="${X(v)}" y="${H - 5}" text-anchor="middle">${v}'</text>`).join("")}
+    <path d="${path}" fill="none" stroke="var(--side-blue)" stroke-width="2" stroke-linejoin="round"/>
+    ${last ? `<circle cx="${X(last[0])}" cy="${Y(last[1])}" r="4" fill="var(--side-blue)" stroke="var(--ring)" stroke-width="2"/>` : ""}
+  </svg>`;
+}
+
+function renderLive() {
+  const el = $("#live-slot");
+  if (!el) return;
+  if (LIVE.ok === false) {
+    el.innerHTML = `<div class="panel"><div class="panel-head"><h3>Live</h3>${statusChip("waiting")}</div>
+      <p class="note">Live win chances need the public version of this site; this preview can't connect to the LoL Esports feed.</p></div>`;
+    return;
+  }
+  if (LIVE.ok === null) { el.innerHTML = `<div class="panel"><p class="note">Checking for a live game…</p></div>`; return; }
+  if (!LIVE.states.length) {
+    el.innerHTML = `<div class="panel"><div class="panel-head"><h3>Live</h3><span class="note">Checks every 10 seconds</span></div>
+      <p class="muted">No Worlds game is live right now. When one starts, its win chance appears here.</p></div>`;
+    return;
+  }
+  el.innerHTML = LIVE.states.map(s => {
+    const S = s.series, mm = Math.floor(s.minute), ss = String(Math.floor((s.minute - mm) * 60)).padStart(2, "0");
+    return `<div class="panel live-card">
+      <div class="panel-head"><h3><span class="live-dot" aria-hidden="true"></span>Live · Game ${s.num}</h3>
+        <span class="note">${esc(s.league)} · ${mm}:${ss}${s.state !== "in_game" ? " · " + esc(s.state.replace("_", " ")) : ""}</span></div>
+      <div class="vs">
+        <div class="side"><span class="team"><span class="nm">${esc(s.blue)}</span><span class="chip" style="--rc: var(--side-blue)">Blue side</span></span>
+          <span class="big num" style="color:var(--side-blue)">${pct(s.p)}</span><span class="note">pre-game ${pct(s.pPre)}</span></div>
+        <div class="mid">Win chance</div>
+        <div class="side"><span class="team" style="align-items:flex-end"><span class="nm">${esc(s.red)}</span><span class="chip" style="--rc: var(--side-red)">Red side</span></span>
+          <span class="big num" style="color:var(--side-red)">${pct(1 - s.p)}</span><span class="note">pre-game ${pct(1 - s.pPre)}</span></div>
+      </div>
+      <div class="splitbar"><span style="width:${s.p * 100}%;background:var(--side-blue)"></span><span style="width:${(1 - s.p) * 100}%;background:var(--side-red)"></span></div>
+      ${liveChart(s.history, el.clientWidth - 44)}
+      <div class="tiles">
+        <div class="tile"><span class="k">Gold</span><span class="v" style="font-size:1.375rem">${s.gold > 0 ? "+" : ""}${s.gold.toLocaleString()}</span></div>
+        <div class="tile"><span class="k">Kills</span><span class="v" style="font-size:1.375rem">${s.B.totalKills}–${s.R.totalKills}</span></div>
+        <div class="tile"><span class="k">Towers</span><span class="v" style="font-size:1.375rem">${s.B.towers}–${s.R.towers}</span></div>
+        <div class="tile"><span class="k">Dragons · Barons</span><span class="v" style="font-size:1.375rem">${s.B.dragons.length}–${s.R.dragons.length} · ${s.B.barons}–${s.R.barons}</span></div>
+      </div>
+      <p>Series (Bo${S.bo}): ${esc(S.A)} ${S.aw}–${S.bw} ${esc(S.B)} · chance to win the series: <b>${esc(S.A)} ${pct(S.p)}</b>, ${esc(S.B)} ${pct(1 - S.p)}</p>
+      <p class="note">Win chance = pre-game prediction plus the gold, kill and CS leads. On 18,700 recent games, calls above 90% were right 95–97% of the time. About 20 seconds behind the broadcast.</p>
+    </div>`;
+  }).join("");
+}
+
+function renderNext() {
+  const el = $("#next-slot");
+  if (!el) return;
+  if (!LIVE.next || !LIVE.next.length) { el.innerHTML = ""; return; }
+  el.innerHTML = `<div class="panel"><div class="panel-head"><h3>Up next</h3><span class="note">From the official schedule</span></div>
+    <div class="next-list">${LIVE.next.map((e, i) => {
+      const [ta, tb] = e.match.teams, a = ourTeam(ta), b = ourTeam(tb), bo = e.match.strategy.count;
+      const when = new Date(e.startTime);
+      const known = a && b && a !== b;
+      const pa = known ? seriesWin(gameP(a, b), bo) : null;
+      return `<div class="next-row">
+        <div class="when"><b>${when.toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" })}</b>
+          <span class="note">${when.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" })} · ${esc(e.blockName || "")} · Bo${bo}</span>
+          ${i === 0 ? `<span class="note countdown" data-t="${when.getTime()}"></span>` : ""}</div>
+        <div class="who">${known
+          ? `<span class="${pa >= 0.5 ? "fav" : ""}">${esc(a)} ${pct(pa)}</span><span class="note">vs</span><span class="${pa < 0.5 ? "fav" : ""}">${esc(b)} ${pct(1 - pa)}</span>`
+          : `<span>${esc(ta.name || "TBD")}</span><span class="note">vs</span><span>${esc(tb.name || "TBD")}</span>`}</div>
+      </div>`;
+    }).join("")}</div></div>`;
+  tickCountdown();
+}
+function tickCountdown() {
+  document.querySelectorAll(".countdown").forEach(c => {
+    const ms = +c.dataset.t - clock().getTime();
+    if (ms <= 0) { c.textContent = "Starting now"; return; }
+    const h = Math.floor(ms / 3600000), m = Math.floor(ms % 3600000 / 60000);
+    c.textContent = `Starts in ${h ? `${h} h ` : ""}${m} min`;
+  });
+}
+
+function pageToday() {
+  const T = D.crystal_tracker, mine = D.crystal_ball.personal;
+  const tallyLine = t => ["won", "on track", "tied", "behind", "lost"].filter(k => t && t[k]).map(k => `${statusChip(k)}<span class="num">${t[k]}</span>`).join("") || `<span class="note">Starts with the first Worlds game</span>`;
+  return `
+  <section class="page" id="today">
+    <div class="lede"><h2>Today</h2>
+      <p>The game being played right now, what's next, and how our predictions are doing.</p></div>
+    <div id="live-slot"></div>
+    <div id="next-slot"></div>
+    ${record2026()}
+    <div class="grid-2">
+      <a class="panel link-card" href="#crystal">
+        <div class="panel-head"><h3>Crystal Ball</h3><span class="chev" aria-hidden="true"></span></div>
+        ${T && T.tally.personal ? `<div class="score-row"><span class="who">You</span><span class="legend" style="gap:.5rem">${tallyLine(T.tally.personal)}</span></div>` : ""}
+        <div class="score-row"><span class="who">Model</span><span class="legend" style="gap:.5rem">${tallyLine(T && T.tally.model)}</span></div>
+      </a>
+      <a class="panel link-card" href="#pickem">
+        <div class="panel-head"><h3>Pick'em</h3><span class="chev" aria-hidden="true"></span></div>
+        <p class="note">3-0: ${D.pickem["3-0"].map(esc).join(", ")} · 0-3: ${D.pickem["0-3"].map(esc).join(", ")}</p>
+        <p class="note">Advance: ${D.pickem.advance.map(esc).join(", ")}</p>
+      </a>
+    </div>
+  </section>`;
+}
+function startToday() {
+  stopToday();
+  renderLive(); renderNext();
+  pollLive(); loadNext();
+  LIVE.timer = setInterval(() => { pollLive(); tickCountdown(); }, 10000);
+}
+function stopToday() { clearInterval(LIVE.timer); LIVE.timer = 0; }
 
 /* ---------- motion: springs (Apple's damping ratio + response) ---------- */
 // A spring has no fixed duration. Every new target continues from the current
@@ -781,10 +1104,10 @@ const appX = makeSpring(0, v => {
 let current = null, enterFrom = null;
 
 /* ---------- router ---------- */
-const RENDER = { pickem: pagePickem, playin: pagePlayin, crystal: pageCrystal, matchup: pageMatchup, teams: pageTeams, record: pageRecord, about: pageAbout };
+const RENDER = { today: pageToday, pickem: pagePickem, playin: pagePlayin, crystal: pageCrystal, matchup: pageMatchup, teams: pageTeams, record: pageRecord, about: pageAbout };
 function route() {
   let id = location.hash.slice(1);
-  if (!PAGES.includes(id)) id = "pickem";
+  if (!PAGES.includes(id)) id = "today";
   const prev = current;
   current = id;
   document.querySelectorAll("#tabs a").forEach(a => a.setAttribute("aria-current", a.getAttribute("href") === "#" + id ? "page" : "false"));
@@ -794,6 +1117,7 @@ function route() {
   if (id === "matchup") { renderMatchup(); bindMatchup(); }
   if (id === "teams") { renderHistory(); renderLeagues(); bindTeams(); }
   if (id === "record") renderCalib();
+  if (id === "today") startToday(); else stopToday();
   if (prev === null || prev === id) return;
   if (scrollY > $("#top").offsetHeight) scrollTo({ top: 0 });
   // Enter from the side we're moving toward: forward comes in from the right.

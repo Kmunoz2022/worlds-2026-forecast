@@ -1,0 +1,48 @@
+{
+  "locked_at": "2026-10-15T02:40:04Z",
+  "note": "Model pick for the presence question, added after the first lock because the question was missing from the original 17. Never regenerate or edit.",
+  "questions": [
+    {
+      "id": "presence",
+      "question": "Which champion will have the highest Presence (% of games picked or banned) across all drafts?",
+      "pick": "Vi",
+      "pick_p": 0.3784,
+      "options": [
+        {
+          "label": "Vi",
+          "p": 0.3784
+        },
+        {
+          "label": "Nocturne",
+          "p": 0.1665
+        },
+        {
+          "label": "Cassiopeia",
+          "p": 0.1198
+        },
+        {
+          "label": "Jarvan IV",
+          "p": 0.1117
+        },
+        {
+          "label": "Orianna",
+          "p": 0.0453
+        },
+        {
+          "label": "Olaf",
+          "p": 0.0261
+        },
+        {
+          "label": "Lee Sin",
+          "p": 0.0231
+        },
+        {
+          "label": "Lulu",
+          "p": 0.0159
+        }
+      ],
+      "method": "Patch-weighted presence in recent top-tier drafts (games on the newest patch, 16.20, count 10x), with wide uncertainty because the Worlds patch reshuffles the meta, then the event's ~100 games simulated 20,000 times.",
+      "why": "Vi is picked or banned in 74% of recent top-tier drafts (newest-patch games weighted most), the highest of any champion. Backtested on the last four Worlds this method was right on the #1 champion only about 1 time in 12: the Worlds leader is usually a power pick from the Worlds patch itself (Aatrox went from 30% to 98% in 2022). Next: Nocturne (66%), Cassiopeia (63%)."
+    }
+  ]
+}

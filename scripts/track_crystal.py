@@ -1,177 +1,259 @@
-"""Track the locked Crystal Ball picks against Worlds 2026 as it happens (see docs/DECISIONS.md).
+"""Track Crystal Ball picks against Worlds 2026 as it happens (see docs/DECISIONS.md).
 
-Reads ledger/crystal_ball_locked.json (never modified), measures every
-question from the Worlds main-event games in the data, and marks each pick:
-  not started / on track / behind / won / lost / waiting.
-Questions the game data can't answer (knockout teams, placements, Finals MVP)
-come from config/worlds2026_results.json. Writes Data/processed/crystal_tracker.json.
+Two sets of picks are scored on the same measurements:
+  model     ledger/crystal_ball_locked.json + ledger/crystal_ball_locked_extra.json
+  personal  ledger/crystal_ball_personal.json (the user's own submitted picks)
+Locked files are only read, never written.
+
+Every question is measured once from the Worlds main-event games in the data,
+then each pick is marked: not started / on track / behind / tied / won / lost /
+waiting. Questions the game data can't answer (knockout teams, placements,
+Finals MVP) come from config/worlds2026_results.json.
+Writes Data/processed/crystal_tracker.json.
 
 Usage: .venv/bin/python scripts/track_crystal.py [--rebuild]
 """
 import argparse
 import json
+import re
 import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
-import numpy as np  # noqa: E402
 import pandas as pd  # noqa: E402
 
 from lolpred.config import PROCESSED_DIR  # noqa: E402
 from lolpred.crystal import load_player_games  # noqa: E402
+from lolpred.draft import load_draft_events  # noqa: E402
 from lolpred.splits import worlds_start  # noqa: E402
 
-LOCKED = ROOT / "ledger" / "crystal_ball_locked.json"
+LEDGER = ROOT / "ledger"
 CONFIG = ROOT / "config" / "worlds2026.json"
 RESULTS = ROOT / "config" / "worlds2026_results.json"
 SEASON = 2026
-ROLE = {"top": "Top", "jng": "Jungle", "mid": "Mid", "bot": "Bot", "sup": "Support"}
+FAKER_CAREER, FAKER_TARGET = 616, 700
+UNIQUE_BINS = {"0-99": (0, 99), "100-104": (100, 104), "105-109": (105, 109), "110-114": (110, 114),
+               "115-119": (115, 119), "120+": (120, 10**6)}
+# Short names people type for teams.
+TEAM_ALIASES = {"hle": "Hanwha Life Esports", "hanwha": "Hanwha Life Esports", "gen": "Gen.G", "geng": "Gen.G",
+                "dk": "Dplus KIA", "dplus": "Dplus KIA", "al": "Anyone's Legend", "blg": "Bilibili Gaming",
+                "tes": "Top Esports", "ig": "Invictus Gaming", "g2": "G2 Esports", "mkoi": "Movistar KOI",
+                "koi": "Movistar KOI", "kc": "Karmine Corp", "tl": "Team Liquid", "c9": "Cloud9",
+                "tsw": "Team Secret Whales", "cfo": "CTBC Flying Oyster", "ctbc": "CTBC Flying Oyster",
+                "mvk": "MVK Esports", "los": "LØS", "lgs": "LØS", "fur": "FURIA"}
 
 
-def board(rows, key, fmt, pick, label="name", n=3):
-    """Top n rows plus the pick's own value and rank."""
-    rows = sorted(rows, key=lambda r: -r[key])
-    top = [{"name": r[label], "value": fmt(r[key]), "games": r.get("games")} for r in rows[:n]]
-    mine = next(((i + 1, r) for i, r in enumerate(rows) if r[label] == pick), None)
-    return top, (None if mine is None else {"rank": mine[0], "value": fmt(mine[1][key]), "games": mine[1].get("games")})
+def norm(s):
+    return re.sub(r"[^a-z0-9ø]", "", str(s).lower())
 
 
-def status_from_rank(rank, finished):
-    if rank is None:
-        return "behind" if not finished else "lost"
-    if finished:
-        return "won" if rank == 1 else "lost"
-    return "on track" if rank == 1 else "behind"
+def team_name(s, cfg):
+    """Config team name for whatever the user typed ('HLE', 'Hanwha Life', ...)."""
+    n = norm(s)
+    for t in cfg["teams"]:
+        if norm(t) == n:
+            return t
+    return TEAM_ALIASES.get(n, s)
+
+
+def load_picks():
+    model = {}
+    for f in ("crystal_ball_locked.json", "crystal_ball_locked_extra.json"):
+        path = LEDGER / f
+        if path.exists():
+            for q in json.loads(path.read_text())["questions"]:
+                model[q["id"]] = {"question": q["question"], "pick": q["pick"]}
+    personal = None
+    path = LEDGER / "crystal_ball_personal.json"
+    if path.exists():
+        p = json.loads(path.read_text())["picks"]
+        if any(v.get("pick") for v in p.values()):
+            personal = {k: v for k, v in p.items() if v.get("pick")}
+    return model, personal
+
+
+def measure(ids, pg, ev, games, res, cfg):
+    """Everything the questions need, from the Worlds games so far."""
+    w = pg[pg["gameid"].isin(ids)]
+    M = {}
+    d = ev[ev["gameid"].isin(ids)]
+    pres = d.groupby("champion")["gameid"].nunique() / max(len(ids), 1)
+    M["presence"] = [{"name": c, "value": v, "games": int(v * len(ids) + 0.5)} for c, v in pres.items()]
+    ch = w.groupby("champion").agg(games=("gameid", "nunique"), wins=("result", "sum"), deaths=("deaths", "mean"))
+    ch = ch[ch["games"] >= 5]
+    M["champ_wr"] = [{"name": c, "value": r.wins / r.games, "games": int(r.games)} for c, r in ch.iterrows()]
+    M["champ_deaths"] = [{"name": c, "value": r.deaths, "games": int(r.games)} for c, r in ch.iterrows()]
+    pl = w.groupby("playername").agg(games=("gameid", "nunique"), k=("kills", "sum"), d=("deaths", "sum"),
+                                     a=("assists", "sum"), tk=("teamkills", "sum"), dmg=("damagetochampions", "mean"))
+    M["kda"] = [{"name": p, "value": (r.k + r.a) / max(r.d, 1), "games": int(r.games)} for p, r in pl.iterrows()]
+    M["dmg"] = [{"name": p, "value": r.dmg, "games": int(r.games)} for p, r in pl.iterrows()]
+    M["kp"] = [{"name": p, "value": (r.k + r.a) / max(r.tk, 1), "games": int(r.games)} for p, r in pl.iterrows()]
+    M["kills"] = pl["k"].to_dict()
+    M["teemo"] = int((w["champion"] == "Teemo").sum())
+    M["unique"] = int(w["champion"].nunique())
+    M["before32"] = int((games["gamelength"] < 1920).sum())
+    M["after32"] = int(len(games) - M["before32"])
+    for key, stat in (("max_kills", "kills"), ("max_cs", "total cs")):
+        best = w.loc[w[stat].idxmax()]
+        M[key] = (best["playername"], int(best[stat]))
+    sg = games.loc[games["gamelength"].idxmin()]
+    M["shortest"] = (sg["gamelength"] / 60, w[(w["gameid"] == sg["gameid"]) & (w["result"] == 1)]["teamname"].iat[0])
+    M["ko"] = res.get("knockout_teams") or []
+    M["placements"] = res.get("placements") or {}
+    M["mvp"] = res.get("finals_mvp")
+    return M
+
+
+FMT = {"presence": lambda v: f"{v:.0%}", "champ_wr": lambda v: f"{v:.0%}", "champ_deaths": lambda v: f"{v:.2f}",
+       "kda": lambda v: f"{v:.2f}", "dmg": lambda v: f"{v:,.0f}", "kp": lambda v: f"{v:.0%}"}
+
+
+def ranked(qid, rows, pick, finished):
+    rows = sorted(rows, key=lambda r: -r["value"])
+    fmt = FMT[qid]
+    top = [{"name": r["name"], "value": fmt(r["value"]), "games": r["games"]} for r in rows[:3]]
+    key = norm(pick.split(" (")[0])
+    mine = next(((i + 1, r) for i, r in enumerate(rows) if norm(r["name"]) == key), None)
+    now = None if mine is None else {"rank": mine[0], "value": fmt(mine[1]["value"]), "games": mine[1]["games"]}
+    if not rows:
+        return "waiting", "No one qualifies yet (champions need 5 games).", top, now
+    tied_top = mine is not None and mine[1]["value"] == rows[0]["value"]
+    status = ("won" if tied_top else "lost") if finished else \
+             ("on track" if tied_top else "behind")
+    lead = f"Leader: {top[0]['name']} {top[0]['value']} ({top[0]['games']} games)."
+    if mine is None:
+        lead += " Your pick isn't on the board yet." if qid in ("champ_wr", "champ_deaths") else ""
+    return status, lead, top, now
+
+
+def score(qid, pick, M, cfg, finished):
+    """(status, summary, leaders, pick_now) for one pick."""
+    yes = norm(pick) in ("yes", "y")
+    if qid in FMT:
+        return ranked(qid, M[qid], pick, finished)
+    if qid == "peyz_guma":
+        p, g = int(M["kills"].get("Peyz", 0)), int(M["kills"].get("Gumayusi", 0))
+        lead = "peyz" if p > g else "gumayusi" if g > p else None
+        mine = norm(pick)
+        st = ("won" if lead == mine else "lost") if finished else ("tied" if lead is None else
+                                                                   "on track" if lead == mine else "behind")
+        return st, f"Peyz {p} kills, Gumayusi {g}.", None, None
+    if qid == "faker_700":
+        total = FAKER_CAREER + int(M["kills"].get("Faker", 0))
+        reached = total >= FAKER_TARGET
+        if reached:
+            st = "won" if yes else "lost"
+        else:
+            st = ("lost" if yes else "won") if finished else ("on track" if not yes else "behind")
+        return st, f"Faker is at {total} career Worlds kills ({max(FAKER_TARGET - total, 0)} to go).", None, None
+    if qid == "teemo":
+        if M["teemo"]:
+            return ("won" if yes else "lost"), f"Teemo picked {M['teemo']} times.", None, None
+        return (("lost" if yes else "won") if finished else ("behind" if yes else "on track")), \
+            "Teemo hasn't been picked.", None, None
+    if qid == "unique":
+        lo, hi = UNIQUE_BINS.get(pick.replace(" ", ""), (None, None))
+        u = M["unique"]
+        if lo is None:
+            return "waiting", f"{u} different champions so far (answer '{pick}' not recognised).", None, None
+        st = "lost" if u > hi else (("won" if u >= lo else "lost") if finished else ("on track" if u >= lo else "waiting"))
+        return st, f"{u} different champions picked so far.", None, None
+    if qid == "len32":
+        b, a = M["before32"], M["after32"]
+        lead = "before" if b > a else "after" if a > b else None
+        mine = "before" if norm(pick).startswith("before") else "after"
+        st = ("won" if lead == mine else "lost") if finished else ("tied" if lead is None else
+                                                                   "on track" if lead == mine else "behind")
+        return st, f"{b} games ended before 32:00, {a} after.", None, None
+    if qid in ("kills15", "cs450"):
+        who, val = M["max_kills" if qid == "kills15" else "max_cs"]
+        hit = val >= (15 if qid == "kills15" else 450)
+        st = ("won" if yes else "lost") if hit else (("lost" if yes else "won") if finished else
+                                                    ("waiting" if yes else "on track"))
+        return st, f"Best so far: {who} with {val} {'kills' if qid == 'kills15' else 'CS'}.", None, None
+    if qid == "shortest":
+        minutes, winner = M["shortest"]
+        mine = team_name(pick, cfg)
+        st = ("won" if winner == mine else "lost") if finished else ("on track" if winner == mine else "behind")
+        return st, f"Shortest so far: {minutes:.1f} min, won by {winner}.", None, None
+    if qid in ("regions_ko", "lcs_ko"):
+        if len(M["ko"]) != 8:
+            return "waiting", "Decided when the Swiss stage ends.", None, None
+        regions = {cfg["teams"][t]["region"] for t in M["ko"]}
+        if qid == "regions_ko":
+            return ("won" if str(len(regions)) == str(pick).strip() else "lost"), \
+                f"{len(regions)} regions in knockouts: {', '.join(sorted(regions))}.", None, None
+        has = "LCS" in regions
+        return ("won" if has == yes else "lost"), ("An LCS team made knockouts." if has else
+                                                   "No LCS team made knockouts."), None, None
+    if qid == "hle_t1":
+        p = M["placements"]
+        if "T1" not in p or "Hanwha Life Esports" not in p:
+            return "waiting", "Decided when both teams are out (or one wins).", None, None
+        t1, hle = p["T1"], p["Hanwha Life Esports"]
+        actual = "t1" if t1 < hle else "hle" if hle < t1 else "sameplacement"
+        mine = norm(team_name(pick, cfg)) if norm(pick) not in ("sameplacement", "same") else "sameplacement"
+        mine = {"hanwhalifeesports": "hle"}.get(mine, mine)
+        return ("won" if mine == actual else "lost"), f"T1 placed {t1}, HLE {hle}.", None, None
+    if qid == "mvp_role":
+        if not M["mvp"]:
+            return "waiting", "Decided after the final.", None, None
+        return ("won" if norm(M["mvp"]["role"]) == norm(pick) else "lost"), \
+            f"Finals MVP: {M['mvp']['player']} ({M['mvp']['role']}).", None, None
+    return "waiting", "", None, None
+
+
+def tally(qs):
+    out = {}
+    for q in qs.values():
+        out[q["status"]] = out.get(q["status"], 0) + 1
+    return out
 
 
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--rebuild", action="store_true")
     args = ap.parse_args()
-    locked = json.loads(LOCKED.read_text())
     cfg = json.loads(CONFIG.read_text())
     res = json.loads(RESULTS.read_text())
-    picks = {q["id"]: q for q in locked["questions"]}
     finished = bool(res.get("finished"))
+    model_picks, personal_picks = load_picks()
+    locked_at = json.loads((LEDGER / "crystal_ball_locked.json").read_text())["locked_at"]
 
     m = pd.read_parquet(PROCESSED_DIR / "matches.parquet")
     start = worlds_start(m, SEASON)
     ids = set() if start is None else set(m[(m["league"] == "WLDs") & (m["season"] == SEASON) & (m["date"] >= start)]["gameid"])
-    out = {"locked_at": locked["locked_at"], "games": len(ids), "started": bool(ids), "finished": finished, "questions": {}}
+    out = {"locked_at": locked_at, "games": len(ids), "started": bool(ids), "finished": finished}
 
-    def put(qid, status, summary, top=None, mine=None):
-        out["questions"][qid] = {"pick": picks[qid]["pick"], "status": status, "summary": summary,
-                                 "leaders": top or [], "pick_now": mine}
+    def run(picks):
+        if picks is None:
+            return None
+        if not ids:
+            return {q: {"pick": v["pick"], "status": "not started", "summary": "Worlds hasn't started in the data yet.",
+                        "leaders": [], "pick_now": None} for q, v in picks.items()}
+        out_q = {}
+        for q, v in picks.items():
+            st, summary, leaders, now = score(q, str(v["pick"]), M, cfg, finished)
+            out_q[q] = {"pick": v["pick"], "status": st, "summary": summary, "leaders": leaders or [], "pick_now": now}
+        return out_q
 
-    if not ids:
-        for qid in picks:
-            put(qid, "not started", "Worlds hasn't started in the data yet.")
-        (PROCESSED_DIR / "crystal_tracker.json").write_text(json.dumps(out, indent=2, ensure_ascii=False))
-        print("Worlds 2026 hasn't started in the data; tracker reset to 'not started'.")
-        return
-
-    pg = load_player_games(rebuild=args.rebuild)
-    w = pg[pg["gameid"].isin(ids)]
-    games = w.drop_duplicates("gameid")
-
-    # --- champions (min 5 games)
-    ch = w.groupby("champion").agg(games=("gameid", "nunique"), wins=("result", "sum"), deaths=("deaths", "mean"))
-    ch = ch[ch["games"] >= 5].assign(wr=lambda d: d["wins"] / d["games"]).reset_index()
-    rows = ch.rename(columns={"champion": "name"}).to_dict("records")
-    for qid, key, fmt in (("champ_wr", "wr", lambda v: f"{v:.0%}"), ("champ_deaths", "deaths", lambda v: f"{v:.2f}")):
-        top, mine = board(rows, key, fmt, picks[qid]["pick"])
-        note = "" if mine else f" {picks[qid]['pick']} hasn't reached 5 games yet."
-        put(qid, status_from_rank(mine and mine["rank"], finished),
-            (f"Leader: {top[0]['name']} {top[0]['value']}." if top else "No champion has 5 games yet.") + note, top, mine)
-
-    # --- players
-    pl = w.groupby("playername").agg(games=("gameid", "nunique"), k=("kills", "sum"), d=("deaths", "sum"),
-                                     a=("assists", "sum"), tk=("teamkills", "sum"), dmg=("damagetochampions", "mean"))
-    pl["kda"] = (pl["k"] + pl["a"]) / pl["d"].clip(lower=1)
-    pl["kp"] = (pl["k"] + pl["a"]) / pl["tk"].clip(lower=1)
-    prow = pl.reset_index().rename(columns={"playername": "name"}).to_dict("records")
-    for qid, key, fmt in (("kda", "kda", lambda v: f"{v:.2f}"), ("dmg", "dmg", lambda v: f"{v:,.0f}"),
-                          ("kp", "kp", lambda v: f"{v:.0%}")):
-        pick_player = picks[qid]["pick"].split(" (")[0]
-        top, mine = board(prow, key, fmt, pick_player)
-        put(qid, status_from_rank(mine and mine["rank"], finished),
-            f"Leader: {top[0]['name']} {top[0]['value']} over {top[0]['games']} games.", top, mine)
-
-    k = pl["k"]
-    peyz, guma = int(k.get("Peyz", 0)), int(k.get("Gumayusi", 0))
-    lead = "Peyz" if peyz > guma else "Gumayusi" if guma > peyz else None
-    st = ("won" if lead == picks["peyz_guma"]["pick"] else "lost") if finished else \
-         ("on track" if lead == picks["peyz_guma"]["pick"] else "behind" if lead else "tied")
-    put("peyz_guma", st, f"Peyz {peyz} kills, Gumayusi {guma}.")
-
-    faker = 616 + int(k.get("Faker", 0))
-    st = "lost" if faker >= 700 else ("won" if finished else "on track")
-    put("faker_700", st, f"Faker is at {faker} career Worlds kills ({700 - faker} to go)." if faker < 700
-        else f"Faker reached {faker}.")
-
-    teemo = int((w["champion"] == "Teemo").sum())
-    put("teemo", "lost" if teemo else ("won" if finished else "on track"),
-        f"Teemo picked {teemo} times." if teemo else "Teemo hasn't been picked.")
-
-    uniq = int(w["champion"].nunique())
-    lo, hi = {"0-99": (0, 99), "100-104": (100, 104), "105-109": (105, 109), "110-114": (110, 114),
-              "115-119": (115, 119), "120+": (120, 10**6)}[picks["unique"]["pick"]]
-    st = "lost" if uniq > hi else ("won" if finished and uniq >= lo else "lost" if finished else
-                                   "on track" if uniq >= lo else "waiting")
-    put("unique", st, f"{uniq} different champions picked so far in {len(ids)} games.")
-
-    before = int((games["gamelength"] < 1920).sum())
-    after = len(games) - before
-    lead = "Before 32:00" if before > after else "After 32:00" if after > before else None
-    st = ("won" if lead == picks["len32"]["pick"] else "lost") if finished else \
-         ("on track" if lead == picks["len32"]["pick"] else "behind" if lead else "tied")
-    put("len32", st, f"{before} games ended before 32:00, {after} after.")
-
-    for qid, stat, thr, unit in (("kills15", "kills", 15, "kills"), ("cs450", "total cs", 450, "CS")):
-        best = w.loc[w[stat].idxmax()]
-        hit = best[stat] >= thr
-        yes = picks[qid]["pick"] == "Yes"
-        st = ("won" if yes else "lost") if hit else (("lost" if yes else "won") if finished else
-                                                      ("waiting" if yes else "on track"))
-        put(qid, st, f"Best so far: {best['playername']} with {int(best[stat])} {unit}.")
-
-    sg = games.loc[games["gamelength"].idxmin()]
-    winner = w[(w["gameid"] == sg["gameid"]) & (w["result"] == 1)]["teamname"].iat[0]
-    pick_team = picks["shortest"]["pick"]
-    st = ("won" if winner == pick_team else "lost") if finished else ("on track" if winner == pick_team else "behind")
-    put("shortest", st, f"Shortest so far: {sg['gamelength'] / 60:.1f} min, won by {winner}.")
-
-    # --- questions that need tournament results
-    ko = res.get("knockout_teams") or []
-    if len(ko) == 8:
-        regions = {cfg["teams"][t]["region"] for t in ko}
-        put("regions_ko", "won" if str(len(regions)) == picks["regions_ko"]["pick"] else "lost",
-            f"{len(regions)} regions in knockouts: {', '.join(sorted(regions))}.")
-        has_lcs = any(cfg["teams"][t]["region"] == "LCS" for t in ko)
-        put("lcs_ko", "won" if ("Yes" if has_lcs else "No") == picks["lcs_ko"]["pick"] else "lost",
-            "An LCS team made knockouts." if has_lcs else "No LCS team made knockouts.")
-    else:
-        put("regions_ko", "waiting", "Decided when the Swiss stage ends.")
-        put("lcs_ko", "waiting", "Decided when the Swiss stage ends.")
-    pl_ = res.get("placements") or {}
-    if "T1" in pl_ and "Hanwha Life Esports" in pl_:
-        t1, hle = pl_["T1"], pl_["Hanwha Life Esports"]
-        winner = "T1" if t1 < hle else "HLE" if hle < t1 else "Same placement"
-        put("hle_t1", "won" if winner == picks["hle_t1"]["pick"] else "lost", f"T1 placed {t1}, HLE {hle}.")
-    else:
-        put("hle_t1", "waiting", "Decided when both teams are out (or one wins).")
-    mvp = res.get("finals_mvp")
-    if mvp:
-        put("mvp_role", "won" if mvp["role"] == picks["mvp_role"]["pick"] else "lost",
-            f"Finals MVP: {mvp['player']} ({mvp['role']}).")
-    else:
-        put("mvp_role", "waiting", "Decided after the final.")
-
+    if ids:
+        pg = load_player_games(rebuild=args.rebuild)
+        ev = load_draft_events(rebuild=args.rebuild)
+        games = pg[pg["gameid"].isin(ids)].drop_duplicates("gameid")
+        M = measure(ids, pg, ev, games, res, cfg)
+    out["model"] = run(model_picks)
+    out["personal"] = run(personal_picks)
+    out["tally"] = {"model": tally(out["model"]), "personal": tally(out["personal"]) if out["personal"] else None}
     (PROCESSED_DIR / "crystal_tracker.json").write_text(json.dumps(out, indent=2, ensure_ascii=False))
-    for qid, q in out["questions"].items():
-        print(f"{qid:13s} {q['status']:11s} pick {q['pick']}: {q['summary']}")
+    print(f"games {len(ids)} | model {out['tally']['model']} | personal {out['tally']['personal']}")
+    if ids:
+        for q, v in out["model"].items():
+            mine = (out["personal"] or {}).get(q)
+            print(f"{q:13s} model {v['status']:10s} {v['pick']!s:30.30s} "
+                  + (f"| you {mine['status']:10s} {mine['pick']!s:20.20s}" if mine else "") + f" | {v['summary']}")
 
 
 if __name__ == "__main__":

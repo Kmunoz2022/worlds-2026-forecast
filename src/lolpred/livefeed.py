@@ -97,11 +97,16 @@ def match_start(league_id, match_id):
 def game_start(game_id, around: datetime, step=timedelta(minutes=3)):
     """Wall-clock time of the first in-game frame, found by stepping back from
     `around` (a time inside the game) and then refining to 10 seconds."""
-    t = around
+    # The feed can go silent mid-game (a 12-minute gap in one LCS game), so
+    # only 18 minutes without frames counts as "before the game started".
+    t, misses = around, 0
     for _ in range(40):  # up to 2 hours back
-        if not window(game_id, t - step):
+        if misses >= 6:
             break
-        t -= step
+        if window(game_id, t - (misses + 1) * step):
+            t, misses = t - (misses + 1) * step, 0
+        else:
+            misses += 1
     lo, hi = t - step, t  # no frames at lo, frames at hi
     while hi - lo > timedelta(seconds=10):
         mid = lo + (hi - lo) / 2

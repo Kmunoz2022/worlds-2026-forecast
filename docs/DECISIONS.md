@@ -8,7 +8,7 @@ Why this project is built the way it is: what I chose, what I tried and rejected
 - **Cross-region ratings.** Teams rarely play other regions, so a plain Elo is *worse than a coin flip* at Worlds (52.8%). Splitting each rating into a team part and a league part fixed that. → [Ratings](#ratings-elo-with-cross-region-strength)
 - **The bug where a relegation series moved a whole region.** A bottom LCS team's promotion matches lifted every LCS team by ~200 rating points. → [Bugs I found](#bugs-i-found-and-fixed)
 - **Backtesting the Crystal Ball forecasts showed they were weak, so I published them as long shots.** The champion that dominates Worlds is usually created by the Worlds patch itself. → [Crystal Ball](#crystal-ball-forecasts)
-- **Live in-game predictions** from the LoL Esports broadcast feed: calls above 90% are right 95–97% of the time. → [Live predictions](#live-in-game-predictions)
+- **Live in-game predictions that run in the visitor's browser**, straight from the LoL Esports broadcast feed: calls above 90% are right 95–97% of the time. → [Live predictions](#live-in-game-predictions)
 - **A public prediction ledger.** Every 2026 prediction is committed before the match and graded after, so the record can't be fitted to results. → [Ledger](#the-public-prediction-ledger)
 
 ---
@@ -105,7 +105,7 @@ These are 17 prediction questions on the LoL Esports site, about champions, play
 - **Rare events need Worlds-level history.** 15-kill games happen in 0.2% of Worlds games but 2–3% at MSI/EWC. Base rates now use Worlds plus MSI at half weight, which moved "15+ kills: Yes" from 85% to a coin flip.
 - **Game length depends on the mismatch.** Heavy favourites' wins average 28.6 minutes vs ~32.5 for close games. The shortest-game forecast now models that instead of relying on a 15-game sample.
 
-Every answer comes with a plain-language "why" generated from the simulation's own numbers, and the submitted picks are frozen in `ledger/` and tracked as the event runs.
+Every answer comes with a plain-language "why" generated from the simulation's own numbers. Two sets of picks are tracked as the event runs: the model's (frozen in `ledger/`) and my own, so I can compare my judgement against the model's at the end.
 
 ## Live in-game predictions
 
@@ -128,6 +128,8 @@ One model with time-scaled leads, rather than separate per-minute models, gives 
 
 Teams are identified by their players' names rather than team names (the feed shows "TLAW Morgan", not "Team Liquid").
 
+**In the browser, no server.** The feed allows requests from any website, so the public site runs the whole live pipeline in the visitor's browser: it finds live Worlds games, the game start, the teams, the live win chance and the series odds, and refreshes every 10 seconds. Opened mid-game, it fills in the earlier minutes so the chart shows the whole game. The model is 7 coefficients exported from Python, and the same formulas are used on both sides. A replay switch (`?match=<id>&at=<time>`) runs any finished match as if it were live, which is how I test it.
+
 **Validation:** replaying a finished match (LCS final, Team Liquid 3–1 LYON) through the same code: all four games followed, and the live favourite at the end of each game was the actual winner.
 
 ## The public prediction ledger
@@ -143,7 +145,16 @@ Grading only means something if the predictions were provably made first.
 
 - **One-command refresh** (`scripts/refresh.py`). After downloading new data it rebuilds data, ratings, model and simulation, grades the ledger, logs newly possible matches, updates the trackers and exports the site. It refuses to run on empty input files, which happened once during setup.
 - **Website:** one static page plus one JSON file, plain JavaScript with hand-drawn SVG charts, no framework. Six small pages don't need React, and every number on the site comes from the exported JSON, none typed by hand. It has light and dark themes and works at phone width.
-- **Why static instead of Streamlit:** free hosting, nothing to keep running, and a site rather than a dashboard. The live page runs locally next to the live script, because a static page can't receive a 10-second feed.
+- **Why static instead of Streamlit:** free hosting, nothing to keep running, and a site rather than a dashboard. Live predictions still work because the browser itself reads the feed.
+- **Hosting:** GitHub Pages, deployed by a GitHub Actions workflow on every push to `main`.
+- **Design:** the interface follows Apple's design guidance:
+  - system type, with tracking that tightens as the size grows
+  - a translucent header
+  - a segmented control whose thumb moves on an interruptible spring
+  - swiping between tabs on touch screens, with 1:1 tracking, rubber-banding at the ends, and momentum projection to decide if a flick changes tab
+  - respect for the reduce-motion, reduce-transparency and increase-contrast settings
+
+  I tested the motion with simulated pointer input. That caught two bugs: a spring could get a negative time step, and a swipe could start half-initialized.
 - **Secrets:** the live-feed API key (a public web-client key) is kept out of the code and read from an environment variable or a git-ignored local file.
 - **Stack:** Python 3.13, pandas, NumPy, scikit-learn, Parquet.
 
@@ -160,6 +171,7 @@ Grading only means something if the predictions were provably made first.
 | Weak-region players topped the player-stat forecasts | Checking leaders against past Worlds | Use only games against Worlds-level opponents |
 | The shortest-game forecast rested on 15 games | Explaining the pick in plain language | Model game length from the mismatch and team pace |
 | The live replay started at the wrong time | Minute −0.3 with a 6,500 gold lead | The feed returns final frames for late timestamps; reject frames far from the requested time |
+| Joining a game after a feed outage reset its clock | The live page showed 4:18 with a 17–5 kill score | A 12-minute gap in the feed looked like "before the game"; start detection now rides through up to 18 minutes of silence |
 
 ## What I'd do next
 

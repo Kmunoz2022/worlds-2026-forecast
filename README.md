@@ -3,8 +3,10 @@
 A League of Legends pro-match prediction system built for the 2026 World Championship. It covers:
 - calibrated win probabilities for every game and series
 - a full tournament simulator for pick'em
-- live in-game win probabilities from the official broadcast's stats feed
+- live in-game win probabilities from the official broadcast's stats feed, computed in the visitor's browser
 - a public ledger where every 2026 prediction is committed **before** the match and graded after
+
+**Site:** https://kmunoz2022.github.io/worlds-2026-forecast/ (the Today tab shows the live game during matches)
 
 ![Pick'em page](docs/img/pickem.png)
 
@@ -96,13 +98,15 @@ python3 -m venv .venv && .venv/bin/pip install -r requirements.txt
 # Download the yearly CSVs from Oracle's Elixir into Data/
 .venv/bin/python scripts/refresh.py          # rebuild data, ratings, model, simulation, site data
 .venv/bin/python scripts/ledger.py add "Gen.G" "T1" --bo 5 --stage "Final"   # log a prediction
-.venv/bin/python scripts/live.py             # live win probabilities at http://localhost:8765/live.html
+.venv/bin/python scripts/live.py             # terminal/local version of the live predictions (the site runs them in the browser)
 .venv/bin/python scripts/live.py --replay <match id>   # replay a finished match
 ```
 
+Test the site's live view on a finished match: open `site/index.html?match=<match id>&at=<ISO time>#today` through a local web server.
+
 The live feed needs the public API key that lolesports.com uses (listed in the [community API docs](https://vickz84259.github.io/lolesports-api-docs/)). Set `LOLESPORTS_API_KEY` or add `{"lolesports_api_key": "..."}` to `config/local.json`, which git ignores.
 
-**Stack:** Python 3.13, pandas, NumPy, scikit-learn, Parquet. The website is plain HTML/CSS/JavaScript with hand-drawn SVG charts and no framework.
+**Stack:** Python 3.13, pandas, NumPy, scikit-learn, Parquet. The website is plain HTML/CSS/JavaScript with hand-drawn SVG charts and no framework, deployed to GitHub Pages by GitHub Actions. The live view needs that same public key in the browser; it's the key lolesports.com's own site sends from every visitor's browser, so it isn't a secret.
 
 ## Credits
 
