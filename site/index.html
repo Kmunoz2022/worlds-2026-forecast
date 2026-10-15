@@ -752,7 +752,7 @@ const clockOffset = params.get("at") ? Date.parse(params.get("at")) - Date.now()
 const clock = () => new Date(Date.now() + clockOffset);
 // delay: how far back live requests look. The feed rejects windows ending less
 // than 20 s ago, so start at 40 s and back off if this device's clock runs fast.
-const LIVE = { states: [], ok: null, next: null, timer: 0, polling: false, delay: 40000 };
+const LIVE = { states: [], ok: null, next: null, timer: 0, polling: false, delay: 40000, last: {} };
 const liveGames = {};
 
 async function lget(url) {
@@ -837,8 +837,18 @@ function ourTeam(t) {
 }
 
 async function liveGameState(ev, game, now) {
-  const w = await frameWindow(game.id, new Date(now.getTime() - LIVE.delay));
-  if (!w) return null;
+  let w = null;
+  for (let i = 0; i < 4 && !w; i++) {   // on "too recent", frameWindow raises LIVE.delay: retry at once
+    const before = LIVE.delay;
+    w = await frameWindow(game.id, new Date(now.getTime() - LIVE.delay));
+    if (!w && LIVE.delay === before) break;
+  }
+  if (!w) {
+    // One failed check (slow network, fast device clock) shouldn't blank the card:
+    // keep the last good update for up to 2 minutes.
+    const prev = LIVE.last[game.id];
+    return prev && Date.now() - prev.at < 120000 ? { ...prev.s, stale: true } : null;
+  }
   let G = liveGames[game.id];
   if (!G) {
     const m = w.gameMetadata;
@@ -860,9 +870,11 @@ async function liveGameState(ev, game, now) {
   const aIsBlue = ((game.teams || []).find(t => t.id === ta.id) || {}).side === "blue";
   const A = aIsBlue ? G.blue : G.red, Bt = aIsBlue ? G.red : G.blue, bo = ev.match.strategy.count;
   const inGame = f.gameState === "in_game";
-  return { gid: game.id, num: game.number, minute, state: f.gameState, blue: G.blue, red: G.red, p, pPre: G.pPre,
+  const out = { gid: game.id, num: game.number, minute, state: f.gameState, blue: G.blue, red: G.red, p, pPre: G.pPre,
     gold, csd, B, R, history: G.history, league: ev.league.name,
     series: { A, B: Bt, aw, bw, bo, p: seriesLive(gameP(A, Bt), bo, aw, bw, inGame ? (aIsBlue ? p : 1 - p) : null) } };
+  LIVE.last[game.id] = { s: out, at: Date.now() };
+  return out;
 }
 
 // Opened mid-game: fill in the earlier minutes once, in the background, so the
@@ -957,7 +969,7 @@ function renderLive() {
     const S = s.series, mm = Math.floor(s.minute), ss = String(Math.floor((s.minute - mm) * 60)).padStart(2, "0");
     return `<div class="panel live-card">
       <div class="panel-head"><h3><span class="live-dot" aria-hidden="true"></span>Live · Game ${s.num}</h3>
-        <span class="note">${esc(s.league)} · ${mm}:${ss}${s.state !== "in_game" ? " · " + esc(s.state.replace("_", " ")) : ""}</span></div>
+        <span class="note">${esc(s.league)} · ${mm}:${ss}${s.state !== "in_game" ? " · " + esc(s.state.replace("_", " ")) : ""}${s.stale ? " · updating…" : ""}</span></div>
       <div class="vs">
         <div class="side"><span class="team"><span class="nm">${esc(s.blue)}</span><span class="chip" style="--rc: var(--side-blue)">Blue side</span></span>
           <span class="big num" style="color:var(--side-blue)">${pct(s.p)}</span><span class="note">pre-game ${pct(s.pPre)}</span></div>
