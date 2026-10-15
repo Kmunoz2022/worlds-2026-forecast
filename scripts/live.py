@@ -74,7 +74,9 @@ class LiveTracker:
     def game_state(self, event, game, now, log=True):
         """Everything shown for one game at wall-clock time `now`."""
         gid = game["id"]
-        w = livefeed.window(gid, now - timedelta(seconds=20))
+        # The feed rejects windows ending less than 20 s ago (HTTP 400), and a
+        # window is 10 s long after rounding, so ask for 40 s back.
+        w = livefeed.window(gid, now - timedelta(seconds=livefeed.LIVE_DELAY_S))
         if not w or not w.get("frames"):
             return None
         meta = w["gameMetadata"]

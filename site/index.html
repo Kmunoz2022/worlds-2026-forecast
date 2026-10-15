@@ -831,7 +831,9 @@ function ourTeam(t) {
 }
 
 async function liveGameState(ev, game, now) {
-  const w = await frameWindow(game.id, new Date(now.getTime() - 20000));
+  // The feed rejects windows ending less than 20 s ago (HTTP 400); a window is
+  // 10 s after rounding, so look 40 s back.
+  const w = await frameWindow(game.id, new Date(now.getTime() - 40000));
   if (!w) return null;
   let G = liveGames[game.id];
   if (!G) {
@@ -968,7 +970,7 @@ function renderLive() {
         <div class="tile"><span class="k">Dragons · Barons</span><span class="v" style="font-size:1.375rem">${s.B.dragons.length}–${s.R.dragons.length} · ${s.B.barons}–${s.R.barons}</span></div>
       </div>
       <p>Series (Bo${S.bo}): ${esc(S.A)} ${S.aw}–${S.bw} ${esc(S.B)} · chance to win the series: <b>${esc(S.A)} ${pct(S.p)}</b>, ${esc(S.B)} ${pct(1 - S.p)}</p>
-      <p class="note">Win chance = pre-game prediction plus the gold, kill and CS leads. On 18,700 recent games, calls above 90% were right 95–97% of the time. About 20 seconds behind the broadcast.</p>
+      <p class="note">Win chance = pre-game prediction plus the gold, kill and CS leads. On 18,700 recent games, calls above 90% were right 95–97% of the time. About 40 seconds behind the broadcast.</p>
     </div>`;
   }).join("");
 }

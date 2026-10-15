@@ -18,6 +18,10 @@ from .config import ROOT
 API = "https://esports-api.lolesports.com/persisted/gw"
 FEED = "https://feed.lolesports.com/livestats/v1"
 LOCAL_CONFIG = ROOT / "config" / "local.json"  # git-ignored
+# The feed refuses windows that end less than 20 s ago ("disallowed window with
+# end time less than 20 sec old"). Windows are 10 s and start times round down
+# to 10 s, so live requests look 40 s back.
+LIVE_DELAY_S = 40
 
 
 def api_key() -> str:
