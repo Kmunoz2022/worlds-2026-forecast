@@ -240,6 +240,20 @@ details[open] summary::before { transform: rotate(45deg); }
 details summary:active { opacity: 0.6; }
 
 /* today */
+h3.sec { font-size: 0.8125rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); }
+.slot { display: grid; gap: 0.75rem; }
+.slot:empty { display: none; }
+.score-big { display: flex; align-items: baseline; gap: 0.75rem; font: 600 1.375rem/1.1 var(--display); letter-spacing: -0.02em; color: var(--ink-2); }
+.score-big b { font-size: 2.25rem; font-weight: 700; }
+.score-big .lead { color: var(--ink); }
+.score-big .dash { color: var(--muted); }
+.score-words { font-weight: 500; }
+.games { list-style: none; margin: 0; padding: 0; display: grid; background: var(--surface-2); border-radius: var(--radius-s); overflow: hidden; }
+.games li { display: grid; grid-template-columns: 4.5rem 1fr auto; gap: 0.625rem; align-items: baseline; padding: 0.5rem 0.75rem; font-size: 0.9375rem; }
+.games li + li { box-shadow: inset 0 1px 0 var(--rule); }
+.games .gn { font-size: 0.8125rem; color: var(--muted); }
+@media (max-width: 560px) { .bd { display: none; } }
+.pick-line { display: flex; flex-wrap: wrap; gap: 0.5rem 0.75rem; align-items: center; }
 .sub-k { font-size: 0.8125rem; font-weight: 600; color: var(--ink-2); }
 .sub-k .note { font-weight: 400; }
 .stat-table { font-size: 0.9375rem; }
@@ -701,7 +715,7 @@ function record2026() {
   const s = L.summary;
   const row = e => `<tr>
     <td class="l">${esc(e.stage)}</td><td class="l">${esc(e.team_a)} vs ${esc(e.team_b)} <span class="muted">Bo${e.best_of}</span></td>
-    <td class="l"><b>${esc(e.pick)}</b> <span class="muted small">${Object.entries(e.score_dist).filter(([k]) => { const [x, y] = k.split("-").map(Number); return e.pick === e.team_a ? x > y : y > x; }).map(([k, v]) => `${e.pick === e.team_a ? k : k.split("-").reverse().join("-")} ${pct(v)}`).sort().join(" · ")}</span></td>
+    <td class="l"><b>${esc(e.pick)}</b> <span class="muted small bd">${Object.entries(e.score_dist).filter(([k]) => { const [x, y] = k.split("-").map(Number); return e.pick === e.team_a ? x > y : y > x; }).map(([k, v]) => `${e.pick === e.team_a ? k : k.split("-").reverse().join("-")} ${pct(v)}`).sort().join(" · ")}</span></td>
     <td class="num">${pct(Math.max(e.p_series_a, 1 - e.p_series_a))}</td>
     <td class="l">${e.status === "graded" ? `${esc(e.winner)} ${Math.max(e.a_wins, e.b_wins)}-${Math.min(e.a_wins, e.b_wins)} ${statusChip(e.correct ? "won" : "lost")}` : `<span class="muted">Logged ${esc(e.predicted_at.slice(5, 16).replace("T", " "))} UTC</span>`}</td></tr>`;
   return `<div class="panel">
@@ -768,7 +782,7 @@ const clockOffset = params.get("at") ? Date.parse(params.get("at")) - Date.now()
 const clock = () => new Date(Date.now() + clockOffset);
 // delay: how far back live requests look. The feed rejects windows ending less
 // than 20 s ago, so start at 40 s and back off if this device's clock runs fast.
-const LIVE = { states: [], ok: null, next: null, timer: 0, polling: false, delay: 40000, last: {} };
+const LIVE = { states: [], ok: null, next: null, current: null, previous: null, timer: 0, mtimer: 0, polling: false, delay: 40000, last: {} };
 const liveGames = {};
 
 async function lget(url) {
@@ -940,17 +954,6 @@ async function pollLive() {
   renderLive();
 }
 
-async function loadNext() {
-  try {
-    const d = await lget(`${LV.api}/getSchedule?hl=en-US&leagueId=${D.live.worlds_league_id}`);
-    LIVE.next = ((d && d.data.schedule.events) || [])
-      .filter(e => e.type === "match" && e.state !== "completed")
-      .sort((a, b) => a.startTime.localeCompare(b.startTime)).slice(0, 4);
-  } catch (e) {
-    LIVE.next = null;
-  }
-  renderNext();
-}
 
 // Short names for tight spots (chart edges, stat headers).
 const SHORT = { "Gen.G": "GEN", "Hanwha Life Esports": "HLE", "T1": "T1", "Dplus KIA": "DK", "Anyone's Legend": "AL",
@@ -1006,10 +1009,12 @@ function renderLive() {
   }
   if (LIVE.ok === null) { el.innerHTML = `<div class="panel"><p class="note">Checking for a live game…</p></div>`; return; }
   if (!LIVE.states.length) {
-    el.innerHTML = `<div class="panel"><div class="panel-head"><h3>Live</h3><span class="note">Checks every 10 seconds</span></div>
+    el.innerHTML = LIVE.current && LIVE.current.length ? "" : `<div class="panel"><div class="panel-head"><h3>Live</h3><span class="note">Checks every 10 seconds</span></div>
       <p class="muted">No Worlds game is live right now. When one starts, its win chance appears here.</p></div>`;
+    renderMatches();
     return;
   }
+  renderMatches();
   el.innerHTML = LIVE.states.map(s => {
     const S = s.series, mm = Math.floor(s.minute), ss = String(Math.floor((s.minute - mm) * 60)).padStart(2, "0");
     const goldLead = s.gold === 0 ? "Gold is even" : `${esc(s.gold > 0 ? s.blue : s.red)} leads by ${Math.abs(s.gold).toLocaleString()} gold`;
@@ -1044,7 +1049,7 @@ function renderNext() {
   const el = $("#next-slot");
   if (!el) return;
   if (!LIVE.next || !LIVE.next.length) { el.innerHTML = ""; return; }
-  el.innerHTML = `<div class="panel"><div class="panel-head"><h3>Up next</h3><span class="note">From the official schedule</span></div>
+  el.innerHTML = `<h3 class="sec">Next</h3><div class="panel"><div class="panel-head"><h3>Up next</h3><span class="note">From the official schedule</span></div>
     <div class="next-list">${LIVE.next.map((e, i) => {
       const [ta, tb] = e.match.teams, a = ourTeam(ta), b = ourTeam(tb), bo = e.match.strategy.count;
       const when = new Date(e.startTime);
@@ -1071,15 +1076,130 @@ function tickCountdown() {
   });
 }
 
+/* ---------- Today: previous / current / next matches ---------- */
+// Each finished game's winner isn't in the feed directly. Read each game's final
+// frames, score which side was ahead at the end (inhibitors, towers, gold), then
+// give each team its official number of game wins, so the totals always match.
+const gameCache = {};       // game id -> final summary (finished games never change)
+const SEASON_FROM = "2026-01-01";
+
+async function finalFrames(gid, lowerBound) {
+  // Asked for a time after a game ended, the feed returns its final frames.
+  const at = new Date(Math.max(lowerBound.getTime(), clock().getTime() - 90000));
+  const r = await fetch(`${LV.feed}/window/${gid}?startingTime=${feedTs(at)}`, { headers: { "x-api-key": LIVE_KEY } });
+  if (!r.ok) return null;
+  const t = await r.text(); const w = t ? JSON.parse(t) : null;
+  return w && w.frames && w.frames.length && w.frames[w.frames.length - 1].gameState === "finished" ? w : null;
+}
+async function gameSummary(g) {
+  if (gameCache[g.id]) return gameCache[g.id];
+  try { const c = JSON.parse(localStorage.getItem("g:" + g.id) || "null"); if (c) return (gameCache[g.id] = c); } catch (e) {}
+  const w = await finalFrames(g.id, new Date(0));
+  if (!w) return null;
+  const m = w.gameMetadata, f = w.frames[w.frames.length - 1];
+  const blue = teamFromPlayers(m.blueTeamMetadata.participantMetadata), red = teamFromPlayers(m.redTeamMetadata.participantMetadata);
+  const end = new Date(f.rfc460Timestamp), start = await findStart(g.id, end);
+  const B = f.blueTeam, R = f.redTeam;
+  const s = { blue, red, minutes: (end - start) / 60000, kills: [B.totalKills, R.totalKills],
+    edge: 3 * (B.inhibitors - R.inhibitors) + (B.towers - R.towers) + (B.totalGold - R.totalGold) / 3000 };
+  gameCache[g.id] = s;
+  try { localStorage.setItem("g:" + g.id, JSON.stringify(s)); } catch (e) {}
+  return s;
+}
+async function matchDetail(e) {
+  const d = await lget(`${LV.api}/getEventDetails?hl=en-US&id=${e.match.id}`);
+  const ev = d && d.data.event;
+  if (!ev) return null;
+  const [ta, tb] = ev.match.teams, A = ourTeam(ta), B = ourTeam(tb);
+  const done = ev.match.games.filter(g => g.state === "completed");
+  const sums = await Promise.all(done.map(gameSummary));
+  const aw = (ta.result || {}).gameWins || 0, bw = (tb.result || {}).gameWins || 0;
+  // Team A's edge in each finished game, then hand A its official number of wins.
+  const games = done.map((g, i) => {
+    const s = sums[i], aBlue = ((g.teams || []).find(t => t.id === ta.id) || {}).side === "blue";
+    return { num: g.number, s, aEdge: s ? (aBlue ? s.edge : -s.edge) : 0 };
+  });
+  const order = [...games].sort((x, y) => y.aEdge - x.aEdge);
+  order.forEach((g, i) => { g.winner = i < aw ? A : B; });
+  return { id: e.match.id, start: new Date(e.startTime), state: e.state, block: e.blockName || "", bo: ev.match.strategy.count,
+    A, B, aName: ta.name, bName: tb.name, aw, bw, games: games.sort((x, y) => x.num - y.num),
+    inProgress: ev.match.games.some(g => g.state === "inProgress"),
+    liveGid: (ev.match.games.find(g => g.state === "inProgress") || {}).id };
+}
+async function loadMatches() {
+  try {
+    const d = await lget(`${LV.api}/getSchedule?hl=en-US&leagueId=${D.live.worlds_league_id}`);
+    const evs = ((d && d.data.schedule.events) || []).filter(e => e.type === "match" && e.startTime >= SEASON_FROM)
+      .sort((a, b) => a.startTime.localeCompare(b.startTime));
+    const prev = evs.filter(e => e.state === "completed").slice(-6).reverse();
+    const cur = evs.filter(e => e.state === "inProgress");
+    LIVE.next = evs.filter(e => e.state === "unstarted").slice(0, 4);
+    LIVE.current = (await Promise.all(cur.map(matchDetail))).filter(Boolean);
+    LIVE.previous = (await Promise.all(prev.map(matchDetail))).filter(Boolean);
+    LIVE.matchesOk = true;
+  } catch (e) {
+    LIVE.matchesOk = false;
+  }
+  renderMatches();
+  renderNext();
+}
+
+// Our logged prediction for this match (the latest one made before it started), if any.
+function loggedPick(m) {
+  const L = D.ledger ? D.ledger.entries : [];
+  const c = L.filter(e => new Set([e.team_a, e.team_b]).has(m.A) && new Set([e.team_a, e.team_b]).has(m.B)
+    && new Date(e.predicted_at) < m.start).sort((x, y) => y.predicted_at.localeCompare(x.predicted_at))[0];
+  if (c) return { pick: c.pick, p: Math.max(c.p_series_a, 1 - c.p_series_a), logged: true };
+  if (!m.A || !m.B) return null;
+  const p = seriesWin(gameP(m.A, m.B), m.bo);
+  return { pick: p >= 0.5 ? m.A : m.B, p: Math.max(p, 1 - p), logged: false };
+}
+function gameLine(g, m) {
+  const s = g.s;
+  if (!s) return `<li><span class="gn">Game ${g.num}</span><span><b>${esc(g.winner || "?")}</b> won</span></li>`;
+  const wk = s.blue === g.winner ? s.kills[0] : s.kills[1], lk = s.blue === g.winner ? s.kills[1] : s.kills[0];
+  return `<li><span class="gn">Game ${g.num}</span><span><b>${esc(g.winner)}</b> won</span>
+    <span class="note">${Math.round(s.minutes)} min · kills ${wk}–${lk}</span></li>`;
+}
+function matchCard(m, kind) {
+  const lp = loggedPick(m), w = (m.bo + 1) / 2;
+  const lead = m.aw === m.bw ? `Tied ${m.aw}–${m.bw}` : `${esc(m.aw > m.bw ? m.A || m.aName : m.B || m.bName)} ${kind === "previous" ? "won" : "leads"} ${Math.max(m.aw, m.bw)}–${Math.min(m.aw, m.bw)}`;
+  const winner = kind === "previous" ? (m.aw > m.bw ? m.A : m.B) : null;
+  const right = lp && winner ? lp.pick === winner : null;
+  const nowP = kind === "current" && m.A && m.B ? seriesLive(gameP(m.A, m.B), m.bo, m.aw, m.bw, null) : null;
+  return `<div class="panel match-card">
+    <div class="panel-head"><h3>${esc(m.A || m.aName)} vs ${esc(m.B || m.bName)}</h3>
+      <span class="note">${esc(m.block)} · best of ${m.bo} (first to ${w}) · ${m.start.toLocaleDateString(undefined, { month: "short", day: "numeric" })}</span></div>
+    <div class="score-big"><span class="${m.aw > m.bw ? "lead" : ""}">${esc(short(m.A || m.aName))} <b>${m.aw}</b></span><span class="dash">–</span><span class="${m.bw > m.aw ? "lead" : ""}"><b>${m.bw}</b> ${esc(short(m.B || m.bName))}</span></div>
+    <p class="score-words">${lead}${kind === "current" && m.inProgress ? ` · Game ${m.aw + m.bw + 1} in progress` : kind === "current" ? ` · Game ${m.aw + m.bw + 1} starting soon` : ""}</p>
+    ${m.games.length ? `<ol class="games">${m.games.map(g => gameLine(g, m)).join("")}</ol>` : ""}
+    ${lp ? `<p class="pick-line"><span>${lp.logged ? "Our pick before the match" : "Model's pick"}: <b>${esc(lp.pick)}</b> (${pct(lp.p)} to win the series)</span>
+      ${right === null ? "" : right ? statusChip("won").replace(">Won<", ">Pick right<") : statusChip("lost").replace(">Lost<", ">Pick wrong<")}</p>` : ""}
+    ${kind === "current" && m.inProgress && !(LIVE.states || []).some(s => s.gid === m.liveGid)
+      ? `<p class="note">Game ${m.aw + m.bw + 1} is in draft or loading. Live win chances appear here once it starts.</p>` : ""}
+    ${nowP != null ? `<p class="note">Chance to win the series now, before the next game: ${esc(m.A)} ${pct(nowP)} · ${esc(m.B)} ${pct(1 - nowP)}${m.inProgress ? " (updates with the live game below)" : ""}</p>` : ""}
+  </div>`;
+}
+function renderMatches() {
+  const cur = $("#current-slot"), prev = $("#previous-slot");
+  const anyCur = (LIVE.current && LIVE.current.length) || (LIVE.states && LIVE.states.length);
+  if (cur) cur.innerHTML = anyCur ? `<h3 class="sec">Current</h3>${(LIVE.current || []).map(m => matchCard(m, "current")).join("")}` : "";
+  if (prev) prev.innerHTML = LIVE.previous && LIVE.previous.length ? `<h3 class="sec">Previous</h3>${LIVE.previous.map(m => matchCard(m, "previous")).join("")}` : "";
+}
+
 function pageToday() {
   const T = D.crystal_tracker;
   const tallyLine = t => ["won", "on track", "tied", "behind", "lost"].filter(k => t && t[k]).map(k => `${statusChip(k)}<span class="num">${t[k]}</span>`).join("") || `<span class="note">Starts with the first Worlds game</span>`;
   return `
   <section class="page" id="today">
     <div class="lede"><h2>Today</h2>
-      <p>The game being played right now, what's next, and how our predictions are doing.</p></div>
-    <div id="live-slot"></div>
-    <div id="next-slot"></div>
+      <p>The match being played right now, what's next, and how today's earlier matches went against our picks.</p></div>
+    <div class="slot">
+      <div id="current-slot" class="slot"></div>
+      <div id="live-slot" class="slot"></div>
+    </div>
+    <div id="next-slot" class="slot"></div>
+    <div id="previous-slot" class="slot"></div>
     ${record2026()}
     <div class="grid-2">
       <a class="panel link-card" href="#crystal">
@@ -1096,11 +1216,12 @@ function pageToday() {
 }
 function startToday() {
   stopToday();
-  renderLive(); renderNext();
-  pollLive(); loadNext();
+  renderMatches(); renderLive(); renderNext();
+  pollLive(); loadMatches();
   LIVE.timer = setInterval(() => { pollLive(); tickCountdown(); }, 10000);
+  LIVE.mtimer = setInterval(loadMatches, 60000);   // series scores and finished games
 }
-function stopToday() { clearInterval(LIVE.timer); LIVE.timer = 0; }
+function stopToday() { clearInterval(LIVE.timer); clearInterval(LIVE.mtimer); LIVE.timer = LIVE.mtimer = 0; }
 
 /* ---------- motion: springs (Apple's damping ratio + response) ---------- */
 // A spring has no fixed duration. Every new target continues from the current
