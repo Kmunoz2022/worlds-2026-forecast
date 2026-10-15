@@ -27,8 +27,8 @@ def main():
     args = ap.parse_args()
     if args.ledger_dir:
         d = Path(args.ledger_dir)
-        record.PREDICTIONS, record.RESULTS, record.LIVE_CALLS = (d / "predictions.jsonl", d / "results.jsonl",
-                                                                  d / "live_calls.jsonl")
+        record.PREDICTIONS, record.RESULTS = d / "predictions.jsonl", d / "results.jsonl"
+        record.LIVE_CALLS, record.GAME_STATS = d / "live_calls.jsonl", d / "game_stats.jsonl"
     if args.cmd == "update":
         print(json.dumps(record.update()))
     else:

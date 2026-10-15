@@ -539,7 +539,7 @@ function pageCrystal() {
   const tallyRow = (who, t) => `<div class="score-row"><span class="who">${who}</span>
       <span class="legend" style="gap:0.5rem">${order.filter(k => t && t[k]).map(k => `${statusChip(k)}<span class="num">${t[k]}</span>`).join("")}</span></div>`;
   const scoreboard = !T ? "" : `<div class="panel">
-      <div class="panel-head"><h3>Tracker</h3><span class="note">${T.started ? `${T.games} Worlds games so far` : "Starts when Worlds games reach the data"}</span></div>
+      <div class="panel-head"><h3>Tracker</h3><span class="note">${T.started ? `${T.games} Worlds games so far · ${T.source === "live feed" ? "updated after every game" : `official data through ${fmtDate(T.data_through)}`}` : "Starts with the first Worlds game"}</span></div>
       ${tallyRow("Picks", T.tally.model)}
       <p class="note">Picks were locked before Worlds and can't change; this only shows how each one is doing. "Won" and "lost" are final; "on track" and "behind" can still change.</p>
     </div>`;
@@ -1429,7 +1429,11 @@ Promise.all([fetch("data.json").then(r => r.json()),
   fetch("record.json").then(r => r.ok ? r.json() : null).catch(() => null)]).then(([d, rec]) => {
   D = d;
   // record.json is graded from the ledger when the site deploys; data.json's copy is the fallback.
-  if (rec) { D.ledger = rec.ledger; D.liveRecord = rec.live; }
+  if (rec) {
+    D.ledger = rec.ledger; D.liveRecord = rec.live;
+    // The feed tracker updates after every game; the official-data one wins once it has caught up.
+    if (rec.crystal && rec.crystal.games > ((D.crystal_tracker && D.crystal_tracker.games) || 0)) D.crystal_tracker = rec.crystal;
+  }
   $("#meta").textContent = `Data through ${fmtDate(D.meta.data_through)} · ${D.meta.sims.toLocaleString()} simulated tournaments`;
   window.addEventListener("hashchange", route);
   initSwipe();

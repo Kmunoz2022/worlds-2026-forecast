@@ -107,6 +107,12 @@ These are 17 prediction questions on the LoL Esports site, about champions, play
 
 Every answer comes with a plain-language "why" generated from the simulation's own numbers. The submitted picks are frozen in `ledger/` and tracked as the event runs.
 
+**Tracking the picks automatically.** The Crystal Ball tracker used to wait for the daily official data. Now the scheduled job saves each finished game's player stats from the live feed (champions, kills/deaths/assists, CS, game length) and re-scores every pick after each game. Two details mattered:
+- **Pauses.** The feed has no game clock, and pro games get paused (one of the first five Worlds games had a 45-second pause), so wall-clock time overstates game length, which decides the "before or after 32 minutes" and "shortest game" questions. Frames are marked as paused, so the job finds each pause to about 10 seconds by bisection and removes it.
+- **What the feed can't answer.** Presence counts bans, and the feed has no bans; it also only has each player's share of team damage, not totals. Those two questions keep the last official result, labelled with its date. Once the official data catches up, the site switches back to it as the record.
+
+The scoring rules live in one module used by both trackers, so a pick can't be judged differently depending on the source.
+
 ## Live in-game predictions
 
 **Model:** one logistic regression for any minute of the game. Inputs: pre-game log-odds plus gold, kill and CS leads, each also scaled by game time. Trained on snapshots at 0/10/15/20/25 minutes. XP isn't used because the live feed doesn't carry it. Tested on 18.7k games from 2025–26:

@@ -101,3 +101,16 @@ def test_live_summary_calibration_and_checkpoints():
     assert s["call_accuracy"] == pytest.approx(5 / 6)
     assert {r["minute"]: r["call_accuracy"] for r in s["by_minute"]} == {0: 1.0, 5: 0.5, 10: 1.0, 15: 1.0}
     assert sum(c["n"] for c in s["calibration"]) == 6
+
+
+def test_game_time_removes_pauses():
+    pauses = [(600, 645), (1200, 1320)]
+    assert record.game_time(500, pauses) == 500
+    assert record.game_time(620, pauses) == 600       # inside the first pause: clock stopped
+    assert record.game_time(1000, pauses) == 955
+    assert record.game_time(2000, pauses) == 2000 - 45 - 120
+
+
+def test_player_name_drops_team_tag():
+    assert record.player_name("KC Canna") == "Canna"
+    assert record.player_name("Faker") == "Faker"

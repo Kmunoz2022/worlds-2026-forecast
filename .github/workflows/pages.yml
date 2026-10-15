@@ -3,7 +3,7 @@ name: Deploy site to GitHub Pages
 on:
   push:
     branches: [main]
-    paths: ["site/**", "ledger/**", "src/lolpred/record.py", ".github/workflows/pages.yml"]
+    paths: ["site/**", "ledger/**", "src/lolpred/record.py", "src/lolpred/crystal_track.py", "config/worlds2026_results.json", ".github/workflows/pages.yml"]
   workflow_dispatch:
   workflow_call:  # the ledger workflow redeploys after it commits
 

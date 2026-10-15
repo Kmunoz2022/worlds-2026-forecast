@@ -29,6 +29,8 @@ LEDGER_DIR = ROOT / "ledger"
 PREDICTIONS = LEDGER_DIR / "predictions.jsonl"
 RESULTS = LEDGER_DIR / "results.jsonl"
 LIVE_CALLS = LEDGER_DIR / "live_calls.jsonl"
+GAME_STATS = LEDGER_DIR / "game_stats.jsonl"
+RESULTS_CONFIG = ROOT / "config" / "worlds2026_results.json"
 SITE_DATA = ROOT / "site" / "data.json"
 CONFIG = ROOT / "config" / "worlds2026.json"
 
@@ -226,7 +228,25 @@ def build_record(open_stages: set | None = None) -> dict:
         open_stages = set(STAGE_ORDER[last:])
     g = grade(preds, results, open_stages)
     return {"updated": now_utc(), "ledger": {"summary": summary(g), "entries": g},
-            "results": results, "live": live_summary(calls)}
+            "results": results, "live": live_summary(calls), "crystal": crystal()}
+
+
+def crystal() -> dict:
+    """Crystal Ball tracker from the feed's game stats (see crystal_track.py)."""
+    from .crystal_track import feed_tracker
+    picks, locked_at = {}, None
+    for name in ("crystal_ball_locked.json", "crystal_ball_locked_extra.json"):
+        path = LEDGER_DIR / name
+        if path.exists():
+            d = json.loads(path.read_text())
+            locked_at = locked_at or d["locked_at"]
+            picks |= {q["id"]: {"question": q["question"], "pick": q["pick"]} for q in d["questions"]}
+    cfg = json.loads(CONFIG.read_text())
+    res = json.loads(RESULTS_CONFIG.read_text())
+    csv_tracker = json.loads(SITE_DATA.read_text()).get("crystal_tracker") if SITE_DATA.exists() else None
+    out = feed_tracker(picks, read_jsonl(GAME_STATS), res, list(cfg["teams"]),
+                       {t: v["region"] for t, v in cfg["teams"].items()}, csv_tracker)
+    return {"locked_at": locked_at, **out}
 
 
 # ---------- feed (network) ----------
@@ -292,24 +312,113 @@ def match_result(data: dict, e: dict) -> dict | None:
             "games": games, "recorded_at": now_utc()}
 
 
-def game_live_calls(data: dict, result: dict, game: dict) -> dict | None:
-    """The live model's chance for blue at every game minute."""
-    if not game.get("start"):
-        return None
+# Feed champion ids that differ from the names everyone uses.
+CHAMPION_NAMES = {"MonkeyKing": "Wukong", "Nunu": "Nunu & Willump", "Renata": "Renata Glasc", "KSante": "K'Sante",
+                  "Kaisa": "Kai'Sa", "Chogath": "Cho'Gath", "Khazix": "Kha'Zix", "Velkoz": "Vel'Koz",
+                  "Belveth": "Bel'Veth", "RekSai": "Rek'Sai", "KogMaw": "Kog'Maw", "Leblanc": "LeBlanc",
+                  "JarvanIV": "Jarvan IV", "MasterYi": "Master Yi", "MissFortune": "Miss Fortune",
+                  "TahmKench": "Tahm Kench", "TwistedFate": "Twisted Fate", "XinZhao": "Xin Zhao", "DrMundo": "Dr. Mundo",
+                  "AurelionSol": "Aurelion Sol", "LeeSin": "Lee Sin", "Ksante": "K'Sante"}
+
+
+def player_name(summoner: str) -> str:
+    """'KC Canna' -> 'Canna': the feed puts the team tag first."""
+    parts = summoner.strip().split(" ", 1)
+    return parts[1] if len(parts) == 2 else parts[0]
+
+
+def game_time(t: float, pauses: list) -> float:
+    """Seconds of game clock at wall-clock offset t (pauses removed)."""
+    return t - sum(max(0.0, min(t, pe) - ps) for ps, pe in pauses)
+
+
+def _state(game_id, start, t):
+    w = livefeed.window(game_id, start + timedelta(seconds=t))
+    return w["frames"][-1]["gameState"] if w else None
+
+
+def _refine(game_id, start, lo, hi, paused_at_hi):
+    """Boundary between lo and hi (seconds) to ~10 s, by bisection."""
+    while hi - lo > 10:
+        mid = (lo + hi) / 2
+        if (_state(game_id, start, mid) == "paused") == paused_at_hi:
+            hi = mid
+        else:
+            lo = mid
+    return hi
+
+
+def scan_game(game: dict) -> dict:
+    """One sample per wall-clock minute, plus pauses found to ~10 s. The feed
+    has no game clock but marks paused frames; pauses shorter than the gap
+    between samples can be missed (at most a minute)."""
+    gid = game["game_id"]
+    start, end = livefeed.parse_ts(game["start"]), livefeed.parse_ts(game["end"])
+    total = (end - start).total_seconds()
+    samples, m = [], 1
+    while m * 60 < total:
+        w = livefeed.window(gid, start + timedelta(minutes=m))
+        samples.append((m * 60, w["frames"][-1] if w else None))
+        m += 1
+    paused = [f is not None and f["gameState"] == "paused" for _, f in samples]
+    pauses, i = [], 0
+    while i < len(samples):
+        if not paused[i]:
+            i += 1
+            continue
+        j = i
+        while j + 1 < len(samples) and paused[j + 1]:
+            j += 1
+        lo = samples[i - 1][0] if i > 0 else 0
+        hi = samples[j + 1][0] if j + 1 < len(samples) else total
+        pauses.append((_refine(gid, start, lo, samples[i][0], True), _refine(gid, start, samples[j][0], hi, False)))
+        i = j + 1
+    return {"samples": samples, "pauses": pauses, "duration_s": game_time(total, pauses)}
+
+
+def game_live_calls(data: dict, result: dict, game: dict, scan: dict) -> dict:
+    """The live model's chance for blue at every minute of game time."""
     live = data["live"]
     p_pre = live["p_blue"][game["blue"]][game["red"]]
-    start, end = livefeed.parse_ts(game["start"]), livefeed.parse_ts(game["end"])
-    calls, m = [], 1
-    while start + timedelta(minutes=m) < end:
-        w = livefeed.window(game["game_id"], start + timedelta(minutes=m))
-        if w:
-            s = livefeed.frame_state(w["frames"][-1])
-            calls.append([m, round(live_p_blue(live, p_pre, m, s["gold_diff"], s["kill_diff"], s["cs_diff"]), 4)])
-        m += 1
+    calls, seen = [], set()
+    for t, f in scan["samples"]:
+        if f is None or f["gameState"] != "in_game":
+            continue
+        minute = round(game_time(t, scan["pauses"]) / 60)
+        if minute < 1 or minute in seen:
+            continue
+        seen.add(minute)
+        s = livefeed.frame_state(f)
+        calls.append([minute, round(live_p_blue(live, p_pre, minute, s["gold_diff"], s["kill_diff"], s["cs_diff"]), 4)])
     return {"game_id": game["game_id"], "match_id": result["match_id"], "number": game["number"],
             "blue": game["blue"], "red": game["red"], "blue_won": game["winner"] == game["blue"],
             "p_pre_blue": p_pre, "calls": calls, "model_data_through": data["meta"]["data_through"],
             "computed_at": now_utc()}
+
+
+def game_stats(result: dict, game: dict, scan: dict) -> dict | None:
+    """End-of-game player stats for the Crystal Ball tracker."""
+    end = livefeed.parse_ts(game["end"])
+    w = livefeed.final_frames(game["game_id"], datetime.now(timezone.utc) - timedelta(seconds=90))
+    d = livefeed._get(f"{livefeed.FEED}/details/{game['game_id']}?startingTime={livefeed.ts(end - timedelta(seconds=20))}")
+    if not w or not d or not d.get("frames"):
+        return None
+    final = {p["participantId"]: p for p in d["frames"][-1]["participants"]}
+    meta = w["gameMetadata"]
+    players = []
+    for side in ("blue", "red"):
+        for pm in meta[f"{side}TeamMetadata"]["participantMetadata"]:
+            p = final.get(pm["participantId"], {})
+            players.append({"name": player_name(pm["summonerName"]), "team": game[side], "side": side,
+                            "role": pm.get("role"), "champion": CHAMPION_NAMES.get(pm["championId"], pm["championId"]),
+                            "kills": p.get("kills", 0), "deaths": p.get("deaths", 0), "assists": p.get("assists", 0),
+                            "cs": p.get("creepScore", 0), "kill_participation": p.get("killParticipation"),
+                            "damage_share": p.get("championDamageShare")})
+    return {"game_id": game["game_id"], "match_id": result["match_id"], "number": game["number"],
+            "stage": result["stage"], "patch": meta.get("patchVersion"), "blue": game["blue"], "red": game["red"],
+            "winner": game["winner"], "duration_s": round(scan["duration_s"]),
+            "paused_s": round(sum(pe - ps for ps, pe in scan["pauses"])), "players": players,
+            "recorded_at": now_utc()}
 
 
 def update(log=print) -> dict:
@@ -335,14 +444,27 @@ def update(log=print) -> dict:
                 log(f"result {r['team_a']} {r['a_wins']}-{r['b_wins']} {r['team_b']} ({r['stage']})")
     append_jsonl(RESULTS, new_results)
 
+    # One scan per game feeds both the live calls and the Crystal Ball stats; games
+    # recorded before a file existed are filled in too.
     have_calls = {c["game_id"] for c in read_jsonl(LIVE_CALLS)}
-    new_calls = []
-    for r in new_results:
+    have_stats = {g["game_id"] for g in read_jsonl(GAME_STATS)}
+    new_calls, new_stats = [], []
+    for r in read_jsonl(RESULTS):
         for g in r["games"]:
-            if g["game_id"] not in have_calls:
-                c = game_live_calls(data, r, g)
-                if c:
-                    new_calls.append(c)
-                    log(f"live calls {g['blue']} vs {g['red']} game {g['number']}: {len(c['calls'])} minutes")
+            need_calls, need_stats = g["game_id"] not in have_calls, g["game_id"] not in have_stats
+            if not (need_calls or need_stats) or not g.get("start"):
+                continue
+            scan = scan_game(g)
+            if need_calls:
+                new_calls.append(game_live_calls(data, r, g, scan))
+            if need_stats:
+                st = game_stats(r, g, scan)
+                if st:
+                    new_stats.append(st)
+            n_pauses = len(scan["pauses"])
+            log(f"game {g['blue']} vs {g['red']} #{g['number']}: {scan['duration_s'] / 60:.1f} min of game time, "
+                f"{n_pauses} pause(s)")
     append_jsonl(LIVE_CALLS, new_calls)
-    return {"predictions": len(new_preds), "results": len(new_results), "live_games": len(new_calls)}
+    append_jsonl(GAME_STATS, new_stats)
+    return {"predictions": len(new_preds), "results": len(new_results), "live_games": len(new_calls),
+            "game_stats": len(new_stats)}
