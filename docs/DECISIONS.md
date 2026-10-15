@@ -9,7 +9,7 @@ Why this project is built the way it is: what I chose, what I tried and rejected
 - **The bug where a relegation series moved a whole region.** A bottom LCS team's promotion matches lifted every LCS team by ~200 rating points. → [Bugs I found](#bugs-i-found-and-fixed)
 - **Backtesting the Crystal Ball forecasts showed they were weak, so I published them as long shots.** The champion that dominates Worlds is usually created by the Worlds patch itself. → [Crystal Ball](#crystal-ball-forecasts)
 - **Live in-game predictions that run in the visitor's browser**, straight from the LoL Esports broadcast feed: calls above 90% are right 95–97% of the time. → [Live predictions](#live-in-game-predictions)
-- **A public prediction ledger.** Every 2026 prediction is committed before the match and graded after, so the record can't be fitted to results. → [Ledger](#the-public-prediction-ledger)
+- **A public prediction ledger that runs itself.** A scheduled job commits every 2026 prediction before the match and grades it after, including the live model's minute-by-minute calls. CI fails if any past entry is edited. → [Ledger](#the-public-prediction-ledger)
 
 ---
 
@@ -140,14 +140,17 @@ Teams are identified by their players' names rather than team names (the feed sh
 
 Grading only means something if the predictions were provably made first.
 - `ledger/predictions.jsonl` is **append-only**: each entry is timestamped before the match, and entries are never edited.
-- After the match, each played series is graded against the most recent prediction made before it started.
-- For the double-elimination Play-In, I log **every possible pairing in advance**, so later bracket matches have a prediction on record even when two matches are played the same day.
+- After the match, each played series is graded against the most recent prediction made before its first game started.
+- **It runs itself.** A scheduled GitHub Actions job (every 30 minutes) reads the official schedule, logs a prediction for each match as soon as both teams are known, records finished matches, and commits. Nothing depends on me remembering to log a match the night before. The numbers come from the published site data, so the ledger records exactly what the site was showing. Before that job existed, I logged every possible Play-In pairing in advance by hand.
+- **Live calls are graded too.** After each game the job works out the live model's chance at every game minute from the feed and saves it (`ledger/live_calls.jsonl`). The Model record page shows how often the favourite at each minute won, and whether 80% calls won about 80% of the time.
+- **CI enforces it.** A check fails the build if any earlier ledger line is changed or removed, or if a locked pick file changes at all.
+- Only the job appends to the ledger, so my local runs never conflict with it. The record page is built from the ledger when the site deploys.
 - Submitted pick'em and Crystal Ball picks are frozen in `ledger/*_locked.json`. Later model runs update the live odds but never the picks.
 - The repository's commit history adds public timestamps.
 
 ## Engineering
 
-- **One-command refresh** (`scripts/refresh.py`). After downloading new data it rebuilds data, ratings, model and simulation, grades the ledger, logs newly possible matches, updates the trackers and exports the site. It refuses to run on empty input files, which happened once during setup.
+- **One-command refresh** (`scripts/refresh.py`). After downloading new data it rebuilds data, ratings, model and simulation, cross-checks the ledger against the official data, updates the trackers and exports the site. It refuses to run on empty input files, which happened once during setup.
 - **Website:** one static page plus one JSON file, plain JavaScript with hand-drawn SVG charts, no framework. Six small pages don't need React, and every number on the site comes from the exported JSON, none typed by hand. It has light and dark themes and works at phone width.
 - **Why static instead of Streamlit:** free hosting, nothing to keep running, and a site rather than a dashboard. Live predictions still work because the browser itself reads the feed.
 - **Hosting:** GitHub Pages, deployed by a GitHub Actions workflow on every push to `main`.
@@ -159,6 +162,7 @@ Grading only means something if the predictions were provably made first.
   - respect for the reduce-motion, reduce-transparency and increase-contrast settings
 
   I tested the motion with simulated pointer input. That caught two bugs: a spring could get a negative time step, and a swipe could start half-initialized.
+- **Tests and CI:** pytest covers the series maths (only valid final scores, probabilities sum to 1, live updates consistent with pre-game odds), grading (latest prediction before the start, teams in either order, inputs never modified), team-name matching, the live model (the browser/CI version matches the Python one) and the published files. They run on every push, along with the append-only ledger check.
 - **Secrets:** the live-feed API key (a public web-client key) is kept out of the code and read from an environment variable or a git-ignored local file.
 - **Stack:** Python 3.13, pandas, NumPy, scikit-learn, Parquet.
 
@@ -175,11 +179,13 @@ Grading only means something if the predictions were provably made first.
 | Weak-region players topped the player-stat forecasts | Checking leaders against past Worlds | Use only games against Worlds-level opponents |
 | The shortest-game forecast rested on 15 games | Explaining the pick in plain language | Model game length from the mismatch and team pace |
 | The live replay started at the wrong time | Minute −0.3 with a 6,500 gold lead | The feed returns final frames for late timestamps; reject frames far from the requested time |
+| Game winners swapped in a past final | Testing automatic grading on the 2025 final: the result came out 2–3 instead of 3–2 | The schedule's blue/red list was swapped for all five games; sides now come from the feed's own game metadata (which players are on blue) |
 | Joining a game after a feed outage reset its clock | The live page showed 4:18 with a 17–5 kill score | A 12-minute gap in the feed looked like "before the game"; start detection now rides through up to 18 minutes of silence |
 
 ## What I'd do next
 
-- Grade the 2026 ledger and the live calls after Worlds, and publish the results.
-- Add tests (series maths, ledger grading, feed parsing, no-leakage checks) and CI.
+- Write up the 2026 ledger and live-call results after Worlds.
+- A live model that also uses objectives (barons and buff timers, dragon soul, inhibitors, deaths), trained on archived timelines.
+- No-leakage tests on the feature pipeline (they need the raw data, so they don't run in CI yet).
 - Model rating uncertainty (Glicko-2) for teams with few games.
 - Add roster-change features from player data.

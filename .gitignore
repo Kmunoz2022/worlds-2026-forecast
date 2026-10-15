@@ -13,6 +13,9 @@ config/local.json
 
 # Live state written while scripts/live.py runs
 site/live/live.json
+
+# Built when the site deploys (scripts/auto_ledger.py record)
+site/record.json
 *.tmp
 
 # OS / editor

@@ -1,0 +1,50 @@
+name: Prediction ledger
+
+# Every 30 minutes: log a prediction for each Worlds match whose teams are known,
+# record finished matches and grade the live model's calls (scripts/auto_ledger.py).
+# The ledger files are append-only; this commit is the timestamp that proves a
+# prediction came before its match. Then the site is rebuilt with the new record.
+on:
+  schedule:
+    - cron: "*/30 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: ledger
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    outputs:
+      changed: ${{ steps.commit.outputs.changed }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - run: pip install numpy==2.5.3
+      - name: Log upcoming matches, record finished ones
+        env:
+          LOLESPORTS_API_KEY: ${{ secrets.LOLESPORTS_API_KEY }}
+        run: python scripts/auto_ledger.py update
+      - name: Commit the ledger
+        id: commit
+        run: |
+          if git diff --quiet -- ledger; then echo "changed=false" >> "$GITHUB_OUTPUT"; exit 0; fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898283+github-actions[bot]@users.noreply.github.com"
+          git add ledger
+          git commit -m "Ledger: automatic update $(date -u +%Y-%m-%dT%H:%MZ)"
+          for i in 1 2 3; do git pull --rebase && git push && break; sleep 5; done
+          echo "changed=true" >> "$GITHUB_OUTPUT"
+
+  deploy:
+    needs: update
+    if: needs.update.outputs.changed == 'true'
+    uses: ./.github/workflows/pages.yml

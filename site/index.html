@@ -672,7 +672,10 @@ function pageRecord() {
   return `
   <section class="page" id="record">
     <div class="lede"><h2>Model record</h2>
-      <p>Every number here is out-of-sample: each Worlds was predicted by a model trained only on games played before it. These are the past four Worlds, ${ours.n} games in total.</p></div>
+      <p>Worlds 2026 so far, graded automatically as matches finish. Below that, the past four Worlds (${ours.n} games): every number there is out-of-sample, predicted by a model trained only on games played before each event.</p></div>
+    ${record2026()}
+    ${liveRecord()}
+    <div class="lede"><h3>Past Worlds, 2022-2025</h3></div>
     <div class="tiles">
       <div class="tile"><span class="k">Picked the winner</span><span class="v">${pct(ours.accuracy, 1)}</span><span class="s">of ${ours.n} Worlds games, 2022-2025</span></div>
       <div class="tile"><span class="k">Log loss</span><span class="v">${ours.log_loss.toFixed(3)}</span><span class="s">lower is better · coin flip ${ov["Coin flip"].log_loss.toFixed(3)}</span></div>
@@ -704,7 +707,7 @@ function pageRecord() {
           <td><div class="bar-cell"><span class="num">${pct(r.accuracy, 1)}</span><span class="track"><span class="fill" style="width:${r.accuracy * 100}%"></span></span></div></td>
           <td class="num">${r.minute ? pct(r.share_over_90) : "–"}</td><td class="num">${r.acc_over_90 != null ? pct(r.acc_over_90, 1) : "–"}</td></tr>`).join("")}</tbody>
       </table></div>
-      <p class="note">In-game test: ${ig[0].n.toLocaleString()} games from ${D.ingame.test}, using gold, experience, CS and kill differences at each minute mark, trained on ${D.ingame.train}. Live in-game predictions are planned.</p>
+      <p class="note">In-game test: ${ig[0].n.toLocaleString()} games from ${D.ingame.test}, using gold, experience, CS and kill differences at each minute mark, trained on ${D.ingame.train}. The live model built from this runs on the Today page during matches; its Worlds 2026 calls are graded above.</p>
     </div>
   </section>`;
 }
@@ -730,7 +733,31 @@ function record2026() {
       <thead><tr><th class="l">Stage</th><th class="l">Match</th><th class="l">Our pick</th><th>Our pick's chance</th><th class="l">Result</th></tr></thead>
       <tbody>${[...done].reverse().map(row).join("")}${open.map(row).join("")}</tbody>
     </table></div>
-    <p class="note">For the Play-In, every possible pairing is logged in advance, so later bracket matches have a prediction on record before they're known. Predictions for pairings that never happen stay listed as waiting.</p>
+    <p class="note">A scheduled job saves a prediction for each match as soon as both teams are known, and grades it when the match ends. Predictions are appended to a public file (ledger/predictions.jsonl) and never edited, and the commit time on GitHub proves each came before its match.</p>
+  </div>`;
+}
+
+function liveRecord() {
+  const L = D.liveRecord;
+  if (!L) return "";
+  const head = `<div class="panel-head"><h3>Live calls, Worlds 2026</h3><span class="note">The live model's chance at every game minute, checked against who won</span></div>`;
+  if (!L.games) return `<div class="panel">${head}<p class="muted">No finished games checked yet. After each game, the live model's chance at every minute is saved and checked against the winner.</p></div>`;
+  const bar = v => `<div class="bar-cell"><span class="num">${pct(v, 1)}</span><span class="track"><span class="fill" style="width:${v * 100}%"></span></span></div>`;
+  return `<div class="panel">${head}
+    <div class="tiles">
+      <div class="tile"><span class="k">Games checked</span><span class="v">${L.games}</span><span class="s">${L.calls.toLocaleString()} minute-by-minute calls</span></div>
+      <div class="tile"><span class="k">Calls right</span><span class="v">${pct(L.call_accuracy, 1)}</span><span class="s">the team favoured at that minute won</span></div>
+      <div class="tile"><span class="k">Brier score</span><span class="v">${L.call_brier.toFixed(3)}</span><span class="s">lower is better · coin flip 0.250</span></div>
+    </div>
+    <div class="tbl-wrap"><table>
+      <thead><tr><th class="l">Moment</th><th>Picked the winner</th><th>Games</th></tr></thead>
+      <tbody>${L.by_minute.map(r => `<tr><td class="l">${r.minute ? r.minute + " minutes in" : "Before the game"}</td><td>${bar(r.call_accuracy)}</td><td class="num">${r.calls}</td></tr>`).join("")}</tbody>
+    </table></div>
+    <div class="tbl-wrap"><table>
+      <thead><tr><th class="l">Live model gave the favourite</th><th>Its average chance</th><th>Favourite won</th><th>Calls</th></tr></thead>
+      <tbody>${L.calibration.map(c => `<tr><td class="l">${Math.round(c.from * 100)}–${Math.round(c.to * 100)}%</td><td class="num">${pct(c.said, 1)}</td><td>${bar(c.won)}</td><td class="num">${c.n.toLocaleString()}</td></tr>`).join("")}</tbody>
+    </table></div>
+    <p class="note">If the live model is honest, "Favourite won" matches "Its average chance" in every row. Calls are worked out from the official live feed after each game, with the same model and pre-game odds the site showed, and saved to a public append-only file (ledger/live_calls.jsonl).</p>
   </div>`;
 }
 
@@ -1093,17 +1120,17 @@ async function finalFrames(gid, lowerBound) {
 }
 async function gameSummary(g) {
   if (gameCache[g.id]) return gameCache[g.id];
-  try { const c = JSON.parse(localStorage.getItem("g:" + g.id) || "null"); if (c) return (gameCache[g.id] = c); } catch (e) {}
+  try { const c = JSON.parse(localStorage.getItem("g2:" + g.id) || "null"); if (c) return (gameCache[g.id] = c); } catch (e) {}
   const w = await finalFrames(g.id, new Date(0));
   if (!w) return null;
   const m = w.gameMetadata, f = w.frames[w.frames.length - 1];
   const blue = teamFromPlayers(m.blueTeamMetadata.participantMetadata), red = teamFromPlayers(m.redTeamMetadata.participantMetadata);
   const end = new Date(f.rfc460Timestamp), start = await findStart(g.id, end);
   const B = f.blueTeam, R = f.redTeam;
-  const s = { blue, red, minutes: (end - start) / 60000, kills: [B.totalKills, R.totalKills],
+  const s = { blue, red, blueId: m.blueTeamMetadata.esportsTeamId, minutes: (end - start) / 60000, kills: [B.totalKills, R.totalKills],
     edge: 3 * (B.inhibitors - R.inhibitors) + (B.towers - R.towers) + (B.totalGold - R.totalGold) / 3000 };
   gameCache[g.id] = s;
-  try { localStorage.setItem("g:" + g.id, JSON.stringify(s)); } catch (e) {}
+  try { localStorage.setItem("g2:" + g.id, JSON.stringify(s)); } catch (e) {}
   return s;
 }
 async function matchDetail(e) {
@@ -1116,7 +1143,8 @@ async function matchDetail(e) {
   const aw = (ta.result || {}).gameWins || 0, bw = (tb.result || {}).gameWins || 0;
   // Team A's edge in each finished game, then hand A its official number of wins.
   const games = done.map((g, i) => {
-    const s = sums[i], aBlue = ((g.teams || []).find(t => t.id === ta.id) || {}).side === "blue";
+    // The event's side list can be swapped; the feed's own game metadata is right.
+    const s = sums[i], aBlue = s && s.blueId ? s.blueId === ta.id : ((g.teams || []).find(t => t.id === ta.id) || {}).side === "blue";
     return { num: g.number, s, aEdge: s ? (aBlue ? s.edge : -s.edge) : 0 };
   });
   const order = [...games].sort((x, y) => y.aEdge - x.aEdge);
@@ -1397,8 +1425,11 @@ function bindTeams() {
   });
 }
 
-fetch("data.json").then(r => r.json()).then(d => {
+Promise.all([fetch("data.json").then(r => r.json()),
+  fetch("record.json").then(r => r.ok ? r.json() : null).catch(() => null)]).then(([d, rec]) => {
   D = d;
+  // record.json is graded from the ledger when the site deploys; data.json's copy is the fallback.
+  if (rec) { D.ledger = rec.ledger; D.liveRecord = rec.live; }
   $("#meta").textContent = `Data through ${fmtDate(D.meta.data_through)} · ${D.meta.sims.toLocaleString()} simulated tournaments`;
   window.addEventListener("hashchange", route);
   initSwipe();

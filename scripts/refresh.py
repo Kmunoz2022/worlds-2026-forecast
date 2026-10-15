@@ -1,8 +1,7 @@
 """One command after downloading a new Oracle's Elixir CSV (see docs/DECISIONS.md).
 
 Rebuilds the data, ratings and model, re-simulates the rest of Worlds,
-grades the prediction ledger, logs predictions for newly possible Play-In
-matches, updates the Crystal Ball tracker, archives finished games' minute-by-
+grades the prediction ledger, updates the Crystal Ball tracker, archives finished games' minute-by-
 minute timelines, and exports the website data.
 Locked picks (ledger/*_locked.json) are never touched.
 
@@ -45,12 +44,13 @@ def main():
     run("scripts/simulate_worlds.py")
     run("scripts/ingame_eval.py")
     run("scripts/live_model.py")
-    run("scripts/ledger.py", "grade")
-    run("scripts/ledger.py", "auto")
+    # Predictions are logged by the scheduled GitHub job (scripts/auto_ledger.py), not here,
+    # so the ledger has one writer. This grade from Oracle's Elixir is a cross-check.
     run("scripts/ledger.py", "grade")
     run("scripts/track_crystal.py", "--rebuild")
     run("scripts/archive_timelines.py")
     run("scripts/export_site.py")
+    run("scripts/auto_ledger.py", "record")  # local copy of site/record.json for previews
     print("\nAll done. Republish site/index.html with site/data.json to update the website.")
 
 

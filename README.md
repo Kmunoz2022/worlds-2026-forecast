@@ -1,10 +1,13 @@
 # Worlds 2026 Forecast
 
+[![Tests](https://github.com/Kmunoz2022/worlds-2026-forecast/actions/workflows/tests.yml/badge.svg)](https://github.com/Kmunoz2022/worlds-2026-forecast/actions/workflows/tests.yml) [![Prediction ledger](https://github.com/Kmunoz2022/worlds-2026-forecast/actions/workflows/ledger.yml/badge.svg)](https://github.com/Kmunoz2022/worlds-2026-forecast/actions/workflows/ledger.yml)
+
 A League of Legends pro-match prediction system built for the 2026 World Championship. It covers:
 - calibrated win probabilities for every game and series
 - a full tournament simulator for pick'em
 - live in-game win probabilities from the official broadcast's stats feed, computed in the visitor's browser
-- a public ledger where every 2026 prediction is committed **before** the match and graded after
+- a public ledger where every 2026 prediction is committed **before** the match and graded after, by a scheduled GitHub Actions job (no manual step)
+- grading of the live model's minute-by-minute calls against who actually won
 
 **Site:** https://kmunoz2022.github.io/worlds-2026-forecast/ (the Today tab shows the live game during matches)
 
@@ -86,7 +89,8 @@ src/lolpred/        library: data, elo, features, series, tournament, predict, l
 scripts/            pipeline steps and tools (refresh.py runs the whole chain)
 config/             Worlds 2026 field, seeds, bracket; results as they happen
 models/             saved model parameters
-ledger/             locked picks and the append-only 2026 prediction ledger
+ledger/             locked picks; append-only predictions, results and live calls
+tests/              unit tests (pytest), run on every push
 site/               static website (index.html + data.json) and the local live page
 docs/               decision log, result tables, screenshots
 ```
@@ -97,7 +101,8 @@ docs/               decision log, result tables, screenshots
 python3 -m venv .venv && .venv/bin/pip install -r requirements.txt
 # Download the yearly CSVs from Oracle's Elixir into Data/
 .venv/bin/python scripts/refresh.py          # rebuild data, ratings, model, simulation, site data
-.venv/bin/python scripts/ledger.py add "Gen.G" "T1" --bo 5 --stage "Final"   # log a prediction
+.venv/bin/python scripts/auto_ledger.py update   # log upcoming matches, record results, grade live calls (CI runs this every 30 min)
+.venv/bin/python -m pytest -q                    # tests (pip install -r requirements-dev.txt)
 .venv/bin/python scripts/live.py             # terminal/local version of the live predictions (the site runs them in the browser)
 .venv/bin/python scripts/live.py --replay <match id>   # replay a finished match
 ```
