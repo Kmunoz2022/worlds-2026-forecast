@@ -28,16 +28,14 @@ FINAL = "p_LR full (intl x5) +cal"
 LOCKED_CRYSTAL = ROOT / "ledger" / "crystal_ball_locked.json"
 LOCKED_PICKEM = ROOT / "ledger" / "pickem_locked.json"
 LOCKED_EXTRA = ROOT / "ledger" / "crystal_ball_locked_extra.json"
-PERSONAL = ROOT / "ledger" / "crystal_ball_personal.json"
 
 
 def crystal_section():
-    """Locked model picks (presence question first) plus the user's own picks."""
+    """Locked model picks, presence question first. (Personal picks are private
+    and never exported.)"""
     cb = json.loads(LOCKED_CRYSTAL.read_text())
     if LOCKED_EXTRA.exists():
         cb["questions"] = json.loads(LOCKED_EXTRA.read_text())["questions"] + cb["questions"]
-    personal = json.loads(PERSONAL.read_text()) if PERSONAL.exists() else None
-    cb["personal"] = ({k: v["pick"] for k, v in personal["picks"].items() if v.get("pick")} or None) if personal else None
     return cb
 
 

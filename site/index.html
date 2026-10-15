@@ -466,7 +466,7 @@ function pagePlayin() {
 }
 
 function pageCrystal() {
-  const cb = D.crystal_ball, T = D.crystal_tracker, mine = cb.personal;
+  const cb = D.crystal_ball, T = D.crystal_tracker;
   const groups = [
     ["Champions", ["presence", "champ_wr", "champ_deaths", "teemo", "unique"]],
     ["Players", ["kda", "dmg", "kp", "peyz_guma", "faker_700", "mvp_role"]],
@@ -475,7 +475,6 @@ function pageCrystal() {
   ];
   const byId = Object.fromEntries(cb.questions.map(q => [q.id, q]));
   const trkModel = id => T && T.model && T.model[id];
-  const trkYou = id => T && T.personal && T.personal[id];
   const strength = p => p >= 0.75 ? "Strong pick" : p >= 0.55 ? "Lean" : p >= 0.3 ? "Best guess" : "Long shot";
   const pickRow = (who, pick, t, sub) => `<div class="pick-row">
       <span class="who">${who}</span>
@@ -494,12 +493,11 @@ function pageCrystal() {
     return `<div class="panel">
       <h3 style="font-size:1.0625rem">${esc(q.question)}</h3>
       <div class="picks2">
-        ${mine && mine[q.id] ? pickRow("You", mine[q.id], trkYou(q.id)) : ""}
-        ${pickRow("Model", q.pick, trkModel(q.id), `${pct(q.pick_p)} · ${strength(q.pick_p).toLowerCase()}`)}
+        ${pickRow("Pick", q.pick, trkModel(q.id), `${pct(q.pick_p)} · ${strength(q.pick_p).toLowerCase()}`)}
       </div>
       ${now(q.id)}
       ${top.length ? `<ol class="top3">${top.map((o, i) => `<li><span class="rk">${["1st", "2nd", "3rd"][i]}</span><span>${esc(o.label)}</span><span class="num">${pct(o.p)}</span></li>`).join("")}</ol>` : ""}
-      <div class="why"><span class="k">Why the model picked it</span><p>${esc(q.why || "")}</p></div>
+      <div class="why"><span class="k">Why this pick</span><p>${esc(q.why || "")}</p></div>
       <details><summary>How it's calculated${q.options.length > 3 ? " · all options" : ""}</summary>
         <div class="hbars" style="margin-top:10px">${opts.map(o => `<div class="hbar"><span>${esc(o.label)}</span>
           <span class="track"><span class="fill" style="display:block;width:${o.p / max * 100}%;background:var(${o.label === q.pick ? "--s1" : "--axis"})"></span></span>
@@ -512,16 +510,15 @@ function pageCrystal() {
   const tallyRow = (who, t) => `<div class="score-row"><span class="who">${who}</span>
       <span class="legend" style="gap:0.5rem">${order.filter(k => t && t[k]).map(k => `${statusChip(k)}<span class="num">${t[k]}</span>`).join("")}</span></div>`;
   const scoreboard = !T ? "" : `<div class="panel">
-      <div class="panel-head"><h3>Scoreboard</h3><span class="note">${T.started ? `${T.games} Worlds games so far` : "Starts when Worlds games reach the data"}</span></div>
-      ${T.tally.personal ? tallyRow("You", T.tally.personal) : `<p class="note">Your own picks will appear here once they're added to the site.</p>`}
-      ${tallyRow("Model", T.tally.model)}
+      <div class="panel-head"><h3>Tracker</h3><span class="note">${T.started ? `${T.games} Worlds games so far` : "Starts when Worlds games reach the data"}</span></div>
+      ${tallyRow("Picks", T.tally.model)}
       <p class="note">Picks were locked before Worlds and can't change; this only shows how each one is doing. "Won" and "lost" are final; "on track" and "behind" can still change.</p>
     </div>`;
   const ov = Object.entries(cb.roster_overrides || {}).map(([t, r]) => Object.entries(r).map(([pos, p]) => `${p} plays ${pos} for ${t}`).join(", ")).join("; ");
   return `
   <section class="page" id="crystal">
     <div class="lede"><h2>Crystal Ball</h2>
-      <p>Your picks and the model's picks for all ${cb.questions.length} questions, tracked as Worlds is played. The model's answers come from ${cb.sims.toLocaleString()} simulated tournaments (about ${Math.round(cb.games_mean)} games each), using each team's recent games against Worlds-level opponents.${ov ? ` Roster change included: ${esc(ov)}.` : ""}</p></div>
+      <p>The model's picks for all ${cb.questions.length} questions, locked before Worlds and tracked as it's played. They come from ${cb.sims.toLocaleString()} simulated tournaments (about ${Math.round(cb.games_mean)} games each), using each team's recent games against Worlds-level opponents.${ov ? ` Roster change included: ${esc(ov)}.` : ""}</p></div>
     ${scoreboard}
     <p class="note">How sure the model was: a strong pick wins at least 75% of the time, a lean 55-75%, a best guess is the single most likely answer, and a long shot is under 30% even as the favourite. Champion questions depend on the Worlds patch, so they're long shots.</p>
     ${groups.map(([g, ids]) => `<h3>${g}</h3><div class="grid-2">${ids.filter(i => byId[i]).map(i => card(byId[i])).join("")}</div>`).join("")}
@@ -1007,7 +1004,7 @@ function tickCountdown() {
 }
 
 function pageToday() {
-  const T = D.crystal_tracker, mine = D.crystal_ball.personal;
+  const T = D.crystal_tracker;
   const tallyLine = t => ["won", "on track", "tied", "behind", "lost"].filter(k => t && t[k]).map(k => `${statusChip(k)}<span class="num">${t[k]}</span>`).join("") || `<span class="note">Starts with the first Worlds game</span>`;
   return `
   <section class="page" id="today">
@@ -1019,8 +1016,7 @@ function pageToday() {
     <div class="grid-2">
       <a class="panel link-card" href="#crystal">
         <div class="panel-head"><h3>Crystal Ball</h3><span class="chev" aria-hidden="true"></span></div>
-        ${T && T.tally.personal ? `<div class="score-row"><span class="who">You</span><span class="legend" style="gap:.5rem">${tallyLine(T.tally.personal)}</span></div>` : ""}
-        <div class="score-row"><span class="who">Model</span><span class="legend" style="gap:.5rem">${tallyLine(T && T.tally.model)}</span></div>
+        <div class="score-row"><span class="who">Picks</span><span class="legend" style="gap:.5rem">${tallyLine(T && T.tally.model)}</span></div>
       </a>
       <a class="panel link-card" href="#pickem">
         <div class="panel-head"><h3>Pick'em</h3><span class="chev" aria-hidden="true"></span></div>

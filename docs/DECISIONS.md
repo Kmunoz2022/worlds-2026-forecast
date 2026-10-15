@@ -105,7 +105,7 @@ These are 17 prediction questions on the LoL Esports site, about champions, play
 - **Rare events need Worlds-level history.** 15-kill games happen in 0.2% of Worlds games but 2–3% at MSI/EWC. Base rates now use Worlds plus MSI at half weight, which moved "15+ kills: Yes" from 85% to a coin flip.
 - **Game length depends on the mismatch.** Heavy favourites' wins average 28.6 minutes vs ~32.5 for close games. The shortest-game forecast now models that instead of relying on a 15-game sample.
 
-Every answer comes with a plain-language "why" generated from the simulation's own numbers. Two sets of picks are tracked as the event runs: the model's (frozen in `ledger/`) and my own, so I can compare my judgement against the model's at the end.
+Every answer comes with a plain-language "why" generated from the simulation's own numbers. The submitted picks are frozen in `ledger/` and tracked as the event runs.
 
 ## Live in-game predictions
 

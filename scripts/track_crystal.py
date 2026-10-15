@@ -2,14 +2,15 @@
 
 Two sets of picks are scored on the same measurements:
   model     ledger/crystal_ball_locked.json + ledger/crystal_ball_locked_extra.json
-  personal  ledger/crystal_ball_personal.json (the user's own submitted picks)
-Locked files are only read, never written.
+  personal  notes/crystal_ball_personal.json (private, git-ignored: my own picks)
+Locked files are only read, never written. Personal results go only to the
+private notes/crystal_tracker_personal.json, never to the website or the repo.
 
 Every question is measured once from the Worlds main-event games in the data,
 then each pick is marked: not started / on track / behind / tied / won / lost /
 waiting. Questions the game data can't answer (knockout teams, placements,
 Finals MVP) come from config/worlds2026_results.json.
-Writes Data/processed/crystal_tracker.json.
+Writes Data/processed/crystal_tracker.json (model only).
 
 Usage: .venv/bin/python scripts/track_crystal.py [--rebuild]
 """
@@ -66,7 +67,7 @@ def load_picks():
             for q in json.loads(path.read_text())["questions"]:
                 model[q["id"]] = {"question": q["question"], "pick": q["pick"]}
     personal = None
-    path = LEDGER / "crystal_ball_personal.json"
+    path = ROOT / "notes" / "crystal_ball_personal.json"
     if path.exists():
         p = json.loads(path.read_text())["picks"]
         if any(v.get("pick") for v in p.values()):
@@ -245,13 +246,16 @@ def main():
         games = pg[pg["gameid"].isin(ids)].drop_duplicates("gameid")
         M = measure(ids, pg, ev, games, res, cfg)
     out["model"] = run(model_picks)
-    out["personal"] = run(personal_picks)
-    out["tally"] = {"model": tally(out["model"]), "personal": tally(out["personal"]) if out["personal"] else None}
+    out["tally"] = {"model": tally(out["model"])}
     (PROCESSED_DIR / "crystal_tracker.json").write_text(json.dumps(out, indent=2, ensure_ascii=False))
-    print(f"games {len(ids)} | model {out['tally']['model']} | personal {out['tally']['personal']}")
+    personal = run(personal_picks)
+    if personal:
+        (ROOT / "notes" / "crystal_tracker_personal.json").write_text(json.dumps(
+            {"games": len(ids), "personal": personal, "tally": tally(personal)}, indent=2, ensure_ascii=False))
+    print(f"games {len(ids)} | model {out['tally']['model']} | personal {tally(personal) if personal else None}")
     if ids:
         for q, v in out["model"].items():
-            mine = (out["personal"] or {}).get(q)
+            mine = (personal or {}).get(q)
             print(f"{q:13s} model {v['status']:10s} {v['pick']!s:30.30s} "
                   + (f"| you {mine['status']:10s} {mine['pick']!s:20.20s}" if mine else "") + f" | {v['summary']}")
 
