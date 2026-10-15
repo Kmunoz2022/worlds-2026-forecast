@@ -6,6 +6,7 @@ __pycache__/
 # Raw data: Oracle's Elixir CSVs (~460 MB) and everything rebuilt from them
 Data/*.csv
 Data/processed/
+Data/timelines/
 
 # Local secrets and machine-specific settings
 config/local.json

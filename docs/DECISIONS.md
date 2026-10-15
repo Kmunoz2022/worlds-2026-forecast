@@ -132,6 +132,10 @@ Teams are identified by their players' names rather than team names (the feed sh
 
 **Validation:** replaying a finished match (LCS final, Team Liquid 3–1 LYON) through the same code: all four games followed, and the live favourite at the end of each game was the actual winner.
 
+**Timeline archive.** Oracle's Elixir only has snapshots at 10/15/20/25 minutes, with no timed objectives. The feed has the whole game, so a script archives every finished Worlds game at one sample per game-minute: each team's gold, kills, towers, dragons, barons and inhibitors, and each player's gold, CS, level, K/D/A, items, wards, damage share and kill participation (about 12 KB per game). The feed keeps games for at least a year, so past events can be backfilled. This is groundwork for a live model that also uses objectives, and for measuring how teams play from behind (comebacks, lost leads).
+
+**Draft experiment.** Adding champion strength in the current meta and each player's record on their champion improved pre-game predictions on all 2025–26 games (accuracy 64.9% → 65.8%, log loss 0.626 → 0.617, 18.8k games), but not on international games (1,967 games, slightly worse). Worlds plays on its own patch, players' champion records come from domestic play, and top teams draft carefully against each other. So the draft isn't in the model yet. It will be retested on Worlds-patch games once enough are played.
+
 ## The public prediction ledger
 
 Grading only means something if the predictions were provably made first.

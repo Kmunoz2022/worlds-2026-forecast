@@ -2,7 +2,8 @@
 
 Rebuilds the data, ratings and model, re-simulates the rest of Worlds,
 grades the prediction ledger, logs predictions for newly possible Play-In
-matches, updates the Crystal Ball tracker, and exports the website data.
+matches, updates the Crystal Ball tracker, archives finished games' minute-by-
+minute timelines, and exports the website data.
 Locked picks (ledger/*_locked.json) are never touched.
 
 Usage: .venv/bin/python scripts/refresh.py [--skip-train]
@@ -48,6 +49,7 @@ def main():
     run("scripts/ledger.py", "auto")
     run("scripts/ledger.py", "grade")
     run("scripts/track_crystal.py", "--rebuild")
+    run("scripts/archive_timelines.py")
     run("scripts/export_site.py")
     print("\nAll done. Republish site/index.html with site/data.json to update the website.")
 
