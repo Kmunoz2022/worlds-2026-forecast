@@ -750,7 +750,9 @@ const LV = { api: "https://esports-api.lolesports.com/persisted/gw", feed: "http
 const params = new URLSearchParams(location.search);
 const clockOffset = params.get("at") ? Date.parse(params.get("at")) - Date.now() : 0;
 const clock = () => new Date(Date.now() + clockOffset);
-const LIVE = { states: [], ok: null, next: null, timer: 0, polling: false };
+// delay: how far back live requests look. The feed rejects windows ending less
+// than 20 s ago, so start at 40 s and back off if this device's clock runs fast.
+const LIVE = { states: [], ok: null, next: null, timer: 0, polling: false, delay: 40000 };
 const liveGames = {};
 
 async function lget(url) {
@@ -763,7 +765,11 @@ const feedTs = d => new Date(Math.floor(d.getTime() / 10000) * 10000).toISOStrin
 // 10 s of frames starting at d. Asked for a time after a game ended, the feed
 // returns the game's final frames instead, so frames far from d are rejected.
 async function frameWindow(gid, d) {
-  const w = await lget(`${LV.feed}/window/${gid}?startingTime=${feedTs(d)}`);
+  const r = await fetch(`${LV.feed}/window/${gid}?startingTime=${feedTs(d)}`, { headers: { "x-api-key": LIVE_KEY } });
+  // "Too recent" (HTTP 400): this device's clock is probably running fast. Look further back next time.
+  if (r.status === 400) { LIVE.delay = Math.min(LIVE.delay + 15000, 120000); return null; }
+  const t = r.ok ? await r.text() : "";
+  const w = t ? JSON.parse(t) : null;
   if (!w || !w.frames || !w.frames.length) return null;
   return Math.abs(new Date(w.frames[0].rfc460Timestamp) - d) <= 40000 ? w : null;
 }
@@ -831,9 +837,7 @@ function ourTeam(t) {
 }
 
 async function liveGameState(ev, game, now) {
-  // The feed rejects windows ending less than 20 s ago (HTTP 400); a window is
-  // 10 s after rounding, so look 40 s back.
-  const w = await frameWindow(game.id, new Date(now.getTime() - 40000));
+  const w = await frameWindow(game.id, new Date(now.getTime() - LIVE.delay));
   if (!w) return null;
   let G = liveGames[game.id];
   if (!G) {
