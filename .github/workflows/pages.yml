@@ -31,10 +31,11 @@ jobs:
           {
             printf '<!doctype html>\n<html lang="en">\n<head>\n'
             printf '<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">\n'
+            cat site/head-public.html
             cat site/index.html
             printf '\n</html>\n'
           } > _site/index.html
-          cp site/data.json _site/data.json
+          cp site/data.json site/favicon.svg site/apple-touch-icon.png site/og.png _site/
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
