@@ -122,6 +122,31 @@ section.page { display: grid; gap: 1.75rem; }
 .team { display: inline-flex; flex-direction: column; gap: 1px; min-width: 0; align-items: flex-start; }
 .team .nm { font-weight: 600; letter-spacing: -0.01em; }
 
+/* Images: team logos, champion icons, player photos. Riot assets (fan-project use). */
+.team-row { display: inline-flex; align-items: center; gap: 0.625rem; min-width: 0; text-align: left; }
+.logo { width: 1.75rem; height: 1.75rem; object-fit: contain; flex: none; }
+.logo-s { width: 1.125rem; height: 1.125rem; vertical-align: -0.2em; }
+.logo-l { width: 2.75rem; height: 2.75rem; }
+.logo.alt { display: none; }
+/* Some logos are white: swap to the team's dark logo (or a dark silhouette) on the light theme. */
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) .logo.has-alt { display: none; }
+  :root:not([data-theme="dark"]) .logo.alt { display: inline-block; }
+  :root:not([data-theme="dark"]) .logo.ink { filter: brightness(0); }
+}
+:root[data-theme="light"] .logo.has-alt { display: none; }
+:root[data-theme="light"] .logo.alt { display: inline-block; }
+:root[data-theme="light"] .logo.ink { filter: brightness(0); }
+.champ { width: 1.75rem; height: 1.75rem; border-radius: 7px; object-fit: cover; flex: none; background: var(--fill); }
+.champ-s { width: 1.25rem; height: 1.25rem; border-radius: 4px; }
+.champ-l { width: 2.75rem; height: 2.75rem; border-radius: 10px; }
+.ph { width: 2.75rem; height: 2.75rem; border-radius: 50%; object-fit: cover; object-position: 50% 15%; background: var(--fill); flex: none; }
+.ph-s { width: 1.75rem; height: 1.75rem; }
+.ph-empty { display: inline-grid; place-items: center; font: 600 0.75rem var(--body); color: var(--muted); }
+.ent { display: inline-flex; align-items: center; gap: 0.5rem; min-width: 0; vertical-align: middle; }
+.ent .sub { display: block; font: 400 0.75rem var(--body); color: var(--muted); letter-spacing: 0; }
+.comp { display: inline-flex; gap: 2px; }
+
 /* pick'em */
 .picks { display: grid; grid-template-columns: 2fr 2fr 5fr; gap: 0.875rem; }
 .pick-group { display: grid; gap: 0.5rem; align-content: start; }
@@ -155,6 +180,11 @@ tr.clickable:hover td { background: var(--surface-2); }
 tr.clickable:active td { background: var(--fill); transition: none; }
 .form { font-family: var(--body); font-size: 0.75rem; font-weight: 600; letter-spacing: 0.02em; text-align: left; }
 .form .w { color: var(--win); } .form .l { color: var(--loss); }
+.dots { display: inline-flex; gap: 2px; vertical-align: middle; }
+.dots i { width: 0.4375rem; height: 0.4375rem; border-radius: 50%; background: var(--loss); }
+#team-rows .logo { width: 1.5rem; height: 1.5rem; }
+#team-rows td.l { min-width: 11rem; }
+.dots i.w { background: var(--win); }
 
 /* play-in */
 .grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(18.75rem, 100%), 1fr)); gap: 1rem; }
@@ -218,15 +248,24 @@ svg .base { stroke: var(--axis); stroke-width: 1; }
 
 /* crystal ball cards */
 .picks2 { display: grid; gap: 0; background: var(--surface-2); border-radius: var(--radius-s); overflow: hidden; }
-.pick-row { display: grid; grid-template-columns: 3.25rem 1fr auto; gap: 0.625rem; align-items: center; padding: 0.625rem 0.75rem; }
+.pick-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 0.75rem; align-items: center; padding: 0.75rem; }
+.pick-row.has-pic { grid-template-columns: auto minmax(0, 1fr) auto; }
+.pick-row .ans { display: grid; gap: 0.125rem; justify-items: start; }
+.pick-row .ans .k { font: 600 0.6875rem var(--body); text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted); }
+.pick-row .ans .nm { font: 600 1.1875rem/1.2 var(--display); letter-spacing: -0.016em; }
+.pick-row .ans .sub { display: inline-flex; align-items: center; gap: 0.3rem; font: 500 0.8125rem var(--body); color: var(--ink-2); letter-spacing: 0; }
 .pick-row + .pick-row { box-shadow: inset 0 1px 0 var(--rule); }
 .pick-row .who { font-size: 0.75rem; font-weight: 600; color: var(--muted); }
-.pick-row .ans { font: 600 1.125rem/1.2 var(--display); letter-spacing: -0.016em; min-width: 0; }
+.pick-row .ans { min-width: 0; }
 .pick-row .ans small { font: 400 0.75rem var(--body); color: var(--muted); letter-spacing: 0; }
+
+.q-head { display: flex; align-items: center; gap: 0.75rem; }
+.track-now .lead { display: flex; flex-wrap: wrap; align-items: center; gap: 0.375rem 1rem; }
+.lead-i { display: inline-flex; align-items: center; gap: 0.375rem; }
 .score-row { display: grid; grid-template-columns: 3.25rem 1fr; gap: 0.625rem; align-items: center; }
 .score-row .who { font-size: 0.8125rem; font-weight: 600; }
 .top3 { list-style: none; margin: 0; padding: 0; display: grid; gap: 0; background: var(--surface-2); border-radius: var(--radius-s); overflow: hidden; }
-.top3 li { display: grid; grid-template-columns: 2.375rem 1fr auto; gap: 0.5rem; align-items: baseline; padding: 0.5rem 0.75rem; font-size: 0.875rem; }
+.top3 li { display: grid; grid-template-columns: 2.375rem 1fr auto; gap: 0.5rem; align-items: center; padding: 0.5rem 0.75rem; font-size: 0.875rem; }
 .top3 li + li { box-shadow: inset 0 1px 0 var(--rule); }
 .top3 .rk { font: 600 0.75rem var(--body); color: var(--gold); }
 .why { display: grid; gap: 0.25rem; }
@@ -243,7 +282,7 @@ details summary:active { opacity: 0.6; }
 h3.sec { font-size: 0.8125rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); }
 .slot { display: grid; gap: 0.75rem; }
 .slot:empty { display: none; }
-.score-big { display: flex; align-items: baseline; gap: 0.75rem; font: 600 1.375rem/1.1 var(--display); letter-spacing: -0.02em; color: var(--ink-2); }
+.score-big { display: flex; align-items: center; gap: 0.75rem; font: 600 1.375rem/1.1 var(--display); letter-spacing: -0.02em; color: var(--ink-2); }
 .score-big b { font-size: 2.25rem; font-weight: 700; }
 .score-big .lead { color: var(--ink); }
 .score-big .dash { color: var(--muted); }
@@ -252,6 +291,41 @@ h3.sec { font-size: 0.8125rem; font-weight: 600; text-transform: uppercase; lett
 .games li { display: grid; grid-template-columns: 4.5rem 1fr auto; gap: 0.625rem; align-items: baseline; padding: 0.5rem 0.75rem; font-size: 0.9375rem; }
 .games li + li { box-shadow: inset 0 1px 0 var(--rule); }
 .games .gn { font-size: 0.8125rem; color: var(--muted); }
+.games li { grid-template-columns: 4.5rem minmax(8rem, 1fr) auto auto; align-items: center; }
+.g-comps { display: inline-flex; align-items: center; gap: 0.5rem; }
+.comp { align-items: center; }
+.comp .logo { margin-right: 0.25rem; }
+@media (max-width: 760px) { .games li { grid-template-columns: 4.5rem 1fr auto; } .g-comps { grid-column: 2 / -1; grid-row: 2; } }
+.score-big > span { display: inline-flex; align-items: center; gap: 0.5rem; }
+.tbd { color: var(--muted); }
+/* live scoreboard */
+.scoreboard { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+@media (max-width: 900px) { .scoreboard { grid-template-columns: 1fr; } }
+.sb-side { background: var(--surface-2); border-radius: var(--radius-s); padding: 0.375rem 0.75rem; display: grid; }
+.sb-head { display: grid; grid-template-columns: auto auto 1fr; gap: 0.5rem; align-items: center; padding: 0.375rem 0; font-size: 0.875rem; font-weight: 600; }
+.sb-cols { display: grid; grid-template-columns: 4.5rem 2.75rem 3rem; justify-self: end; font: 600 0.6875rem var(--body); color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em; text-align: right; }
+.sb-row { display: grid; grid-template-columns: 2.5rem minmax(0, 1fr) 4.5rem 2.75rem 3rem; gap: 0.5rem; align-items: center; padding: 0.4375rem 0; font-size: 0.875rem; }
+.sb-row + .sb-row { box-shadow: inset 0 1px 0 var(--rule); }
+.sb-row > .num { text-align: right; }
+.sb-champ { position: relative; width: 2.5rem; height: 2.5rem; }
+.sb-champ .champ { width: 2.5rem; height: 2.5rem; border-radius: 8px; }
+.sb-champ .lvl { position: absolute; right: -4px; bottom: -4px; min-width: 1.125rem; height: 1.125rem; padding: 0 3px; border-radius: 999px; background: var(--surface); box-shadow: 0 0 0 1.5px var(--surface-2); font: 600 0.625rem/1.125rem var(--body); text-align: center; color: var(--ink); }
+.sb-name { display: grid; gap: 0.125rem; min-width: 0; }
+.sb-name b { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 600; }
+.sb-name .sub { font-size: 0.75rem; color: var(--muted); }
+.sb-items { display: flex; gap: 2px; flex-wrap: wrap; }
+.item { width: 1.25rem; height: 1.25rem; border-radius: 4px; background: var(--fill); }
+.item.empty { display: inline-block; }
+.sb-row.dead .champ { filter: grayscale(1); opacity: 0.45; }
+.sb-mini { display: none; font-size: 0.75rem; color: var(--muted); }
+.sb-side { container-type: inline-size; }
+@container (max-width: 22rem) {
+  .sb-row { grid-template-columns: 2.5rem minmax(0, 1fr) auto; }
+  .sb-row .sb-wide, .sb-cols span:not(:first-child) { display: none; }
+  .sb-cols { grid-template-columns: auto; }
+  .sb-mini { display: block; }
+}
+.dead-tag { color: var(--loss); font-weight: 600; }
 @media (max-width: 560px) { .bd { display: none; } }
 .pick-line { display: flex; flex-wrap: wrap; gap: 0.5rem 0.75rem; align-items: center; }
 .sub-k { font-size: 0.8125rem; font-weight: 600; color: var(--ink-2); }
@@ -342,7 +416,33 @@ const esc = s => String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;"
 const pct = (p, d = 0) => p == null ? "–" : (p * 100 < 0.5 && p > 0 && d === 0 ? "<1" : (p * 100).toFixed(d)) + "%";
 const teamOf = n => D.teams.find(t => t.name === n);
 const chip = r => `<span class="chip" style="--rc: var(${REGION_VAR[r] || "--muted"})">${esc(r)}</span>`;
-const teamCell = n => { const t = teamOf(n); return `<span class="team"><span class="nm">${esc(n)}</span>${chip(t.region)}</span>`; };
+/* ---------- images (config/team_assets.json via data.json) ---------- */
+const AS = () => D.assets || { teams: {}, players: {}, ddragon: null };
+let PLAYERS_LC = null;
+// Player photo record by name, any case ("knight" or "Knight").
+function playerAsset(n) {
+  if (!PLAYERS_LC) PLAYERS_LC = Object.fromEntries(Object.entries(AS().players).map(([k, v]) => [k.toLowerCase(), v]));
+  return PLAYERS_LC[String(n).toLowerCase()];
+}
+function logo(team, size = "") {
+  const t = AS().teams[team];
+  if (!t) return "";
+  const cls = "logo" + (size ? " logo-" + size : "");
+  return `<img class="${cls}${t.logo_light ? " has-alt" : ""}${t.logo_ink ? " ink" : ""}" src="${t.logo}" alt="" loading="lazy" decoding="async">`
+    + (t.logo_light ? `<img class="${cls} alt" src="${t.logo_light}" alt="" loading="lazy" decoding="async">` : "");
+}
+// Champion names ("Wukong") or feed ids ("MonkeyKing") -> Data Dragon id.
+const champId = n => (AS().ddragon && AS().ddragon.champions[n]) || String(n).replace(/[^A-Za-z]/g, "");
+const champImg = (n, size = "") => AS().ddragon
+  ? `<img class="champ${size ? " champ-" + size : ""}" src="${AS().ddragon.base}/champion/${champId(n)}.png" alt="" loading="lazy" decoding="async" onerror="this.style.visibility='hidden'">` : "";
+const itemImg = id => id && AS().ddragon
+  ? `<img class="item" src="${AS().ddragon.base}/item/${id}.png" alt="" loading="lazy" decoding="async" onerror="this.style.visibility='hidden'">` : `<span class="item empty"></span>`;
+const playerImg = (n, size = "") => {
+  const a = playerAsset(n), cls = "ph" + (size ? " ph-" + size : "");
+  return a ? `<img class="${cls}" src="${a.photo}" alt="" loading="lazy" decoding="async">` : `<span class="${cls} ph-empty" aria-hidden="true">${esc(String(n)[0] || "?")}</span>`;
+};
+const teamTag = (n, label = n, size = "s") => `<span class="ent">${logo(n, size)}<span>${esc(label)}</span></span>`;
+const teamCell = n => { const t = teamOf(n); return `<span class="team-row">${logo(n)}<span class="team"><span class="nm">${esc(n)}</span>${chip(t.region)}</span></span>`; };
 const fmtDate = s => new Date(s + "T12:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric" });
 
 /* ---------- series maths (beta-binomial, same as src/lolpred/series.py) ---------- */
@@ -433,7 +533,7 @@ function seriesBlock(a, b, bo) {
     </div>
     <div class="sub-k">Chance of each final score</div>
     <div class="hbars" aria-label="Final score chances">
-      ${order.map(d => `<div class="hbar"><span>${d.a > d.b ? esc(a) : esc(b)} <b class="num">${Math.max(d.a, d.b)}-${Math.min(d.a, d.b)}</b></span>
+      ${order.map(d => `<div class="hbar"><span class="ent">${logo(d.a > d.b ? a : b, "s")}<span>${esc(short(d.a > d.b ? a : b))} <b class="num">${Math.max(d.a, d.b)}-${Math.min(d.a, d.b)}</b></span></span>
         <span class="track"><span class="fill" style="display:block;width:${d.p / max * 100}%;background:var(${d.a > d.b ? "--s1" : "--s2"})"></span></span>
         <span class="v">${pct(d.p)}</span></div>`).join("")}
     </div>
@@ -457,7 +557,7 @@ function playinBracket() {
 }
 function bracketMatch(mt) {
   const row = (t, p) => `<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;padding:6px 0;${t === mt.w ? "font-weight:600" : "color:var(--ink-2)"}">
-    <span>${esc(t)}${t === mt.w ? '<span class="tag">Pick</span>' : ""}</span><span class="num">${pct(p)}</span></div>`;
+    <span>${teamTag(t, t, "")}${t === mt.w ? '<span class="tag">Pick</span>' : ""}</span><span class="num">${pct(p)}</span></div>`;
   const fav = mt.w, favIsX = fav === mt.x;
   const scores = scoreDist(gameP(mt.x, mt.y), 5).filter(d => favIsX ? d.a > d.b : d.b > d.a)
     .map(d => ({ s: `${Math.max(d.a, d.b)}-${Math.min(d.a, d.b)}`, p: d.p })).sort((u, v) => u.s.localeCompare(v.s));
@@ -505,30 +605,59 @@ function pageCrystal() {
   const byId = Object.fromEntries(cb.questions.map(q => [q.id, q]));
   const trkModel = id => T && T.model && T.model[id];
   const strength = p => p >= 0.75 ? "Strong pick" : p >= 0.55 ? "Lean" : p >= 0.3 ? "Best guess" : "Long shot";
-  const pickRow = (who, pick, t, sub) => `<div class="pick-row">
-      <span class="who">${who}</span>
-      <span class="ans">${esc(pick)}${sub ? ` <small>${sub}</small>` : ""}</span>
+  // What each answer is, so it can show its picture: champion icon, player photo or team logo.
+  const CHAMP_Q = new Set(["presence", "champ_wr", "champ_deaths"]), PLAYER_Q = new Set(["kda", "dmg", "kp", "peyz_guma"]);
+  const TEAM_Q = new Set(["shortest", "hle_t1"]);
+  const QICON = { teemo: () => champImg("Teemo", "l"), faker_700: () => playerImg("Faker"), mvp_role: () => "" };
+  // "Knight (Bilibili Gaming, Mid)" -> name, team, role
+  const parsePlayer = label => { const m = String(label).match(/^(.*?) \((.*), (\w+)\)$/); return m ? { name: m[1], team: m[2], role: m[3] } : { name: String(label) }; };
+  // Small version for lists: icon + name (+ team logo for players).
+  const entity = (qid, label) => {
+    if (CHAMP_Q.has(qid)) return `<span class="ent">${champImg(label, "s")}<span>${esc(label)}</span></span>`;
+    if (PLAYER_Q.has(qid)) {
+      const pl = parsePlayer(label), a = playerAsset(pl.name), team = pl.team || (a && a.team);
+      return `<span class="ent">${playerImg(pl.name, "s")}<span>${esc(pl.name)}</span>${team ? logo(team, "s") : ""}</span>`;
+    }
+    if (TEAM_Q.has(qid) && AS().teams[label]) return teamTag(label);
+    return esc(label);
+  };
+  // The pick itself: picture, name, team/role, then how sure the model was.
+  const pickParts = (qid, label) => {
+    if (CHAMP_Q.has(qid)) return { pic: champImg(label, "l"), name: label };
+    if (PLAYER_Q.has(qid)) {
+      const pl = parsePlayer(label), a = playerAsset(pl.name), team = pl.team || (a && a.team), role = pl.role || (a && a.role);
+      return { pic: playerImg(pl.name), name: pl.name, sub: [team ? `${logo(team, "s")} ${esc(team)}` : "", role ? esc(role) : ""].filter(Boolean).join(" · ") };
+    }
+    if (TEAM_Q.has(qid) && AS().teams[label]) return { pic: logo(label, "l"), name: label };
+    return { pic: "", name: label };
+  };
+  const pickRow = (pick, t, sub, qid) => {
+    const x = pickParts(qid, pick);
+    return `<div class="pick-row${x.pic ? " has-pic" : ""}">
+      ${x.pic ? `<span class="pick-pic">${x.pic}</span>` : ""}
+      <span class="ans"><span class="k">Model's pick</span><span class="nm">${esc(x.name)}</span>${x.sub ? `<span class="sub">${x.sub}</span>` : ""}<small>${sub}</small></span>
       ${t ? statusChip(t.status) : ""}
     </div>`;
+  };
   const now = id => {
     const t = trkModel(id);
     if (!t || !T.started) return "";
-    const lead = t.leaders && t.leaders.length ? `<span class="lead">Top now: ${t.leaders.map((l, i) => `${i + 1}. ${esc(l.name)} ${esc(l.value)}${l.games ? ` (${l.games}g)` : ""}`).join(" · ")}</span>` : "";
+    const lead = t.leaders && t.leaders.length ? `<span class="lead">Top now: ${t.leaders.map((l, i) => `<span class="lead-i">${i + 1}. ${entity(id, l.name)} <b class="num">${esc(l.value)}</b>${l.games ? ` <span class="muted">(${l.games} games)</span>` : ""}</span>`).join("")}</span>` : "";
     return `<div class="track-now"><b>${esc(t.summary)}</b>${lead}</div>`;
   };
   const card = q => {
     const opts = q.options.slice(0, 6), max = Math.max(...opts.map(o => o.p));
     const top = q.options.length > 2 ? q.options.slice(0, 3) : [];
     return `<div class="panel">
-      <h3 style="font-size:1.0625rem">${esc(q.question)}</h3>
+      <div class="q-head">${QICON[q.id] ? QICON[q.id]() : ""}<h3 style="font-size:1.0625rem">${esc(q.question)}</h3></div>
       <div class="picks2">
-        ${pickRow("Pick", q.pick, trkModel(q.id), `model's chance ${pct(q.pick_p)} · ${strength(q.pick_p).toLowerCase()}`)}
+        ${pickRow(q.pick, trkModel(q.id), `Model's chance ${pct(q.pick_p)} · ${strength(q.pick_p).toLowerCase()}`, q.id)}
       </div>
       ${now(q.id)}
-      ${top.length ? `<ol class="top3">${top.map((o, i) => `<li><span class="rk">${["1st", "2nd", "3rd"][i]}</span><span>${esc(o.label)}</span><span class="num">${pct(o.p)}</span></li>`).join("")}</ol>` : ""}
+      ${top.length ? `<ol class="top3">${top.map((o, i) => `<li><span class="rk">${["1st", "2nd", "3rd"][i]}</span><span>${entity(q.id, o.label)}</span><span class="num">${pct(o.p)}</span></li>`).join("")}</ol>` : ""}
       <div class="why"><span class="k">Why this pick</span><p>${esc(q.why || "")}</p></div>
       <details><summary>How it's calculated${q.options.length > 3 ? " · all options" : ""}</summary>
-        <div class="hbars" style="margin-top:10px">${opts.map(o => `<div class="hbar"><span>${esc(o.label)}</span>
+        <div class="hbars" style="margin-top:10px">${opts.map(o => `<div class="hbar"><span>${entity(q.id, o.label)}</span>
           <span class="track"><span class="fill" style="display:block;width:${o.p / max * 100}%;background:var(${o.label === q.pick ? "--s1" : "--axis"})"></span></span>
           <span class="v">${pct(o.p)}</span></div>`).join("")}</div>
         <p class="note" style="margin-top:10px">${esc(q.method)}</p>
@@ -585,7 +714,7 @@ function pageTeams() {
       <td class="num muted">${i + 1}</td><td class="l">${teamCell(t.name)}</td>
       <td class="num">${Math.round(t.strength)}</td><td class="num">${pct(t.avg_game_win)}</td>
       <td class="num">${t.wins}-${t.losses}</td>
-      <td class="form">${[...t.last10].map(c => `<span class="${c === "W" ? "w" : "l"}">${c}</span>`).join("")}</td>
+      <td class="form"><span class="dots" role="img" aria-label="Last 10 games, oldest first: ${[...t.last10].map(c => c === "W" ? "win" : "loss").join(", ")}">${[...t.last10].map(c => `<i class="${c === "W" ? "w" : "l"}"></i>`).join("")}</span></td>
     </tr>`).join("");
   return `
   <section class="page" id="teams">
@@ -596,7 +725,7 @@ function pageTeams() {
         <div class="tbl-wrap"><table>
           <thead><tr><th>#</th><th class="l">Team</th><th>Rating</th><th title="Average chance to win one game against each of the other 18 Worlds teams">Win % vs field</th><th>2026 W-L</th><th class="l">Last 10</th></tr></thead>
           <tbody id="team-rows">${rows}</tbody></table></div>
-        <p class="note"><b>Rating:</b> team Elo plus region strength (higher is stronger). <b>Win % vs field:</b> average chance to win one game against each of the other 18 Worlds teams. <b>2026 W-L:</b> games won and lost this year. <b>Last 10:</b> most recent games, newest on the right.</p>
+        <p class="note"><b>Rating:</b> team Elo plus region strength (higher is stronger). <b>Win % vs field:</b> average chance to win one game against each of the other 18 Worlds teams. <b>2026 W-L:</b> games won and lost this year. <b>Last 10:</b> most recent games, newest on the right (green win, red loss).</p>
       </div>
       <div style="display:grid;gap:16px">
         <div class="panel">
@@ -717,10 +846,10 @@ function record2026() {
   const done = L.entries.filter(e => e.status === "graded"), open = L.entries.filter(e => e.status === "pending");
   const s = L.summary;
   const row = e => `<tr>
-    <td class="l">${esc(e.stage)}</td><td class="l">${esc(e.team_a)} vs ${esc(e.team_b)} <span class="muted">Bo${e.best_of}</span></td>
-    <td class="l"><b>${esc(e.pick)}</b> <span class="muted small bd">${Object.entries(e.score_dist).filter(([k]) => { const [x, y] = k.split("-").map(Number); return e.pick === e.team_a ? x > y : y > x; }).map(([k, v]) => `${e.pick === e.team_a ? k : k.split("-").reverse().join("-")} ${pct(v)}`).sort().join(" · ")}</span></td>
+    <td class="l">${esc(e.stage)}</td><td class="l">${teamTag(e.team_a, short(e.team_a))} <span class="muted">vs</span> ${teamTag(e.team_b, short(e.team_b))} <span class="muted">Bo${e.best_of}</span></td>
+    <td class="l"><b>${teamTag(e.pick, short(e.pick))}</b> <span class="muted small bd">${Object.entries(e.score_dist).filter(([k]) => { const [x, y] = k.split("-").map(Number); return e.pick === e.team_a ? x > y : y > x; }).map(([k, v]) => `${e.pick === e.team_a ? k : k.split("-").reverse().join("-")} ${pct(v)}`).sort().join(" · ")}</span></td>
     <td class="num">${pct(Math.max(e.p_series_a, 1 - e.p_series_a))}</td>
-    <td class="l">${e.status === "graded" ? `${esc(e.winner)} ${Math.max(e.a_wins, e.b_wins)}-${Math.min(e.a_wins, e.b_wins)} ${statusChip(e.correct ? "won" : "lost")}` : `<span class="muted">Logged ${esc(e.predicted_at.slice(5, 16).replace("T", " "))} UTC</span>`}</td></tr>`;
+    <td class="l">${e.status === "graded" ? `${teamTag(e.winner, short(e.winner))} ${Math.max(e.a_wins, e.b_wins)}-${Math.min(e.a_wins, e.b_wins)} ${statusChip(e.correct ? "won" : "lost")}` : `<span class="muted">Logged ${esc(e.predicted_at.slice(5, 16).replace("T", " "))} UTC</span>`}</td></tr>`;
   return `<div class="panel">
     <div class="panel-head"><h3>Worlds 2026 record</h3><span class="note">Every prediction is saved before the match and graded after</span></div>
     ${s.series ? `<div class="tiles">
@@ -894,10 +1023,11 @@ function ourTeam(t) {
 }
 
 async function liveGameState(ev, game, now) {
-  let w = null;
+  let w = null, at = null;
   for (let i = 0; i < 4 && !w; i++) {   // on "too recent", frameWindow raises LIVE.delay: retry at once
     const before = LIVE.delay;
-    w = await frameWindow(game.id, new Date(now.getTime() - LIVE.delay));
+    at = new Date(now.getTime() - LIVE.delay);
+    w = await frameWindow(game.id, at);
     if (!w && LIVE.delay === before) break;
   }
   if (!w) {
@@ -927,11 +1057,30 @@ async function liveGameState(ev, game, now) {
   const aIsBlue = ((game.teams || []).find(t => t.id === ta.id) || {}).side === "blue";
   const A = aIsBlue ? G.blue : G.red, Bt = aIsBlue ? G.red : G.blue, bo = ev.match.strategy.count;
   const inGame = f.gameState === "in_game";
+  const players = await livePlayers(game.id, at, w.gameMetadata, f);
   const out = { gid: game.id, num: game.number, minute, state: f.gameState, blue: G.blue, red: G.red, p, pPre: G.pPre,
-    gold, csd, B, R, history: G.history, league: ev.league.name,
+    gold, csd, B, R, history: G.history, league: ev.league.name, players,
     series: { A, B: Bt, aw, bw, bo, p: seriesLive(gameP(A, Bt), bo, aw, bw, inGame ? (aIsBlue ? p : 1 - p) : null) } };
   LIVE.last[game.id] = { s: out, at: Date.now() };
   return out;
+}
+
+// Each player's champion, level, K/D/A, CS, gold and whether they're dead, from the
+// window frame; items come from the feed's details endpoint (one more request).
+async function livePlayers(gid, at, meta, f) {
+  let items = {};
+  try {
+    const r = await fetch(`${LV.feed}/details/${gid}?startingTime=${feedTs(at)}`, { headers: { "x-api-key": LIVE_KEY } });
+    const t = r.ok ? await r.text() : "", d = t ? JSON.parse(t) : null;
+    if (d && d.frames && d.frames.length) items = Object.fromEntries(d.frames[d.frames.length - 1].participants.map(p => [p.participantId, p.items]));
+  } catch (e) { /* items are optional */ }
+  const side = (tm, fr) => tm.participantMetadata.map(pm => {
+    const p = fr.participants.find(x => x.participantId === pm.participantId) || {};
+    const name = pm.summonerName.includes(" ") ? pm.summonerName.slice(pm.summonerName.indexOf(" ") + 1) : pm.summonerName;
+    return { name, role: pm.role, champ: pm.championId, level: p.level || 1, k: p.kills || 0, d: p.deaths || 0, a: p.assists || 0,
+      cs: p.creepScore || 0, gold: p.totalGold || 0, dead: p.currentHealth === 0 && f.gameState === "in_game", items: items[pm.participantId] };
+  });
+  return { blue: side(meta.blueTeamMetadata, f.blueTeam), red: side(meta.redTeamMetadata, f.redTeam) };
 }
 
 // Opened mid-game: fill in the earlier minutes once, in the background, so the
@@ -992,7 +1141,7 @@ const short = n => SHORT[n] || n;
 function liveChart(h, width, blue, red) {
   // Drawn at the card's real width so labels stay at their normal size.
   // The line is the blue team's chance: top edge = blue wins, bottom edge = red wins.
-  const W = Math.max(280, Math.round(width)), H = 170, m = { l: 64, r: 26, t: 12, b: 24 };
+  const W = Math.max(280, Math.round(width)), H = 170, m = { l: 86, r: 26, t: 12, b: 24 };
   const xmax = Math.max(30, ...h.map(p => p[0]));
   const X = v => m.l + v / xmax * (W - m.l - m.r), Y = v => H - m.b - v * (H - m.t - m.b);
   const path = h.map((p, i) => `${i ? "L" : "M"}${X(p[0]).toFixed(1)},${Y(p[1]).toFixed(1)}`).join("");
@@ -1020,10 +1169,31 @@ function statTable(s) {
   ];
   const cell = (v, other, side, f) => `<td class="${v > other ? "lead lead-" + side : ""}">${(f || String)(v)}</td>`;
   return `<div class="tbl-wrap"><table class="stat-table">
-    <thead><tr><th class="l">${esc(short(s.blue))} <span class="side-tag" style="--rc:var(--side-blue)">Blue</span></th><th class="mid-col"></th>
-      <th>${esc(short(s.red))} <span class="side-tag" style="--rc:var(--side-red)">Red</span></th></tr></thead>
+    <thead><tr><th class="l">${teamTag(s.blue, short(s.blue))} <span class="side-tag" style="--rc:var(--side-blue)">Blue</span></th><th class="mid-col"></th>
+      <th>${teamTag(s.red, short(s.red))} <span class="side-tag" style="--rc:var(--side-red)">Red</span></th></tr></thead>
     <tbody>${rows.map(([k, b, r, f]) => `<tr>${cell(b, r, "blue", f).replace("<td", '<td style="text-align:left"')}<th class="mid-col" scope="row">${k}</th>${cell(r, b, "red", f)}</tr>`).join("")}</tbody>
   </table></div>`;
+}
+
+let CHAMP_NAME = null;   // Data Dragon id -> display name ("MonkeyKing" -> "Wukong")
+const champName = id => {
+  if (!CHAMP_NAME) CHAMP_NAME = Object.fromEntries(Object.entries((AS().ddragon || {}).champions || {}).map(([n, i]) => [i, n]));
+  return CHAMP_NAME[id] || id;
+};
+function scoreboard(s) {
+  const side = (list, color, team) => `<div class="sb-side">
+    <div class="sb-head">${teamTag(team, team, "s")}<span class="side-tag" style="--rc:var(--side-${color})">${color === "blue" ? "Blue" : "Red"}</span>
+      <span class="sb-cols"><span>K / D / A</span><span>CS</span><span>Gold</span></span></div>
+    ${list.map(p => `<div class="sb-row${p.dead ? " dead" : ""}">
+      <span class="sb-champ">${champImg(p.champ)}<span class="lvl num" aria-label="level ${p.level}">${p.level}</span></span>
+      <span class="sb-name"><b>${esc(p.name)}</b><span class="sub">${esc(champName(p.champ))}${p.dead ? " · <span class=\"dead-tag\">dead</span>" : ""}</span>
+        ${p.items ? `<span class="sb-items">${p.items.slice(0, 7).map(itemImg).join("")}</span>` : ""}
+        <span class="sb-mini num">${p.cs} CS · ${(p.gold / 1000).toFixed(1)}k gold</span></span>
+      <span class="num sb-kda">${p.k}/${p.d}/${p.a}</span>
+      <span class="num sb-wide">${p.cs}</span>
+      <span class="num sb-wide">${(p.gold / 1000).toFixed(1)}k</span>
+    </div>`).join("")}</div>`;
+  return `<div class="scoreboard">${side(s.players.blue, "blue", s.blue)}${side(s.players.red, "red", s.red)}</div>`;
 }
 
 function renderLive() {
@@ -1047,20 +1217,21 @@ function renderLive() {
     const goldLead = s.gold === 0 ? "Gold is even" : `${esc(s.gold > 0 ? s.blue : s.red)} leads by ${Math.abs(s.gold).toLocaleString()} gold`;
     const w = (S.bo + 1) / 2;
     return `<div class="panel live-card">
-      <div class="panel-head"><h3><span class="live-dot" aria-hidden="true"></span>Live: ${esc(s.blue)} vs ${esc(s.red)}</h3>
+      <div class="panel-head"><h3><span class="live-dot" aria-hidden="true"></span>Live: ${teamTag(s.blue, s.blue, "")} <span class="muted">vs</span> ${teamTag(s.red, s.red, "")}</h3>
         <span class="note">Game ${s.num} · ${mm}:${ss} game time${s.state !== "in_game" ? " · " + esc(s.state.replace("_", " ")) : ""}${s.stale ? " · updating…" : ""}</span></div>
       <div class="sub-k">Chance to win this game</div>
       <div class="vs">
-        <div class="side"><span class="team"><span class="nm">${esc(s.blue)}</span><span class="chip" style="--rc: var(--side-blue)">Blue side</span></span>
+        <div class="side"><span class="team-row">${logo(s.blue, "l")}<span class="team"><span class="nm">${esc(s.blue)}</span><span class="chip" style="--rc: var(--side-blue)">Blue side</span></span></span>
           <span class="big num" style="color:var(--side-blue)">${pct(s.p)}</span><span class="note">Before the game: ${pct(s.pPre)}</span></div>
         <div class="mid">vs</div>
-        <div class="side"><span class="team" style="align-items:flex-end"><span class="nm">${esc(s.red)}</span><span class="chip" style="--rc: var(--side-red)">Red side</span></span>
+        <div class="side"><span class="team-row"><span class="team" style="align-items:flex-end"><span class="nm">${esc(s.red)}</span><span class="chip" style="--rc: var(--side-red)">Red side</span></span>${logo(s.red, "l")}</span>
           <span class="big num" style="color:var(--side-red)">${pct(1 - s.p)}</span><span class="note">Before the game: ${pct(1 - s.pPre)}</span></div>
       </div>
       <div class="splitbar" role="img" aria-label="${esc(s.blue)} ${pct(s.p)}, ${esc(s.red)} ${pct(1 - s.p)}"><span style="width:${s.p * 100}%;background:var(--side-blue)"></span><span style="width:${(1 - s.p) * 100}%;background:var(--side-red)"></span></div>
       <div class="sub-k">${esc(s.blue)}'s chance over the game <span class="note">(higher = ${esc(short(s.blue))}, lower = ${esc(short(s.red))})</span></div>
       ${liveChart(s.history, el.clientWidth - 44, s.blue, s.red)}
-      <div class="sub-k">In this game so far <span class="note">· ${goldLead}</span></div>
+      ${s.players ? `<div class="sub-k">Players <span class="note">· level on the champion icon; greyed out = dead right now</span></div>${scoreboard(s)}` : ""}
+      <div class="sub-k">Team totals <span class="note">· ${goldLead}</span></div>
       ${statTable(s)}
       <div class="series-line">
         <span><b>Series</b> · best of ${S.bo} (first to ${w} wins)</span>
@@ -1088,8 +1259,8 @@ function renderNext() {
           ${e.state === "inProgress" ? `<span class="note" style="color:var(--loss);font-weight:600">Live now, see above</span>`
             : i === 0 ? `<span class="note countdown" data-t="${when.getTime()}"></span>` : ""}</div>
         <div class="who">${known
-          ? `<span class="note" style="flex-basis:100%">Chance to win the series</span><span class="${pa >= 0.5 ? "fav" : ""}">${esc(a)} ${pct(pa)}</span><span class="note">vs</span><span class="${pa < 0.5 ? "fav" : ""}">${esc(b)} ${pct(1 - pa)}</span>`
-          : `<span>${esc(ta.name || "TBD")}</span><span class="note">vs</span><span>${esc(tb.name || "TBD")}</span>`}</div>
+          ? `<span class="note" style="flex-basis:100%">Chance to win the series</span><span class="${pa >= 0.5 ? "fav" : ""}">${teamTag(a, a, "")} <span class="num">${pct(pa)}</span></span><span class="note">vs</span><span class="${pa < 0.5 ? "fav" : ""}">${teamTag(b, b, "")} <span class="num">${pct(1 - pa)}</span></span>`
+          : [[ta, a], [tb, b]].map(([t, o]) => o ? teamTag(o, o, "") : `<span class="tbd">${esc(t.name && t.name !== "TBD" ? t.name : "To be decided")}</span>`).join(`<span class="note">vs</span>`)}</div>
       </div>`;
     }).join("")}</div></div>`;
   tickCountdown();
@@ -1120,7 +1291,7 @@ async function finalFrames(gid, lowerBound) {
 }
 async function gameSummary(g) {
   if (gameCache[g.id]) return gameCache[g.id];
-  try { const c = JSON.parse(localStorage.getItem("g2:" + g.id) || "null"); if (c) return (gameCache[g.id] = c); } catch (e) {}
+  try { const c = JSON.parse(localStorage.getItem("g3:" + g.id) || "null"); if (c) return (gameCache[g.id] = c); } catch (e) {}
   const w = await finalFrames(g.id, new Date(0));
   if (!w) return null;
   const m = w.gameMetadata, f = w.frames[w.frames.length - 1];
@@ -1128,9 +1299,10 @@ async function gameSummary(g) {
   const end = new Date(f.rfc460Timestamp), start = await findStart(g.id, end);
   const B = f.blueTeam, R = f.redTeam;
   const s = { blue, red, blueId: m.blueTeamMetadata.esportsTeamId, minutes: (end - start) / 60000, kills: [B.totalKills, R.totalKills],
+    champs: [m.blueTeamMetadata, m.redTeamMetadata].map(t => t.participantMetadata.map(p => p.championId)),
     edge: 3 * (B.inhibitors - R.inhibitors) + (B.towers - R.towers) + (B.totalGold - R.totalGold) / 3000 };
   gameCache[g.id] = s;
-  try { localStorage.setItem("g2:" + g.id, JSON.stringify(s)); } catch (e) {}
+  try { localStorage.setItem("g3:" + g.id, JSON.stringify(s)); } catch (e) {}
   return s;
 }
 async function matchDetail(e) {
@@ -1184,9 +1356,13 @@ function loggedPick(m) {
 }
 function gameLine(g, m) {
   const s = g.s;
-  if (!s) return `<li><span class="gn">Game ${g.num}</span><span><b>${esc(g.winner || "?")}</b> won</span></li>`;
+  const won = `<span class="g-win"><b>${teamTag(g.winner, g.winner || "?")}</b> won</span>`;
+  if (!s) return `<li><span class="gn">Game ${g.num}</span>${won}</li>`;
   const wk = s.blue === g.winner ? s.kills[0] : s.kills[1], lk = s.blue === g.winner ? s.kills[1] : s.kills[0];
-  return `<li><span class="gn">Game ${g.num}</span><span><b>${esc(g.winner)}</b> won</span>
+  // Each side's five champions, blue side first.
+  const comp = (team, ids) => `<span class="comp" title="${esc(team || "")}">${logo(team, "s")}${(ids || []).map(c => champImg(c, "s")).join("")}</span>`;
+  return `<li><span class="gn">Game ${g.num}</span>${won}
+    ${s.champs ? `<span class="g-comps">${comp(s.blue, s.champs[0])}<span class="muted small">vs</span>${comp(s.red, s.champs[1])}</span>` : ""}
     <span class="note">${Math.round(s.minutes)} min · kills ${wk}–${lk}</span></li>`;
 }
 function matchCard(m, kind) {
@@ -1196,12 +1372,12 @@ function matchCard(m, kind) {
   const right = lp && winner ? lp.pick === winner : null;
   const nowP = kind === "current" && m.A && m.B ? seriesLive(gameP(m.A, m.B), m.bo, m.aw, m.bw, null) : null;
   return `<div class="panel match-card">
-    <div class="panel-head"><h3>${esc(m.A || m.aName)} vs ${esc(m.B || m.bName)}</h3>
+    <div class="panel-head"><h3>${teamTag(m.A, m.A || m.aName, "")} <span class="muted">vs</span> ${teamTag(m.B, m.B || m.bName, "")}</h3>
       <span class="note">${esc(m.block)} · best of ${m.bo} (first to ${w}) · ${m.start.toLocaleDateString(undefined, { month: "short", day: "numeric" })}</span></div>
-    <div class="score-big"><span class="${m.aw > m.bw ? "lead" : ""}">${esc(short(m.A || m.aName))} <b>${m.aw}</b></span><span class="dash">–</span><span class="${m.bw > m.aw ? "lead" : ""}"><b>${m.bw}</b> ${esc(short(m.B || m.bName))}</span></div>
+    <div class="score-big"><span class="${m.aw > m.bw ? "lead" : ""}">${logo(m.A, "l")}${esc(short(m.A || m.aName))} <b>${m.aw}</b></span><span class="dash">–</span><span class="${m.bw > m.aw ? "lead" : ""}"><b>${m.bw}</b> ${esc(short(m.B || m.bName))}${logo(m.B, "l")}</span></div>
     <p class="score-words">${lead}${kind === "current" && m.inProgress ? ` · Game ${m.aw + m.bw + 1} in progress` : kind === "current" ? ` · Game ${m.aw + m.bw + 1} starting soon` : ""}</p>
     ${m.games.length ? `<ol class="games">${m.games.map(g => gameLine(g, m)).join("")}</ol>` : ""}
-    ${lp ? `<p class="pick-line"><span>${lp.logged ? "Our pick before the match" : "Model's pick"}: <b>${esc(lp.pick)}</b> (${pct(lp.p)} to win the series)</span>
+    ${lp ? `<p class="pick-line"><span>${lp.logged ? "Our pick before the match" : "Model's pick"}: <b>${teamTag(lp.pick)}</b> (${pct(lp.p)} to win the series)</span>
       ${right === null ? "" : right ? statusChip("won").replace(">Won<", ">Pick right<") : statusChip("lost").replace(">Lost<", ">Pick wrong<")}</p>` : ""}
     ${kind === "current" && m.inProgress && !(LIVE.states || []).some(s => s.gid === m.liveGid)
       ? `<p class="note">Game ${m.aw + m.bw + 1} is in draft or loading. Live win chances appear here once it starts.</p>` : ""}

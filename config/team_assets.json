@@ -1,0 +1,960 @@
+{
+ "teams": {
+  "Gen.G": {
+   "code": "GEN",
+   "slug": "geng",
+   "esports_id": "100205573495116443",
+   "logo": "img/teams/geng.png"
+  },
+  "Hanwha Life Esports": {
+   "code": "HLE",
+   "slug": "hanwha-life-esports",
+   "esports_id": "100205573496804586",
+   "logo": "img/teams/hanwha-life-esports.png",
+   "logo_light": "img/teams/hanwha-life-esports-light.png"
+  },
+  "T1": {
+   "code": "T1",
+   "slug": "t1",
+   "esports_id": "98767991853197861",
+   "logo": "img/teams/t1.png"
+  },
+  "Dplus KIA": {
+   "code": "DK",
+   "slug": "dwg-kia",
+   "esports_id": "100725845018863243",
+   "logo": "img/teams/dwg-kia.png",
+   "logo_light": "img/teams/dwg-kia-light.png"
+  },
+  "Anyone's Legend": {
+   "code": "AL",
+   "slug": "anyones-legend",
+   "esports_id": "99566404856367466",
+   "logo": "img/teams/anyones-legend.png"
+  },
+  "Bilibili Gaming": {
+   "code": "BLG",
+   "slug": "bilibili-gaming",
+   "esports_id": "99566404853854212",
+   "logo": "img/teams/bilibili-gaming.png"
+  },
+  "Top Esports": {
+   "code": "TES",
+   "slug": "top-esports",
+   "esports_id": "99566404854685458",
+   "logo": "img/teams/top-esports.png"
+  },
+  "Invictus Gaming": {
+   "code": "IG",
+   "slug": "invictus-gaming",
+   "esports_id": "99566404848691211",
+   "logo": "img/teams/invictus-gaming.png"
+  },
+  "G2 Esports": {
+   "code": "G2",
+   "slug": "g2-esports",
+   "esports_id": "98767991926151025",
+   "logo": "img/teams/g2-esports.png",
+   "logo_light": "img/teams/g2-esports-light.png"
+  },
+  "Movistar KOI": {
+   "code": "MKOI",
+   "slug": "mad-lions",
+   "esports_id": "103461966965149786",
+   "logo": "img/teams/mad-lions.png"
+  },
+  "Karmine Corp": {
+   "code": "KC",
+   "slug": "karmine-corp",
+   "esports_id": "111692118851466302",
+   "logo": "img/teams/karmine-corp.png"
+  },
+  "Team Liquid": {
+   "code": "TLAW",
+   "slug": "team-liquid",
+   "esports_id": "98926509885559666",
+   "logo": "img/teams/team-liquid.png",
+   "logo_ink": true
+  },
+  "LYON": {
+   "code": "LYON",
+   "slug": "lyon-gaming",
+   "esports_id": "99566405941863385",
+   "logo": "img/teams/lyon-gaming.png"
+  },
+  "Cloud9": {
+   "code": "C9",
+   "slug": "cloud9",
+   "esports_id": "98767991877340524",
+   "logo": "img/teams/cloud9.png"
+  },
+  "Team Secret Whales": {
+   "code": "TSW",
+   "slug": "team-secret-whales",
+   "esports_id": "113661839307879869",
+   "logo": "img/teams/team-secret-whales.png",
+   "logo_ink": true
+  },
+  "CTBC Flying Oyster": {
+   "code": "CFO",
+   "slug": "ctbc-flying-oyster",
+   "esports_id": "107700199633958891",
+   "logo": "img/teams/ctbc-flying-oyster.png"
+  },
+  "MVK Esports": {
+   "code": "MVK",
+   "slug": "saigon-buffalo-esports",
+   "esports_id": "107251245690956393",
+   "logo": "img/teams/saigon-buffalo-esports.png",
+   "logo_light": "img/teams/saigon-buffalo-esports-light.png"
+  },
+  "LØS": {
+   "code": "LOS",
+   "slug": "los",
+   "esports_id": "109480204628225868",
+   "logo": "img/teams/los.png"
+  },
+  "FURIA": {
+   "code": "FUR",
+   "slug": "furia",
+   "esports_id": "100205576309502431",
+   "logo": "img/teams/furia.png"
+  }
+ },
+ "players": {
+  "Chovy": {
+   "team": "Gen.G",
+   "role": "Mid",
+   "photo": "img/players/99871276342168416.png"
+  },
+  "SIRIUSS": {
+   "team": "Gen.G",
+   "role": "Support",
+   "photo": "img/players/113740943728096233.png"
+  },
+  "Ripple": {
+   "team": "Gen.G",
+   "role": "Top",
+   "photo": "img/players/115740909072304963.png"
+  },
+  "Courage": {
+   "team": "Gen.G",
+   "role": "Jungle",
+   "photo": "img/players/108366460978884097.png"
+  },
+  "MUDAI": {
+   "team": "Gen.G",
+   "role": "Bot",
+   "photo": "img/players/115740899235923933.png"
+  },
+  "Lumos": {
+   "team": "Gen.G",
+   "role": "Support",
+   "photo": "img/players/115740899326939236.png"
+  },
+  "Kemish": {
+   "team": "Gen.G",
+   "role": "Mid",
+   "photo": "img/players/113560610683314243.png"
+  },
+  "Ruler": {
+   "team": "Gen.G",
+   "role": "Bot",
+   "photo": "img/players/98767975906852059.png"
+  },
+  "Duro": {
+   "team": "Gen.G",
+   "role": "Support",
+   "photo": "img/players/107454956790371682.png"
+  },
+  "Kiin": {
+   "team": "Gen.G",
+   "role": "Top",
+   "photo": "img/players/99566404532924465.png"
+  },
+  "Canyon": {
+   "team": "Gen.G",
+   "role": "Jungle",
+   "photo": "img/players/100725844994345151.png"
+  },
+  "Delight": {
+   "team": "Hanwha Life Esports",
+   "role": "Support",
+   "photo": "img/players/105501709748188393.png"
+  },
+  "Cracker": {
+   "team": "Hanwha Life Esports",
+   "role": "Mid",
+   "photo": "img/players/115740899104327635.png"
+  },
+  "Valiant": {
+   "team": "Hanwha Life Esports",
+   "role": "Mid",
+   "photo": "img/players/115740899171305432.png"
+  },
+  "Panther": {
+   "team": "Hanwha Life Esports",
+   "role": "Top",
+   "photo": "img/players/115807595873361833.png"
+  },
+  "Kanavi": {
+   "team": "Hanwha Life Esports",
+   "role": "Jungle",
+   "photo": "img/players/101671284628761661.png"
+  },
+  "Gumayusi": {
+   "team": "Hanwha Life Esports",
+   "role": "Bot",
+   "photo": "img/players/103495716775975785.png"
+  },
+  "Bluffing": {
+   "team": "Hanwha Life Esports",
+   "role": "Support",
+   "photo": "img/players/113740952132760566.png"
+  },
+  "Jackal": {
+   "team": "Hanwha Life Esports",
+   "role": "Jungle",
+   "photo": "img/players/113740953522201854.png"
+  },
+  "Pyeonsik": {
+   "team": "Hanwha Life Esports",
+   "role": "Bot",
+   "photo": "img/players/113740949736514801.png"
+  },
+  "Zeka": {
+   "team": "Hanwha Life Esports",
+   "role": "Mid",
+   "photo": "img/players/103478281361900912.png"
+  },
+  "Zeus": {
+   "team": "Hanwha Life Esports",
+   "role": "Top",
+   "photo": "img/players/105320680474347057.png"
+  },
+  "Guardian": {
+   "team": "T1",
+   "role": "Top",
+   "photo": "img/players/115643633313408264.png"
+  },
+  "Haetae": {
+   "team": "T1",
+   "role": "Top",
+   "photo": "img/players/113560604011392262.png"
+  },
+  "Carim": {
+   "team": "T1",
+   "role": "Jungle",
+   "photo": "img/players/108205131230834705.png"
+  },
+  "Guti": {
+   "team": "T1",
+   "role": "Mid",
+   "photo": "img/players/109523134874809981.png"
+  },
+  "Cypher": {
+   "team": "T1",
+   "role": "Bot",
+   "photo": "img/players/108205155000821521.png"
+  },
+  "Eclipse": {
+   "team": "T1",
+   "role": "Bot",
+   "photo": "img/players/116884197729505782.png"
+  },
+  "Jinbeom": {
+   "team": "T1",
+   "role": "Bot",
+   "photo": "img/players/111658292000001586.png"
+  },
+  "Cloud ": {
+   "team": "T1",
+   "role": "Support",
+   "photo": "img/players/111658337799244461.png"
+  },
+  "Painter": {
+   "team": "T1",
+   "role": "Jungle",
+   "photo": "img/players/115643633228772231.png"
+  },
+  "Peyz": {
+   "team": "T1",
+   "role": "Bot",
+   "photo": "img/players/107492068702410338.png"
+  },
+  "Doran": {
+   "team": "T1",
+   "role": "Top",
+   "photo": "img/players/102186485482484390.png"
+  },
+  "Faker": {
+   "team": "T1",
+   "role": "Mid",
+   "photo": "img/players/98767991747728851.png"
+  },
+  "Oner": {
+   "team": "T1",
+   "role": "Jungle",
+   "photo": "img/players/105320682452092471.png"
+  },
+  "Keria": {
+   "team": "T1",
+   "role": "Support",
+   "photo": "img/players/103495716561790834.png"
+  },
+  "ShowMaker": {
+   "team": "Dplus KIA",
+   "role": "Mid",
+   "photo": "img/players/100725844988653773.png"
+  },
+  "Wayne": {
+   "team": "Dplus KIA",
+   "role": "Bot",
+   "photo": "img/players/105501707243664614.png"
+  },
+  "Jaehyuk": {
+   "team": "Dplus KIA",
+   "role": "Top",
+   "photo": "img/players/113543956179181753.png"
+  },
+  "Garden": {
+   "team": "Dplus KIA",
+   "role": "Mid",
+   "photo": "img/players/112822770322732675.png"
+  },
+  "Smash": {
+   "team": "Dplus KIA",
+   "role": "Bot",
+   "photo": "img/players/108205129774185945.png"
+  },
+  "Career": {
+   "team": "Dplus KIA",
+   "role": "Support",
+   "photo": "img/players/108284721867904137.png"
+  },
+  "Loopy": {
+   "team": "Dplus KIA",
+   "role": "Support",
+   "photo": "img/players/107492028745476512.png"
+  },
+  "Nevid": {
+   "team": "Dplus KIA",
+   "role": "Top",
+   "photo": "img/players/114697949393287385.png"
+  },
+  "Siwoo": {
+   "team": "Dplus KIA",
+   "role": "Top",
+   "photo": "img/players/111658292064356964.png"
+  },
+  "Lucid": {
+   "team": "Dplus KIA",
+   "role": "Jungle",
+   "photo": "img/players/106267599829820917.png"
+  },
+  "Solid": {
+   "team": "Dplus KIA",
+   "role": "Jungle",
+   "photo": "img/players/116907472040667554.png"
+  },
+  "Breathe": {
+   "team": "Anyone's Legend",
+   "role": "Top",
+   "photo": "img/players/105516622825169657.png"
+  },
+  "Shanks": {
+   "team": "Anyone's Legend",
+   "role": "Mid",
+   "photo": "img/players/104287400430814502.png"
+  },
+  "Hope": {
+   "team": "Anyone's Legend",
+   "role": "Bot",
+   "photo": "img/players/99566404819916503.png"
+  },
+  "Kael": {
+   "team": "Anyone's Legend",
+   "role": "Support",
+   "photo": "img/players/105530584812980593.png"
+  },
+  "Tarzan": {
+   "team": "Anyone's Legend",
+   "role": "Jungle",
+   "photo": "img/players/99871276342823057.png"
+  },
+  "Bin": {
+   "team": "Bilibili Gaming",
+   "role": "Top",
+   "photo": "img/players/103478281356330346.png"
+  },
+  "ON": {
+   "team": "Bilibili Gaming",
+   "role": "Support",
+   "photo": "img/players/110547957837987327.png"
+  },
+  "Knight": {
+   "team": "Bilibili Gaming",
+   "role": "Mid",
+   "photo": "img/players/99566404803543690.png"
+  },
+  "Viper": {
+   "team": "Bilibili Gaming",
+   "role": "Bot",
+   "photo": "img/players/99871276340698623.png"
+  },
+  "Xun": {
+   "team": "Bilibili Gaming",
+   "role": "Jungle",
+   "photo": "img/players/105516152837078491.png"
+  },
+  "Wenbo": {
+   "team": "Bilibili Gaming",
+   "role": "Top",
+   "photo": "img/players/99566404805093717.png"
+  },
+  "Flandre": {
+   "team": "Bilibili Gaming",
+   "role": "Top",
+   "photo": "img/players/99566404812254466.png"
+  },
+  "Zhuo": {
+   "team": "Top Esports",
+   "role": "Support",
+   "photo": "img/players/105516599464787723.png"
+  },
+  "369": {
+   "team": "Top Esports",
+   "role": "Top",
+   "photo": "img/players/101388912796120370.png"
+  },
+  "Creme": {
+   "team": "Top Esports",
+   "role": "Mid",
+   "photo": "img/players/106368556422916908.png"
+  },
+  "Tian": {
+   "team": "Top Esports",
+   "role": "Jungle",
+   "photo": "img/players/99566404820654675.png"
+  },
+  "ZUIAN": {
+   "team": "Top Esports",
+   "role": "Top",
+   "photo": "img/players/112540645110902751.png"
+  },
+  "JackeyLove": {
+   "team": "Top Esports",
+   "role": "Bot",
+   "photo": "img/players/99566404823220763.png"
+  },
+  "TheShy": {
+   "team": "Invictus Gaming",
+   "role": "Top",
+   "photo": "img/players/99566404810113891.png"
+  },
+  "Assum": {
+   "team": "Invictus Gaming",
+   "role": "Bot",
+   "photo": "img/players/106368497875598272.png"
+  },
+  "Wei": {
+   "team": "Invictus Gaming",
+   "role": "Jungle",
+   "photo": "img/players/103461966880868232.png"
+  },
+  "Rookie": {
+   "team": "Invictus Gaming",
+   "role": "Mid",
+   "photo": "img/players/99566404811346612.png"
+  },
+  "Meiko": {
+   "team": "Invictus Gaming",
+   "role": "Support",
+   "photo": "img/players/98767991785832912.png"
+  },
+  "JiaQi": {
+   "team": "Invictus Gaming",
+   "role": "Bot",
+   "photo": "img/players/113662801804437510.png"
+  },
+  "Hans Sama": {
+   "team": "G2 Esports",
+   "role": "Bot",
+   "photo": "img/players/98767975961872793.png"
+  },
+  "SkewMond": {
+   "team": "G2 Esports",
+   "role": "Jungle",
+   "photo": "img/players/107128052280762804.png"
+  },
+  "Labrov": {
+   "team": "G2 Esports",
+   "role": "Support",
+   "photo": "img/players/102787200059605684.png"
+  },
+  "BrokenBlade": {
+   "team": "G2 Esports",
+   "role": "Top",
+   "photo": "img/players/99566406047571736.png"
+  },
+  "Caps": {
+   "team": "G2 Esports",
+   "role": "Mid",
+   "photo": "img/players/98767975968177297.png"
+  },
+  "Elyoya": {
+   "team": "Movistar KOI",
+   "role": "Jungle",
+   "photo": "img/players/103877629120745120.png"
+  },
+  "Jojopyun": {
+   "team": "Movistar KOI",
+   "role": "Mid",
+   "photo": "img/players/105504920899018806.png"
+  },
+  "Myrwn": {
+   "team": "Movistar KOI",
+   "role": "Top",
+   "photo": "img/players/110350224593953686.png"
+  },
+  "Supa": {
+   "team": "Movistar KOI",
+   "role": "Bot",
+   "photo": "img/players/103536968833612789.png"
+  },
+  "Alvaro": {
+   "team": "Movistar KOI",
+   "role": "Support",
+   "photo": "img/players/107564404490889053.png"
+  },
+  "NightSlayer": {
+   "team": "Movistar KOI",
+   "role": "Top",
+   "photo": "img/players/112455030195807491.png"
+  },
+  "Canna": {
+   "team": "Karmine Corp",
+   "role": "Top",
+   "photo": "img/players/103495716771322725.png"
+  },
+  "Yike": {
+   "team": "Karmine Corp",
+   "role": "Jungle",
+   "photo": "img/players/105537190986692036.png"
+  },
+  "Caliste": {
+   "team": "Karmine Corp",
+   "role": "Bot",
+   "photo": "img/players/109461265532592848.png"
+  },
+  "kyeahoo": {
+   "team": "Karmine Corp",
+   "role": "Mid",
+   "photo": "img/players/108205130709313212.png"
+  },
+  "Busio": {
+   "team": "Karmine Corp",
+   "role": "Support",
+   "photo": "img/players/106625308523122120.png"
+  },
+  "Quid": {
+   "team": "Team Liquid",
+   "role": "Mid",
+   "photo": "img/players/107492071007218117.png"
+  },
+  "Josedeodo": {
+   "team": "Team Liquid",
+   "role": "Jungle",
+   "photo": "img/players/99566408350815597.png"
+  },
+  "Morgan": {
+   "team": "Team Liquid",
+   "role": "Top",
+   "photo": "img/players/103103696693473944.png"
+  },
+  "CoreJJ": {
+   "team": "Team Liquid",
+   "role": "Support",
+   "photo": "img/players/98767991789638893.png"
+  },
+  "Yeon": {
+   "team": "Team Liquid",
+   "role": "Bot",
+   "photo": "img/players/105510944671654183.png"
+  },
+  "Saint": {
+   "team": "LYON",
+   "role": "Mid",
+   "photo": "img/players/107492059066783320.png"
+  },
+  "Dhokla": {
+   "team": "LYON",
+   "role": "Top",
+   "photo": "img/players/99322408701435122.png"
+  },
+  "Inspired": {
+   "team": "LYON",
+   "role": "Jungle",
+   "photo": "img/players/101389713966873995.png"
+  },
+  "Berserker": {
+   "team": "LYON",
+   "role": "Bot",
+   "photo": "img/players/105388936922706146.png"
+  },
+  "Isles": {
+   "team": "LYON",
+   "role": "Support",
+   "photo": "img/players/103103578076943629.png"
+  },
+  "Blaber": {
+   "team": "Cloud9",
+   "role": "Jungle",
+   "photo": "img/players/99101098218071815.png"
+  },
+  "Loki ": {
+   "team": "Cloud9",
+   "role": "Mid",
+   "photo": "img/players/108567314915334762.png"
+  },
+  "Tactical": {
+   "team": "Cloud9",
+   "role": "Bot",
+   "photo": "img/players/101383793877071109.png"
+  },
+  "Zven": {
+   "team": "Cloud9",
+   "role": "Bot",
+   "photo": "img/players/98767991801635485.png"
+  },
+  "Vulcan": {
+   "team": "Cloud9",
+   "role": "Support",
+   "photo": "img/players/99101098208825497.png"
+  },
+  "Thanatos": {
+   "team": "Cloud9",
+   "role": "Top",
+   "photo": "img/players/105501816646382923.png"
+  },
+  "APA": {
+   "team": "Cloud9",
+   "role": "Mid",
+   "photo": "img/players/105957619949286329.png"
+  },
+  "Dire": {
+   "team": "Team Secret Whales",
+   "role": "Mid",
+   "photo": "img/players/113661875306288886.png"
+  },
+  "Eddie": {
+   "team": "Team Secret Whales",
+   "role": "Bot",
+   "photo": "img/players/107251694749147163.png"
+  },
+  "Hizto": {
+   "team": "Team Secret Whales",
+   "role": "Jungle",
+   "photo": "img/players/113662600335177587.png"
+  },
+  "Bie": {
+   "team": "Team Secret Whales",
+   "role": "Support",
+   "photo": "img/players/107251574398720447.png"
+  },
+  "Pun": {
+   "team": "Team Secret Whales",
+   "role": "Top",
+   "photo": "img/players/107251636998679351.png"
+  },
+  "Rest": {
+   "team": "CTBC Flying Oyster",
+   "role": "Top",
+   "photo": "img/players/99566406483009320.png"
+  },
+  "Doggo": {
+   "team": "CTBC Flying Oyster",
+   "role": "Bot",
+   "photo": "img/players/104573129055417270.png"
+  },
+  "Kino": {
+   "team": "CTBC Flying Oyster",
+   "role": "Support",
+   "photo": "img/players/100668757020706361.png"
+  },
+  "POUT": {
+   "team": "CTBC Flying Oyster",
+   "role": "Mid",
+   "photo": "img/players/108443043135317375.png"
+  },
+  "Shad0w": {
+   "team": "CTBC Flying Oyster",
+   "role": "Jungle",
+   "photo": "img/players/102808727762706248.png"
+  },
+  "SanSan": {
+   "team": "MVK Esports",
+   "role": "Jungle",
+   "photo": "img/players/113628612494074867.png"
+  },
+  "Kratos": {
+   "team": "MVK Esports",
+   "role": "Top",
+   "photo": "img/players/109828407662355333.png"
+  },
+  "Gury": {
+   "team": "MVK Esports",
+   "role": "Jungle",
+   "photo": "img/players/109828289393968653.png"
+  },
+  "Harky": {
+   "team": "MVK Esports",
+   "role": "Bot",
+   "photo": "img/players/109828431746365782.png"
+  },
+  "SiuLoong": {
+   "team": "MVK Esports",
+   "role": "Support",
+   "photo": "img/players/112834609700454416.png"
+  },
+  "Chika": {
+   "team": "MVK Esports",
+   "role": "Mid",
+   "photo": "img/players/113628612585554951.png"
+  },
+  "Curse": {
+   "team": "LØS",
+   "role": "Jungle",
+   "photo": "img/players/110434822594728434.png"
+  },
+  "Zest": {
+   "team": "LØS",
+   "role": "Top",
+   "photo": "img/players/107492099069012459.png"
+  },
+  "Feisty": {
+   "team": "LØS",
+   "role": "Mid",
+   "photo": "img/players/107492030596737445.png"
+  },
+  "Duduhh": {
+   "team": "LØS",
+   "role": "Bot",
+   "photo": "img/players/112462169706118570.png"
+  },
+  "Ackerman": {
+   "team": "LØS",
+   "role": "Support",
+   "photo": "img/players/105506922297942200.png"
+  },
+  "Tutsz": {
+   "team": "FURIA",
+   "role": "Mid",
+   "photo": "img/players/103478281329357326.png"
+  },
+  "Ayu": {
+   "team": "FURIA",
+   "role": "Bot",
+   "photo": "img/players/108613483446049530.png"
+  },
+  "Tatu": {
+   "team": "FURIA",
+   "role": "Jungle",
+   "photo": "img/players/108494063372887027.png"
+  },
+  "Guigo": {
+   "team": "FURIA",
+   "role": "Top",
+   "photo": "img/players/100131733430915231.png"
+  },
+  "JoJo": {
+   "team": "FURIA",
+   "role": "Support",
+   "photo": "img/players/99566408211536727.png"
+  },
+  "Shini": {
+   "team": "FURIA",
+   "role": "Jungle",
+   "photo": "img/players/99566407782209288.png"
+  }
+ },
+ "ddragon": {
+  "version": "16.20.1",
+  "base": "https://ddragon.leagueoflegends.com/cdn/16.20.1/img",
+  "champions": {
+   "Aatrox": "Aatrox",
+   "Ahri": "Ahri",
+   "Akali": "Akali",
+   "Akshan": "Akshan",
+   "Alistar": "Alistar",
+   "Ambessa": "Ambessa",
+   "Amumu": "Amumu",
+   "Anivia": "Anivia",
+   "Annie": "Annie",
+   "Aphelios": "Aphelios",
+   "Ashe": "Ashe",
+   "Aurelion Sol": "AurelionSol",
+   "Aurora": "Aurora",
+   "Azir": "Azir",
+   "Bard": "Bard",
+   "Bel'Veth": "Belveth",
+   "Blitzcrank": "Blitzcrank",
+   "Brand": "Brand",
+   "Braum": "Braum",
+   "Briar": "Briar",
+   "Caitlyn": "Caitlyn",
+   "Camille": "Camille",
+   "Cassiopeia": "Cassiopeia",
+   "Cho'Gath": "Chogath",
+   "Corki": "Corki",
+   "Darius": "Darius",
+   "Diana": "Diana",
+   "Draven": "Draven",
+   "Dr. Mundo": "DrMundo",
+   "Ekko": "Ekko",
+   "Elise": "Elise",
+   "Evelynn": "Evelynn",
+   "Ezreal": "Ezreal",
+   "Fiddlesticks": "Fiddlesticks",
+   "Fiora": "Fiora",
+   "Fizz": "Fizz",
+   "Galio": "Galio",
+   "Gangplank": "Gangplank",
+   "Garen": "Garen",
+   "Gnar": "Gnar",
+   "Gragas": "Gragas",
+   "Graves": "Graves",
+   "Gwen": "Gwen",
+   "Hecarim": "Hecarim",
+   "Heimerdinger": "Heimerdinger",
+   "Hwei": "Hwei",
+   "Illaoi": "Illaoi",
+   "Irelia": "Irelia",
+   "Ivern": "Ivern",
+   "Janna": "Janna",
+   "Jarvan IV": "JarvanIV",
+   "Jax": "Jax",
+   "Jayce": "Jayce",
+   "Jhin": "Jhin",
+   "Jinx": "Jinx",
+   "Kai'Sa": "Kaisa",
+   "Kalista": "Kalista",
+   "Karma": "Karma",
+   "Karthus": "Karthus",
+   "Kassadin": "Kassadin",
+   "Katarina": "Katarina",
+   "Kayle": "Kayle",
+   "Kayn": "Kayn",
+   "Kennen": "Kennen",
+   "Kha'Zix": "Khazix",
+   "Kindred": "Kindred",
+   "Kled": "Kled",
+   "Kog'Maw": "KogMaw",
+   "K'Sante": "KSante",
+   "LeBlanc": "Leblanc",
+   "Lee Sin": "LeeSin",
+   "Leona": "Leona",
+   "Lillia": "Lillia",
+   "Lissandra": "Lissandra",
+   "Locke": "Locke",
+   "Lucian": "Lucian",
+   "Lulu": "Lulu",
+   "Lux": "Lux",
+   "Malphite": "Malphite",
+   "Malzahar": "Malzahar",
+   "Maokai": "Maokai",
+   "Master Yi": "MasterYi",
+   "Mel": "Mel",
+   "Milio": "Milio",
+   "Miss Fortune": "MissFortune",
+   "Wukong": "MonkeyKing",
+   "Mordekaiser": "Mordekaiser",
+   "Morgana": "Morgana",
+   "Naafiri": "Naafiri",
+   "Nami": "Nami",
+   "Nasus": "Nasus",
+   "Nautilus": "Nautilus",
+   "Neeko": "Neeko",
+   "Nidalee": "Nidalee",
+   "Nilah": "Nilah",
+   "Nocturne": "Nocturne",
+   "Nunu & Willump": "Nunu",
+   "Olaf": "Olaf",
+   "Orianna": "Orianna",
+   "Ornn": "Ornn",
+   "Pantheon": "Pantheon",
+   "Poppy": "Poppy",
+   "Pyke": "Pyke",
+   "Qiyana": "Qiyana",
+   "Quinn": "Quinn",
+   "Rakan": "Rakan",
+   "Rammus": "Rammus",
+   "Rek'Sai": "RekSai",
+   "Rell": "Rell",
+   "Renata Glasc": "Renata",
+   "Renekton": "Renekton",
+   "Rengar": "Rengar",
+   "Riven": "Riven",
+   "Rumble": "Rumble",
+   "Ryze": "Ryze",
+   "Samira": "Samira",
+   "Sejuani": "Sejuani",
+   "Senna": "Senna",
+   "Seraphine": "Seraphine",
+   "Sett": "Sett",
+   "Shaco": "Shaco",
+   "Shen": "Shen",
+   "Shyvana": "Shyvana",
+   "Singed": "Singed",
+   "Sion": "Sion",
+   "Sivir": "Sivir",
+   "Skarner": "Skarner",
+   "Smolder": "Smolder",
+   "Sona": "Sona",
+   "Soraka": "Soraka",
+   "Swain": "Swain",
+   "Sylas": "Sylas",
+   "Syndra": "Syndra",
+   "Tahm Kench": "TahmKench",
+   "Taliyah": "Taliyah",
+   "Talon": "Talon",
+   "Taric": "Taric",
+   "Teemo": "Teemo",
+   "Thresh": "Thresh",
+   "Tristana": "Tristana",
+   "Trundle": "Trundle",
+   "Tryndamere": "Tryndamere",
+   "Twisted Fate": "TwistedFate",
+   "Twitch": "Twitch",
+   "Udyr": "Udyr",
+   "Urgot": "Urgot",
+   "Varus": "Varus",
+   "Vayne": "Vayne",
+   "Veigar": "Veigar",
+   "Vel'Koz": "Velkoz",
+   "Vex": "Vex",
+   "Vi": "Vi",
+   "Viego": "Viego",
+   "Viktor": "Viktor",
+   "Vladimir": "Vladimir",
+   "Volibear": "Volibear",
+   "Warwick": "Warwick",
+   "Xayah": "Xayah",
+   "Xerath": "Xerath",
+   "Xin Zhao": "XinZhao",
+   "Yasuo": "Yasuo",
+   "Yone": "Yone",
+   "Yorick": "Yorick",
+   "Yunara": "Yunara",
+   "Yuumi": "Yuumi",
+   "Zaahen": "Zaahen",
+   "Zac": "Zac",
+   "Zed": "Zed",
+   "Zeri": "Zeri",
+   "Ziggs": "Ziggs",
+   "Zilean": "Zilean",
+   "Zoe": "Zoe",
+   "Zyra": "Zyra"
+  }
+ }
+}

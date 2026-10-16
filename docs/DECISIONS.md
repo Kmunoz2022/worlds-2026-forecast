@@ -169,6 +169,7 @@ Grading only means something if the predictions were provably made first.
 
   I tested the motion with simulated pointer input. That caught two bugs: a spring could get a negative time step, and a swipe could start half-initialized.
 - **Tests and CI:** pytest covers the series maths (only valid final scores, probabilities sum to 1, live updates consistent with pre-game odds), grading (latest prediction before the start, teams in either order, inputs never modified), team-name matching, the live model (the browser/CI version matches the Python one) and the published files. They run on every push, along with the append-only ledger check.
+- **Images:** team logos, player photos, and champion and item icons, so names aren't the only cue. Logos and photos are downloaded once and shrunk into the site (`scripts/fetch_assets.py`), so the site doesn't depend on another server for them; champion and item icons come from Riot's Data Dragon CDN. Six team logos are white and vanish on the light theme, so the light theme swaps in each team's dark logo, or draws a dark silhouette when there isn't one. The live card now has a full scoreboard: champion, level, items, K/D/A, CS and gold per player, with dead players greyed out. It collapses to a compact layout when its column is narrow (a CSS container query), not just on small screens.
 - **Secrets:** the live-feed API key (a public web-client key) is kept out of the code and read from an environment variable or a git-ignored local file.
 - **Stack:** Python 3.13, pandas, NumPy, scikit-learn, Parquet.
 

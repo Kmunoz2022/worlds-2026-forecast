@@ -117,4 +117,5 @@ The live feed needs the public API key that lolesports.com uses (listed in the [
 
 - Match data: [Oracle's Elixir](https://oracleselixir.com) (Tim Sevenhuysen).
 - Live data: the unofficial LoL Esports API.
-- This project isn't affiliated with or endorsed by Riot Games.
+- Team logos and player photos: LoL Esports. Champion and item icons: Riot's [Data Dragon](https://developer.riotgames.com/docs/lol#data-dragon).
+- This project isn't affiliated with Riot Games. It isn't endorsed by Riot Games and doesn't reflect the views or opinions of Riot Games or anyone officially involved in producing or managing Riot Games properties. Riot Games and all associated properties are trademarks or registered trademarks of Riot Games, Inc.

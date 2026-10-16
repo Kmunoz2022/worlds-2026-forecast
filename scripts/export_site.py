@@ -158,6 +158,8 @@ def main():
         "live": live_section(cfg, tg),
         "crystal_tracker": read_json(PROCESSED_DIR / "crystal_tracker.json"),
         "ledger": read_json(PROCESSED_DIR / "ledger_graded.json"),
+        # Team logos, player photos and the Data Dragon version (scripts/fetch_assets.py).
+        "assets": read_json(ROOT / "config" / "team_assets.json"),
     }
     SITE_DIR.mkdir(exist_ok=True)
     (SITE_DIR / "data.json").write_text(json.dumps(data, ensure_ascii=False, separators=(",", ":")))
