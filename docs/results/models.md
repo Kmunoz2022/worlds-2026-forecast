@@ -7,30 +7,30 @@ Chosen model: **LR full (intl x5) +cal**
 ```
                                                               n  accuracy  log_loss  brier
 set                             model                                                     
-all games 2023+                 Elo                       40998     0.631     0.644  0.226
-                                LR basic                  40998     0.630     0.644  0.226
-                                LR full                   40998     0.649     0.624  0.217
-                                LR full (intl x5)         40998     0.648     0.625  0.218
-                                GBDT full                 40998     0.646     0.625  0.218
-                                GBDT full (intl x5)       40998     0.644     0.626  0.219
-                                Elo +cal                  40998     0.631     0.644  0.226
-                                LR basic +cal             40998     0.630     0.646  0.227
-                                LR full +cal              40998     0.649     0.625  0.218
-                                LR full (intl x5) +cal    40998     0.648     0.626  0.218
-                                GBDT full +cal            40998     0.646     0.627  0.219
-                                GBDT full (intl x5) +cal  40998     0.644     0.631  0.220
-cross-league 2023+              Elo                        4226     0.678     0.603  0.206
-                                LR basic                   4226     0.677     0.609  0.209
-                                LR full                    4226     0.689     0.594  0.203
-                                LR full (intl x5)          4226     0.695     0.590  0.201
-                                GBDT full                  4226     0.685     0.594  0.203
-                                GBDT full (intl x5)        4226     0.688     0.594  0.203
-                                Elo +cal                   4226     0.678     0.600  0.206
-                                LR basic +cal              4226     0.677     0.603  0.208
-                                LR full +cal               4226     0.689     0.592  0.202
-                                LR full (intl x5) +cal     4226     0.695     0.590  0.201
-                                GBDT full +cal             4226     0.685     0.595  0.204
-                                GBDT full (intl x5) +cal   4226     0.688     0.597  0.205
+all games 2023+                 Elo                       41045     0.631     0.644  0.226
+                                LR basic                  41045     0.630     0.644  0.226
+                                LR full                   41045     0.649     0.624  0.218
+                                LR full (intl x5)         41045     0.648     0.625  0.218
+                                GBDT full                 41045     0.646     0.625  0.218
+                                GBDT full (intl x5)       41045     0.644     0.627  0.219
+                                Elo +cal                  41045     0.631     0.645  0.227
+                                LR basic +cal             41045     0.630     0.646  0.227
+                                LR full +cal              41045     0.649     0.625  0.218
+                                LR full (intl x5) +cal    41045     0.648     0.626  0.218
+                                GBDT full +cal            41045     0.646     0.627  0.219
+                                GBDT full (intl x5) +cal  41045     0.644     0.631  0.221
+cross-league 2023+              Elo                        4269     0.676     0.605  0.207
+                                LR basic                   4269     0.676     0.611  0.210
+                                LR full                    4269     0.687     0.596  0.204
+                                LR full (intl x5)          4269     0.692     0.592  0.202
+                                GBDT full                  4269     0.683     0.596  0.204
+                                GBDT full (intl x5)        4269     0.686     0.596  0.204
+                                Elo +cal                   4269     0.676     0.601  0.207
+                                LR basic +cal              4269     0.676     0.604  0.208
+                                LR full +cal               4269     0.687     0.594  0.203
+                                LR full (intl x5) +cal     4269     0.692     0.592  0.202
+                                GBDT full +cal             4269     0.683     0.597  0.205
+                                GBDT full (intl x5) +cal   4269     0.686     0.599  0.206
 VALIDATION: MSI/EWC/FST 2023-25 Elo                         321     0.645     0.670  0.236
                                 LR basic                    321     0.607     0.672  0.237
                                 LR full                     321     0.648     0.658  0.230
@@ -125,7 +125,7 @@ bin
   "model": "LR full (intl x5)",
   "calibrated": true,
   "calibration_slope": 0.9000000000000004,
-  "trained_through": "2026-10-13",
+  "trained_through": "2026-10-16",
   "features": [
     "elo_logit",
     "elo_league_diff",
@@ -151,28 +151,28 @@ bin
     "playoffs"
   ],
   "coefficients": {
-    "form_gspd_diff": 0.3556,
-    "form_win_diff": -0.3359,
-    "form_tower_diff_diff": 0.3041,
-    "form_resid_diff": 0.2187,
-    "elo_logit": 0.2117,
-    "elo_league_diff": 0.1479,
-    "elo_team_diff": 0.1424,
-    "log_games_diff": 0.1342,
-    "form_baron_diff_diff": -0.1062,
-    "region_logit": 0.0678,
-    "log_games_min": 0.0411,
-    "series_lead": 0.0387,
-    "form_firstblood_diff": -0.0386,
-    "form_kd_pm_diff": 0.014,
-    "major_intl": 0.0099,
-    "playoffs": -0.0086,
-    "rest_days_diff": 0.0084,
-    "cross_league": -0.0067,
-    "series_game_no": -0.006,
-    "both_major": 0.0024,
-    "form_minutes_diff": 0.0009,
-    "form_dragon_diff_diff": -0.0004
+    "form_gspd_diff": 0.3568,
+    "form_win_diff": -0.3211,
+    "form_tower_diff_diff": 0.3034,
+    "form_resid_diff": 0.2113,
+    "elo_logit": 0.2087,
+    "elo_league_diff": 0.1457,
+    "elo_team_diff": 0.14,
+    "log_games_diff": 0.134,
+    "form_baron_diff_diff": -0.1075,
+    "region_logit": 0.0699,
+    "form_firstblood_diff": -0.0392,
+    "log_games_min": 0.0385,
+    "series_lead": 0.0375,
+    "major_intl": 0.0118,
+    "form_kd_pm_diff": 0.0096,
+    "rest_days_diff": 0.0096,
+    "cross_league": -0.0091,
+    "series_game_no": -0.0079,
+    "playoffs": -0.0074,
+    "form_dragon_diff_diff": -0.0011,
+    "form_minutes_diff": 0.0007,
+    "both_major": 0.0001
   }
 }
 ```

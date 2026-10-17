@@ -37,16 +37,23 @@ def api_key() -> str:
     return key
 
 
-def _get(url):
+def _get(url, tries=3):
+    """GET with the API key. Timeouts and dropped connections are retried
+    (the feed occasionally stalls); 204/404 mean "nothing there"."""
     req = urllib.request.Request(url, headers={"x-api-key": api_key(), "User-Agent": "lolpred-worlds-forecast"})
-    try:
-        with urllib.request.urlopen(req, timeout=20) as r:
-            body = r.read()
-            return json.loads(body) if body else None
-    except urllib.error.HTTPError as e:
-        if e.code in (204, 404):
-            return None
-        raise
+    for attempt in range(tries):
+        try:
+            with urllib.request.urlopen(req, timeout=20) as r:
+                body = r.read()
+                return json.loads(body) if body else None
+        except urllib.error.HTTPError as e:
+            if e.code in (204, 404):
+                return None
+            raise
+        except (TimeoutError, urllib.error.URLError, ConnectionError):
+            if attempt == tries - 1:
+                raise
+            time.sleep(2 * (attempt + 1))
 
 
 def ts(dt: datetime) -> str:

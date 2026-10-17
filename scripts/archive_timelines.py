@@ -120,7 +120,11 @@ def main():
             for g in (det or {}).get("match", {}).get("games", []):
                 if g["state"] != "completed":
                     continue
-                print(f"{e['startTime'][:10]} {league} {teams} game {g['number']}: {archive_game(e, g)}", flush=True)
+                try:
+                    status = archive_game(e, g)
+                except OSError as err:  # network trouble: this game is retried on the next run
+                    status = f"skipped ({err.__class__.__name__}), will retry next run"
+                print(f"{e['startTime'][:10]} {league} {teams} game {g['number']}: {status}", flush=True)
 
 
 if __name__ == "__main__":

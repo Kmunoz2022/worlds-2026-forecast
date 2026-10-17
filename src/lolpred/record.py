@@ -332,16 +332,19 @@ def game_time(t: float, pauses: list) -> float:
     return t - sum(max(0.0, min(t, pe) - ps) for ps, pe in pauses)
 
 
-def _state(game_id, start, t):
+def _paused(game_id, start, t):
+    """Paused at wall-clock offset t? A stretch with no frames counts too: during
+    some pauses the feed sends nothing (3.5 minutes in one Worlds game), and the
+    official game length matched only once those gaps were removed."""
     w = livefeed.window(game_id, start + timedelta(seconds=t))
-    return w["frames"][-1]["gameState"] if w else None
+    return w is None or w["frames"][-1]["gameState"] == "paused"
 
 
 def _refine(game_id, start, lo, hi, paused_at_hi):
     """Boundary between lo and hi (seconds) to ~10 s, by bisection."""
     while hi - lo > 10:
         mid = (lo + hi) / 2
-        if (_state(game_id, start, mid) == "paused") == paused_at_hi:
+        if _paused(game_id, start, mid) == paused_at_hi:
             hi = mid
         else:
             lo = mid
@@ -350,8 +353,8 @@ def _refine(game_id, start, lo, hi, paused_at_hi):
 
 def scan_game(game: dict) -> dict:
     """One sample per wall-clock minute, plus pauses found to ~10 s. The feed
-    has no game clock but marks paused frames; pauses shorter than the gap
-    between samples can be missed (at most a minute)."""
+    has no game clock but marks paused frames (or sends none during a pause);
+    pauses shorter than the gap between samples can be missed (at most a minute)."""
     gid = game["game_id"]
     start, end = livefeed.parse_ts(game["start"]), livefeed.parse_ts(game["end"])
     total = (end - start).total_seconds()
@@ -360,7 +363,7 @@ def scan_game(game: dict) -> dict:
         w = livefeed.window(gid, start + timedelta(minutes=m))
         samples.append((m * 60, w["frames"][-1] if w else None))
         m += 1
-    paused = [f is not None and f["gameState"] == "paused" for _, f in samples]
+    paused = [f is None or f["gameState"] == "paused" for _, f in samples]
     pauses, i = [], 0
     while i < len(samples):
         if not paused[i]:

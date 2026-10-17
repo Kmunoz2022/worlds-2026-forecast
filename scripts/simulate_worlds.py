@@ -20,10 +20,12 @@ import pandas as pd  # noqa: E402
 from lolpred.config import PROCESSED_DIR  # noqa: E402
 from lolpred.predict import MatchPredictor  # noqa: E402
 from lolpred.series import KAPPA, score_distribution, series_win_prob  # noqa: E402
+from lolpred.splits import worlds_start  # noqa: E402
 from lolpred.tournament import RECORDS, pickem, setup_from_config, simulate  # noqa: E402
 
 CONFIG = ROOT / "config" / "worlds2026.json"
 OUT_JSON = PROCESSED_DIR / "worlds2026_sim.json"
+SEASON = 2026
 RESULTS_MD = ROOT / "docs" / "results" / "worlds2026_sim.md"
 
 
@@ -47,6 +49,25 @@ def series_model_check():
             rows.append({"format": f"Bo{bo}", "series": int(sel.sum()), "model": name,
                          "predicted sweep %": round(100 * pred, 1), "actual sweep %": round(100 * actual, 1)})
     return pd.DataFrame(rows)
+
+
+def play_in_played(cfg):
+    """Play-In series already played, oldest first, from the official data:
+    (team a, team b, a wins, b wins) with config team names."""
+    s = pd.read_parquet(PROCESSED_DIR / "series.parquet")
+    m = pd.read_parquet(PROCESSED_DIR / "matches.parquet")
+    start = worlds_start(m, SEASON)
+    by_id = {v["teamid"]: n for n, v in cfg["teams"].items()}
+    pi = {t for t in cfg["play_in"] if t != "CBLOL_2ND"} | set(cfg["cblol_2nd"][:1])
+    if start is None:
+        return []
+    s = s[(s["league"] == "WLDs") & (s["season"] == SEASON) & (s["start"] >= start)].sort_values("start")
+    out = []
+    for _, r in s.iterrows():
+        a, b = by_id.get(r["team_a"]), by_id.get(r["team_b"])
+        if a in pi and b in pi:
+            out.append((a, b, int(r["a_wins"]), int(r["b_wins"])))
+    return out
 
 
 def main():
@@ -74,6 +95,12 @@ def main():
     print("\n== team strength\n", info[["region", "strength", "team_rating", "league_offset", "games",
                                         "avg_game_win%"]].round(1).to_string())
 
+    played = play_in_played(cfg)
+    if played:
+        print("\n== Play-In results so far (kept as played)")
+        for a, b, wa, wb in played:
+            print(f"   {a} {wa}-{wb} {b}")
+
     scenarios = {}
     for cand in cfg["cblol_2nd"]:
         others = [c for c in cfg["cblol_2nd"] if c != cand]
@@ -81,7 +108,8 @@ def main():
         play_in, pools, round1 = st["play_in"], st["pools"], st["round1"]
         totals = []
         counts = simulate(P, play_in, pools, pi_slot, region, n_sims=args.sims, seed=0,
-                          play_in_round1=round1, game_totals=totals)
+                          play_in_round1=round1, game_totals=totals,
+                          play_in_played=[(idx[a], idx[b], wa, wb) for a, b, wa, wb in played])
         rows = []
         for n in names:
             if n in others:

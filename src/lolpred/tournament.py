@@ -36,20 +36,33 @@ def play(P, a, b, best_of, rng, tally=None):
     return (a, b) if wa > wb else (b, a)
 
 
-def play_in(P, teams, rng, round1=None, tally=None):
+def play_in(P, teams, rng, round1=None, tally=None, played=None):
     """Double elimination, all Bo5: two openers, winners' match, elimination
     match, losers' final, then a grand final between the winners' bracket
     winner and the losers' bracket winner. round1: [(a, b), (c, d)] if known,
-    else drawn at random."""
+    else drawn at random. played: results so far, in that order, as
+    (a, b, a_wins, b_wins); those matches keep their real result."""
+    played = list(played or [])
     if round1 is None:
         t = list(rng.permutation(teams))
         round1 = [(t[0], t[3]), (t[1], t[2])]
-    w1, l1 = play(P, *round1[0], 5, rng, tally)
-    w2, l2 = play(P, *round1[1], 5, rng, tally)
-    ub_w, ub_l = play(P, w1, w2, 5, rng, tally)
-    lb_w, _ = play(P, l1, l2, 5, rng, tally)
-    lbf_w, _ = play(P, ub_l, lb_w, 5, rng, tally)
-    gf_w, _ = play(P, ub_w, lbf_w, 5, rng, tally)
+
+    def match(a, b):
+        if played:
+            pa, pb, wa, wb = played.pop(0)
+            if {pa, pb} != {a, b}:
+                raise ValueError(f"Play-In result {pa} vs {pb} doesn't fit the bracket (expected {a} vs {b})")
+            if tally is not None:
+                tally.append((pa, pb, wa, wb))
+            return (pa, pb) if wa > wb else (pb, pa)
+        return play(P, a, b, 5, rng, tally)
+
+    w1, l1 = match(*round1[0])
+    w2, l2 = match(*round1[1])
+    ub_w, ub_l = match(w1, w2)
+    lb_w, _ = match(l1, l2)
+    lbf_w, _ = match(ub_l, lb_w)
+    gf_w, _ = match(ub_w, lbf_w)
     return gf_w
 
 
@@ -122,7 +135,7 @@ def knockouts(P, records, region, rng, tally=None):
 
 
 def simulate(P, play_in_teams, pools, pi_slot, region, n_sims=20000, seed=0, play_in_round1=None,
-             game_totals=None, outcomes=None):
+             game_totals=None, outcomes=None, play_in_played=None):
     """pools[4] must contain `pi_slot`, a placeholder index replaced each sim by
     the Play-In winner. Returns per-team counts and Swiss-record counts.
     If `game_totals` is a list, appends {stage: games played} for each sim.
@@ -132,7 +145,7 @@ def simulate(P, play_in_teams, pools, pi_slot, region, n_sims=20000, seed=0, pla
     counts = defaultdict(Counter)
     for _ in range(n_sims):
         t_pi, t_sw, t_ko = [], [], []
-        pi_winner = play_in(P, play_in_teams, rng, play_in_round1, t_pi)
+        pi_winner = play_in(P, play_in_teams, rng, play_in_round1, t_pi, play_in_played)
         counts[pi_winner]["play_in_win"] += 1
         sim_pools = {k: [pi_winner if t == pi_slot else t for t in v] for k, v in pools.items()}
         rec = swiss(P, sim_pools, region, rng, t_sw)
