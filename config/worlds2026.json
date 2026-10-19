@@ -2,7 +2,7 @@
   "_notes": [
     "Teams confirmed 2026-09-30; seeds, Play-In and CBLOL #2 (FURIA) confirmed 2026-10-13. Format from web search (Play-In double-elim Bo5, 1 advances; 16-team Swiss, 3 wins in / 3 losses out, Bo1 except Bo3 for qualification/elimination matches, no same-region round 1; 8-team single-elim Bo5 knockouts).",
     "Play-In confirmed 2026-10-13: Cloud9, Karmine Corp, MVK, FURIA. Round 1: C9 vs KC, FURIA vs MVK; grand final = winners' bracket winner vs losers' bracket winner.",
-    "UNCONFIRMED: Swiss pools (built from seeds following the 2025 pool structure). Edit here when the draw is out, then rerun scripts/simulate_worlds.py.",
+    "Swiss pools confirmed by the official round-1 draw (2026-10-19): swiss_round1 lists the drawn pairs (PLAY_IN_WINNER = Karmine Corp). Later rounds are paired by record; results come from ledger/results.jsonl.",
     "cblol_2nd lists the candidates for the CBLOL #2 slot; the simulator runs one scenario per candidate.",
     "roster_overrides: Worlds lineup changes the data can't see yet. TES top laner 369 returns (announced; added 2026-10-13); ZUIAN played Apr-Sep."
   ],
@@ -152,5 +152,39 @@
     "Top Esports": {
       "top": "369"
     }
-  }
+  },
+  "swiss_round1": [
+    [
+      "Gen.G",
+      "Invictus Gaming"
+    ],
+    [
+      "Hanwha Life Esports",
+      "Top Esports"
+    ],
+    [
+      "Bilibili Gaming",
+      "Movistar KOI"
+    ],
+    [
+      "Anyone's Legend",
+      "PLAY_IN_WINNER"
+    ],
+    [
+      "G2 Esports",
+      "Dplus KIA"
+    ],
+    [
+      "Team Liquid",
+      "CTBC Flying Oyster"
+    ],
+    [
+      "LØS",
+      "T1"
+    ],
+    [
+      "Team Secret Whales",
+      "LYON"
+    ]
+  ]
 }

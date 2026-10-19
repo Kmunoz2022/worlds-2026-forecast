@@ -20,12 +20,11 @@ import pandas as pd  # noqa: E402
 from lolpred.config import PROCESSED_DIR  # noqa: E402
 from lolpred.predict import MatchPredictor  # noqa: E402
 from lolpred.series import KAPPA, score_distribution, series_win_prob  # noqa: E402
-from lolpred.splits import worlds_start  # noqa: E402
+from lolpred.record import RESULTS, read_jsonl  # noqa: E402
 from lolpred.tournament import RECORDS, pickem, setup_from_config, simulate  # noqa: E402
 
 CONFIG = ROOT / "config" / "worlds2026.json"
 OUT_JSON = PROCESSED_DIR / "worlds2026_sim.json"
-SEASON = 2026
 RESULTS_MD = ROOT / "docs" / "results" / "worlds2026_sim.md"
 
 
@@ -51,23 +50,25 @@ def series_model_check():
     return pd.DataFrame(rows)
 
 
-def play_in_played(cfg):
-    """Play-In series already played, oldest first, from the official data:
-    (team a, team b, a wins, b wins) with config team names."""
-    s = pd.read_parquet(PROCESSED_DIR / "series.parquet")
-    m = pd.read_parquet(PROCESSED_DIR / "matches.parquet")
-    start = worlds_start(m, SEASON)
-    by_id = {v["teamid"]: n for n, v in cfg["teams"].items()}
-    pi = {t for t in cfg["play_in"] if t != "CBLOL_2ND"} | set(cfg["cblol_2nd"][:1])
-    if start is None:
-        return []
-    s = s[(s["league"] == "WLDs") & (s["season"] == SEASON) & (s["start"] >= start)].sort_values("start")
-    out = []
-    for _, r in s.iterrows():
-        a, b = by_id.get(r["team_a"]), by_id.get(r["team_b"])
-        if a in pi and b in pi:
-            out.append((a, b, int(r["a_wins"]), int(r["b_wins"])))
-    return out
+def played_series():
+    """Worlds series already played, oldest first: ledger/results.jsonl, which the
+    scheduled job fills from the official feed after every match (the CSV can be
+    days behind)."""
+    return sorted(read_jsonl(RESULTS), key=lambda r: r["start"])
+
+
+def swiss_state(results, idx):
+    """Played Swiss series by pair, and each round's pairings (a team's n-th
+    Swiss series is in round n)."""
+    by_pair, rounds, n = {}, {}, {}
+    for r in results:
+        if r["stage"] != "Swiss":
+            continue
+        a, b = idx[r["team_a"]], idx[r["team_b"]]
+        by_pair[frozenset((a, b))] = (a, b, r["a_wins"], r["b_wins"])
+        rounds.setdefault(n.get(a, 0), []).append((a, b))
+        n[a], n[b] = n.get(a, 0) + 1, n.get(b, 0) + 1
+    return by_pair, rounds
 
 
 def main():
@@ -95,11 +96,13 @@ def main():
     print("\n== team strength\n", info[["region", "strength", "team_rating", "league_offset", "games",
                                         "avg_game_win%"]].round(1).to_string())
 
-    played = play_in_played(cfg)
-    if played:
-        print("\n== Play-In results so far (kept as played)")
-        for a, b, wa, wb in played:
-            print(f"   {a} {wa}-{wb} {b}")
+    results = played_series()
+    played = [(r["team_a"], r["team_b"], r["a_wins"], r["b_wins"]) for r in results if r["stage"] == "Play-In"]
+    sw_results, sw_rounds = swiss_state(results, idx)
+    if results:
+        print("\n== Results so far (kept as played)")
+        for r in results:
+            print(f"   {r['stage']}: {r['team_a']} {r['a_wins']}-{r['b_wins']} {r['team_b']}")
 
     scenarios = {}
     for cand in cfg["cblol_2nd"]:
@@ -109,7 +112,8 @@ def main():
         totals = []
         counts = simulate(P, play_in, pools, pi_slot, region, n_sims=args.sims, seed=0,
                           play_in_round1=round1, game_totals=totals,
-                          play_in_played=[(idx[a], idx[b], wa, wb) for a, b, wa, wb in played])
+                          play_in_played=[(idx[a], idx[b], wa, wb) for a, b, wa, wb in played],
+                          swiss_round1=st["swiss_round1"], swiss_results=sw_results, swiss_known_pairs=sw_rounds)
         rows = []
         for n in names:
             if n in others:

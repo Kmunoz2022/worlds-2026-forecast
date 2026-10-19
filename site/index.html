@@ -512,7 +512,7 @@ function pagePickem() {
         </thead>
         <tbody>${rows}</tbody>
       </table></div>
-      <p class="note">Play-In teams' odds include having to win the Play-In first. Swiss pools are built from the confirmed seeds following last year's pool structure; the official round-1 draw isn't out yet. The pick'em format is assumed to be Riot's usual 2 / 2 / 5 picks.</p>
+      <p class="note">Round 1 uses the official draw. Later rounds are paired by record, as in the real Swiss stage, and every series already played keeps its real result. Karmine Corp won the Play-In. The pick'em format is assumed to be Riot's usual 2 / 2 / 5 picks.</p>
     </div>
   </section>`;
 }
@@ -919,7 +919,7 @@ function pageAbout() {
     <section><h3>Series and tournaments</h3><p>Games in a series aren't independent: sweeps happen far more often than coin-flip maths says. Each series draws a slightly different edge for the matchup, which matches real Bo3 and Bo5 score patterns. The tournament is simulated ${D.meta.sims.toLocaleString()} times: Play-In, then Swiss, then knockouts.</p></section>
     <section><h3>What it doesn't know</h3><ul>
       <li>Roster news after the last game played. Top Esports' top laner 369 returning is not in the data.</li>
-      <li>The official Swiss round-1 draw and knockout seeding rules. Pools follow last year's structure.</li>
+      <li>Knockout seeding rules. The bracket follows last year's structure.</li>
       <li>Scrim results, patch changes for Worlds, and draft. It doesn't use betting odds.</li>
     </ul></section>
     <section><h3>Accuracy</h3><p>On the last four Worlds the model picked ${pct(D.model_record.overall[0].accuracy, 1)} of winners, with well-calibrated probabilities. That's close to the ceiling for pre-game predictions at Worlds, where many matches are near coin flips. See Model record.</p></section>

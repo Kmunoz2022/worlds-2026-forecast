@@ -33,28 +33,28 @@ Cloud9                 LCS    1484.8    382           27.7
 ```
                     region  play_in_win  reach_swiss   3-0   3-1   3-2   2-3   1-3   0-3  qualify  semis  final  champion
 team                                                                                                                     
-Gen.G                  LCK          NaN        100.0  47.7  33.7  14.6   2.5   1.2   0.3     96.0   82.2   60.1      42.5
-Dplus KIA              LCK          NaN        100.0  28.5  35.6  23.7   7.4   3.7   1.1     87.8   66.2   35.5      16.4
-T1                     LCK          NaN        100.0  27.4  36.0  24.0   7.3   4.2   1.2     87.3   65.3   34.7      16.1
-Hanwha Life Esports    LCK          NaN        100.0  27.5  34.6  24.2   8.1   4.5   1.1     86.4   62.8   31.4      13.8
-Bilibili Gaming        LPL          NaN        100.0  20.3  33.4  27.0  11.3   6.0   2.1     80.6   38.6   18.0       7.0
-Anyone's Legend        LPL          NaN        100.0  11.3  23.4  26.8  20.2  13.4   4.9     61.4   20.2    6.2       1.6
-Invictus Gaming        LPL          NaN        100.0   7.4  19.6  26.0  23.1  16.7   7.3     52.9   15.4    4.3       1.0
-G2 Esports             LEC          NaN        100.0   7.2  18.1  25.3  24.1  17.1   8.1     50.7   13.9    3.4       0.7
-Top Esports            LPL          NaN        100.0   5.3  14.8  21.2  26.1  22.8   9.8     41.2    9.3    2.0       0.4
-Karmine Corp           LEC         81.5         81.5   3.7  10.7  17.4  20.9  18.4  10.4     31.8    7.3    1.5       0.2
-Team Liquid            LCS          NaN        100.0   4.6  12.1  19.2  27.6  24.2  12.2     36.0    7.1    1.4       0.2
-Movistar KOI           LEC          NaN        100.0   3.3   9.4  16.3  27.2  27.6  16.2     29.1    4.9    0.8       0.1
-LØS                  CBLOL          NaN        100.0   2.6   7.6  12.8  27.3  30.6  19.1     23.0    3.5    0.5       0.1
-LYON                   LCS          NaN        100.0   1.4   4.6   8.7  23.8  34.5  27.0     14.7    1.5    0.1       0.0
-Team Secret Whales     LCP          NaN        100.0   1.2   4.6   8.9  24.3  35.1  25.9     14.7    1.6    0.1       0.0
+Gen.G                  LCK          NaN        100.0  44.4  35.2  15.7   2.9   1.4   0.4     95.3   82.2   59.9      42.3
+Dplus KIA              LCK          NaN        100.0  28.5  35.2  23.8   7.4   3.9   1.3     87.4   66.1   35.5      16.6
+T1                     LCK          NaN        100.0  31.5  34.9  21.3   7.5   3.8   1.0     87.7   66.0   34.2      15.8
+Hanwha Life Esports    LCK          NaN        100.0  26.6  34.3  24.6   8.8   4.5   1.3     85.4   62.8   31.8      13.7
+Bilibili Gaming        LPL          NaN        100.0  24.5  32.5  25.2  10.5   5.7   1.6     82.2   40.2   18.3       7.4
+Anyone's Legend        LPL          NaN        100.0  11.4  23.2  26.4  20.4  13.2   5.4     61.0   19.9    6.1       1.5
+Invictus Gaming        LPL          NaN        100.0   4.5  18.1  26.3  21.1  18.7  11.3     48.9   14.3    4.0       1.0
+G2 Esports             LEC          NaN        100.0   5.1  16.6  24.6  22.9  19.6  11.2     46.3   11.6    3.0       0.6
+Top Esports            LPL          NaN        100.0   3.8  13.0  21.1  24.7  22.7  14.8     37.8    8.5    2.0       0.3
+Karmine Corp           LEC        100.0        100.0   4.7  14.1  23.0  24.7  21.2  12.4     41.8    8.9    1.9       0.3
+Team Liquid            LCS          NaN        100.0   7.1  15.1  19.3  28.9  22.4   7.3     41.4    8.3    1.7       0.3
+Movistar KOI           LEC          NaN        100.0   2.4   9.0  15.5  24.9  28.2  20.0     26.9    4.4    0.8       0.1
+LØS                  CBLOL          NaN        100.0   1.6   6.6  12.2  23.6  29.5  26.3     20.5    3.0    0.4       0.0
+Team Secret Whales     LCP          NaN        100.0   1.8   5.2   8.7  27.6  35.2  21.5     15.7    1.6    0.2       0.0
+LYON                   LCS          NaN        100.0   1.9   5.4   9.1  26.9  35.6  21.0     16.4    1.8    0.1       0.0
 Cloud9                 LCS          0.0          0.0   0.0   0.0   0.0   0.0   0.0   0.0      0.0    0.0    0.0       0.0
-CTBC Flying Oyster     LCP          NaN        100.0   0.3   1.5   3.0  15.2  33.8  46.3      4.8    0.3    0.0       0.0
-MVK Esports            LCP          3.6          3.6   0.0   0.0   0.1   0.5   1.1   1.9      0.1    0.0    0.0       0.0
-FURIA                CBLOL         14.9         14.9   0.1   0.5   0.9   3.2   5.1   5.1      1.5    0.1    0.0       0.0
+CTBC Flying Oyster     LCP          NaN        100.0   0.4   1.6   3.3  17.2  34.2  43.3      5.3    0.4    0.0       0.0
+MVK Esports            LCP          0.0          0.0   0.0   0.0   0.0   0.0   0.0   0.0      0.0    0.0    0.0       0.0
+FURIA                CBLOL          0.0          0.0   0.0   0.0   0.0   0.0   0.0   0.0      0.0    0.0    0.0       0.0
 ```
 
-Pick'em: **3-0** Gen.G, Dplus KIA · **0-3** CTBC Flying Oyster, LYON · **advance** T1, Hanwha Life Esports, Bilibili Gaming, Anyone's Legend, Invictus Gaming
+Pick'em: **3-0** Gen.G, T1 · **0-3** CTBC Flying Oyster, LØS · **advance** Dplus KIA, Hanwha Life Esports, Bilibili Gaming, Anyone's Legend, Invictus Gaming
 
 ## Example series score distributions (%)
 

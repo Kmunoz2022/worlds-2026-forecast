@@ -87,29 +87,45 @@ def _cross_pairs(A, B, bad, rng, tries=200):
     return pairs
 
 
-def swiss(P, pools, region, rng, tally=None):
-    """pools: {1: [idx...], 2: ..., 3: ..., 4: ...}. Returns {team: (wins, losses)}."""
+def swiss(P, pools, region, rng, tally=None, round1=None, results=None, known_pairs=None):
+    """pools: {1: [idx...], 2: ..., 3: ..., 4: ...}. Returns {team: (wins, losses)}.
+    round1: the drawn round-1 pairs, if known (else drawn from the pools).
+    results: {frozenset((a, b)): (a, b, a_wins, b_wins)} for series already
+    played; Swiss never repeats a pairing, so the pair identifies the series.
+    known_pairs: {round index: [(a, b), ...]} pairings already set for later
+    rounds (from results); the other teams in that round are paired at random."""
+    results, known_pairs = results or {}, known_pairs or {}
     wins, losses = defaultdict(int), defaultdict(int)
     played = set()
     same_region = lambda a, b: region[a] == region[b]  # noqa: E731
     rematch = lambda a, b: frozenset((a, b)) in played  # noqa: E731
 
-    pairs = (_cross_pairs(pools[1], pools[4], same_region, rng)
-             + _cross_pairs(pools[2], pools[3], same_region, rng))
-    for _ in range(5):
+    pairs = list(round1) if round1 else (_cross_pairs(pools[1], pools[4], same_region, rng)
+                                         + _cross_pairs(pools[2], pools[3], same_region, rng))
+    for rnd in range(5):
         for a, b in pairs:
-            deciding = wins[a] == 2 or losses[a] == 2
-            w, l = play(P, a, b, 3 if deciding else 1, rng, tally)
+            known = results.get(frozenset((a, b)))
+            if known:
+                ka, kb, wa, wb = known
+                if tally is not None:
+                    tally.append(known)
+                w, l = (ka, kb) if wa > wb else (kb, ka)
+            else:
+                deciding = wins[a] == 2 or losses[a] == 2
+                w, l = play(P, a, b, 3 if deciding else 1, rng, tally)
             wins[w] += 1
             losses[l] += 1
             played.add(frozenset((a, b)))
         active = [t for pool in pools.values() for t in pool if wins[t] < 3 and losses[t] < 3]
         if not active:
             break
+        fixed = [(a, b) for a, b in known_pairs.get(rnd + 1, []) if a in active and b in active]
+        taken = {t for pr in fixed for t in pr}
         groups = defaultdict(list)
         for t in active:
-            groups[(wins[t], losses[t])].append(t)
-        pairs = [p for g in groups.values() for p in _pair_avoiding(g, rematch, rng)]
+            if t not in taken:
+                groups[(wins[t], losses[t])].append(t)
+        pairs = fixed + [p for g in groups.values() for p in _pair_avoiding(g, rematch, rng)]
     return {t: (wins[t], losses[t]) for pool in pools.values() for t in pool}
 
 
@@ -135,7 +151,8 @@ def knockouts(P, records, region, rng, tally=None):
 
 
 def simulate(P, play_in_teams, pools, pi_slot, region, n_sims=20000, seed=0, play_in_round1=None,
-             game_totals=None, outcomes=None, play_in_played=None):
+             game_totals=None, outcomes=None, play_in_played=None, swiss_round1=None, swiss_results=None,
+             swiss_known_pairs=None):
     """pools[4] must contain `pi_slot`, a placeholder index replaced each sim by
     the Play-In winner. Returns per-team counts and Swiss-record counts.
     If `game_totals` is a list, appends {stage: games played} for each sim.
@@ -148,7 +165,8 @@ def simulate(P, play_in_teams, pools, pi_slot, region, n_sims=20000, seed=0, pla
         pi_winner = play_in(P, play_in_teams, rng, play_in_round1, t_pi, play_in_played)
         counts[pi_winner]["play_in_win"] += 1
         sim_pools = {k: [pi_winner if t == pi_slot else t for t in v] for k, v in pools.items()}
-        rec = swiss(P, sim_pools, region, rng, t_sw)
+        r1 = [tuple(pi_winner if t == pi_slot else t for t in pr) for pr in swiss_round1] if swiss_round1 else None
+        rec = swiss(P, sim_pools, region, rng, t_sw, r1, swiss_results, swiss_known_pairs)
         for t, (w, l) in rec.items():
             counts[t][f"{w}-{l}"] += 1
             counts[t]["swiss"] += 1
@@ -206,4 +224,6 @@ def setup_from_config(cfg, cblol_2nd):
         "pools": {int(k): [pi_slot if t == "PLAY_IN_WINNER" else idx[t] for t in v]
                   for k, v in cfg["swiss_pools"].items()},
         "round1": [tuple(resolve(t) for t in pair) for pair in cfg.get("play_in_round1", [])] or None,
+        "swiss_round1": [tuple(pi_slot if t == "PLAY_IN_WINNER" else idx[t] for t in pair)
+                         for pair in cfg.get("swiss_round1", [])] or None,
     }
