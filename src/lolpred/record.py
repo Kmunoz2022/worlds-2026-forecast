@@ -38,6 +38,7 @@ SEASON_FROM = "2026-10-01"  # Worlds 2026, Play-In onward
 LOG_AHEAD_H = 36            # log a match once its teams are known and it starts within this many hours
 STAGE_NAMES = {"Play-Ins": "Play-In"}
 STAGE_ORDER = ["Play-In", "Swiss", "Quarterfinals", "Semifinals", "Finals"]
+PLAY_IN_SERIES = 6
 CHECKPOINTS = [5, 10, 15, 20, 25, 30]
 CALIB_BINS = [0.5, 0.6, 0.7, 0.8, 0.9, 1.0001]
 
@@ -223,12 +224,35 @@ def build_record(open_stages: set | None = None) -> dict:
     """Grade everything in the ledger (no network)."""
     preds, results, calls = read_jsonl(PREDICTIONS), read_jsonl(RESULTS), read_jsonl(LIVE_CALLS)
     if open_stages is None:
-        # A stage is over once a later stage has a result.
+        # A stage is over once a later stage has a result; the Play-In also once
+        # its six series (double elimination, four teams) are played.
         last = max((STAGE_ORDER.index(r["stage"]) for r in results if r["stage"] in STAGE_ORDER), default=0)
         open_stages = set(STAGE_ORDER[last:])
+        if sum(r["stage"] == "Play-In" for r in results) >= PLAY_IN_SERIES:
+            open_stages.discard("Play-In")
     g = grade(preds, results, open_stages)
     return {"updated": now_utc(), "ledger": {"summary": summary(g), "entries": g},
-            "results": results, "live": live_summary(calls), "crystal": crystal()}
+            "results": with_game_details(results, read_jsonl(GAME_STATS)), "live": live_summary(calls),
+            "crystal": crystal()}
+
+
+def with_game_details(results: list[dict], stats: list[dict]) -> list[dict]:
+    """Copies of the results with each game's champions, kills (blue, red) and
+    length added from the game stats, for the site's game-by-game lists."""
+    by_id = {g["game_id"]: g for g in stats}
+    out = []
+    for r in results:
+        games = []
+        for g in r["games"]:
+            st, g = by_id.get(g["game_id"]), dict(g)
+            if st:
+                side = lambda s: [p for p in st["players"] if p["side"] == s]  # noqa: E731
+                g.update(minutes=round(st["duration_s"] / 60, 1),
+                         champs=[[p["champion"] for p in side(s)] for s in ("blue", "red")],
+                         kills=[sum(p["kills"] for p in side(s)) for s in ("blue", "red")])
+            games.append(g)
+        out.append(dict(r, games=games))
+    return out
 
 
 def crystal() -> dict:
