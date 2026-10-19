@@ -5,7 +5,8 @@ grades the prediction ledger, updates the Crystal Ball tracker, archives finishe
 minute timelines, and exports the website data.
 Locked picks (ledger/*_locked.json) are never touched.
 
-Usage: .venv/bin/python scripts/refresh.py [--skip-train]
+Usage: .venv/bin/python scripts/refresh.py [--skip-train] [--skip-archive]
+During Worlds, daily refreshes use both (~2 min); retrain fully about weekly.
 Then republish site/index.html + site/data.json.
 """
 import argparse
@@ -30,6 +31,8 @@ def run(*args):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--skip-train", action="store_true", help="reuse the saved game model (saves ~4 min)")
+    ap.add_argument("--skip-archive", action="store_true",
+                    help="don't archive game timelines now (slow when the feed is; run archive_timelines.py later)")
     args = ap.parse_args()
 
     empty = [p.name for p in sorted((ROOT / "Data").glob("*_LoL_esports_match_data_from_OraclesElixir.csv"))
@@ -48,7 +51,8 @@ def main():
     # so the ledger has one writer. This grade from Oracle's Elixir is a cross-check.
     run("scripts/ledger.py", "grade")
     run("scripts/track_crystal.py", "--rebuild")
-    run("scripts/archive_timelines.py")
+    if not args.skip_archive:
+        run("scripts/archive_timelines.py")
     run("scripts/export_site.py")
     run("scripts/auto_ledger.py", "record")  # local copy of site/record.json for previews
     print("\nAll done. Republish site/index.html with site/data.json to update the website.")
