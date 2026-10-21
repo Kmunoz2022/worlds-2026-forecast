@@ -27,6 +27,31 @@ from .series import sample_series
 
 RECORDS = ["3-0", "3-1", "3-2", "2-3", "1-3", "0-3"]
 
+# Tournament form: in each simulated tournament every team gets one strength shift,
+# N(0, FORM_SD) on the log-odds scale, kept for the whole event. A team that is off
+# at Worlds tends to stay off; winning early in a simulated run then also means that
+# team is likely in form, so its later odds rise. Sized on 2022-25 internationals
+# (MSI, Worlds, EWC, First Stand): residuals against pre-event predictions persist
+# with SD ~0.4, and predicting each later game with this learning was best at
+# 0.5-0.6 (log loss 0.628 -> 0.617). See docs/DECISIONS.md.
+FORM_SD = 0.5
+
+
+def form_posterior(L, games, sd=FORM_SD):
+    """Per-team (mean, sd) of the form shift given real games the model hasn't
+    seen yet (one Newton step from zero, i.e. a Laplace approximation).
+    L: log-odds matrix; games: [(winner, loser), ...] as team indices."""
+    n = L.shape[0]
+    resid, info = np.zeros(n), np.zeros(n)
+    for w, l in games:
+        p = 1 / (1 + np.exp(-L[w, l]))
+        resid[w] += 1 - p
+        resid[l] -= 1 - p
+        info[w] += p * (1 - p)
+        info[l] += p * (1 - p)
+    prec = 1 / sd ** 2 + info
+    return resid / prec, np.sqrt(1 / prec)
+
 
 def play(P, a, b, best_of, rng, tally=None):
     """Returns (winner, loser). Appends (a, b, a_wins, b_wins) to `tally`."""
@@ -152,7 +177,7 @@ def knockouts(P, records, region, rng, tally=None):
 
 def simulate(P, play_in_teams, pools, pi_slot, region, n_sims=20000, seed=0, play_in_round1=None,
              game_totals=None, outcomes=None, play_in_played=None, swiss_round1=None, swiss_results=None,
-             swiss_known_pairs=None):
+             swiss_known_pairs=None, form_sd=0.0, form_games=None):
     """pools[4] must contain `pi_slot`, a placeholder index replaced each sim by
     the Play-In winner. Returns per-team counts and Swiss-record counts.
     If `game_totals` is a list, appends {stage: games played} for each sim.
@@ -160,7 +185,13 @@ def simulate(P, play_in_teams, pools, pi_slot, region, n_sims=20000, seed=0, pla
     (stage, a, b, a_wins, b_wins), Swiss records, and knockout placements."""
     rng = np.random.default_rng(seed)
     counts = defaultdict(Counter)
+    P0 = np.clip(np.asarray(P, float), 1e-6, 1 - 1e-6)
+    L = np.log(P0 / (1 - P0))
+    mu, sd = form_posterior(L, form_games or [], form_sd) if form_sd > 0 else (np.zeros(len(L)), np.zeros(len(L)))
     for _ in range(n_sims):
+        if form_sd > 0:   # this tournament's form for every team, then the game odds it implies
+            u = mu + sd * rng.standard_normal(len(L))
+            P = 1 / (1 + np.exp(-(L + u[:, None] - u[None, :])))
         t_pi, t_sw, t_ko = [], [], []
         pi_winner = play_in(P, play_in_teams, rng, play_in_round1, t_pi, play_in_played)
         counts[pi_winner]["play_in_win"] += 1

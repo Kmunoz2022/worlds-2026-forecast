@@ -21,7 +21,7 @@ from lolpred.config import PROCESSED_DIR  # noqa: E402
 from lolpred.predict import MatchPredictor  # noqa: E402
 from lolpred.series import KAPPA, score_distribution, series_win_prob  # noqa: E402
 from lolpred.record import RESULTS, read_jsonl  # noqa: E402
-from lolpred.tournament import RECORDS, pickem, setup_from_config, simulate  # noqa: E402
+from lolpred.tournament import FORM_SD, RECORDS, pickem, setup_from_config, simulate  # noqa: E402
 
 CONFIG = ROOT / "config" / "worlds2026.json"
 OUT_JSON = PROCESSED_DIR / "worlds2026_sim.json"
@@ -74,6 +74,7 @@ def swiss_state(results, idx):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--sims", type=int, default=20000)
+    ap.add_argument("--no-form", action="store_true", help="simulate without tournament form (for comparison)")
     args = ap.parse_args()
 
     cfg = json.loads(CONFIG.read_text())
@@ -99,6 +100,10 @@ def main():
     results = played_series()
     played = [(r["team_a"], r["team_b"], r["a_wins"], r["b_wins"]) for r in results if r["stage"] == "Play-In"]
     sw_results, sw_rounds = swiss_state(results, idx)
+    # Games the model hasn't seen yet (played after its data ends) shift each team's form.
+    unseen = [(idx[g["winner"]], idx[r["team_b"] if g["winner"] == r["team_a"] else r["team_a"]])
+              for r in results if r["start"][:10] > pred.trained_through for g in r["games"]]
+    print(f"\n== tournament form: SD {0.0 if args.no_form else FORM_SD}, {len(unseen)} games newer than the model's data")
     if results:
         print("\n== Results so far (kept as played)")
         for r in results:
@@ -113,7 +118,8 @@ def main():
         counts = simulate(P, play_in, pools, pi_slot, region, n_sims=args.sims, seed=0,
                           play_in_round1=round1, game_totals=totals,
                           play_in_played=[(idx[a], idx[b], wa, wb) for a, b, wa, wb in played],
-                          swiss_round1=st["swiss_round1"], swiss_results=sw_results, swiss_known_pairs=sw_rounds)
+                          swiss_round1=st["swiss_round1"], swiss_results=sw_results, swiss_known_pairs=sw_rounds,
+                          form_sd=0.0 if args.no_form else FORM_SD, form_games=unseen)
         rows = []
         for n in names:
             if n in others:

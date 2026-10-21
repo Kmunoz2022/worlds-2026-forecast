@@ -94,6 +94,8 @@ Where official draw rules weren't published I used stated approximations. I chec
 
 **Live series odds** use the same model, updated with each finished game (a 60% favourite up 2-0 is 95%; down 0-2, 13%).
 
+**Tournament form.** The game model updates ratings after every game, so its match predictions already react to a team's form at an event (on 2022–25 internationals it even over-reacts slightly). The tournament simulation didn't: it fixed every team's strength before the event, so each simulated match was independent. Against pre-event predictions, a team's results in the first half of an event predict its second half, so each simulated tournament now gives every team one form shift for the whole event (SD 0.5 on the log-odds scale). I sized it on past internationals only: predicting each later game from the pre-event model plus what the team's earlier games at that event showed was best at 0.5–0.6 (log loss 0.628 → 0.617). Two things follow. A team that wins early in a simulated run is probably in form, so its later odds rise, and real results newer than the model's last data update shift each team's form without counting games the model already has. The effect: favourites are less of a lock (Gen.G's title chance 43% → 35%) and underdog runs are more likely.
+
 ## Crystal Ball forecasts
 
 These are 17 prediction questions on the LoL Esports site, about champions, players, games and teams.
