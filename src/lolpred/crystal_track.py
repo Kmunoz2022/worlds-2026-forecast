@@ -51,7 +51,7 @@ def ranked(qid, rows, pick, finished):
     top = [{"name": r["name"], "value": fmt(r["value"]), "games": r["games"]} for r in rows[:3]]
     key = norm(pick.split(" (")[0])
     mine = next(((i + 1, r) for i, r in enumerate(rows) if norm(r["name"]) == key), None)
-    now = None if mine is None else {"rank": mine[0], "value": fmt(mine[1]["value"]), "games": mine[1]["games"]}
+    now = None if mine is None else {"rank": mine[0], "of": len(rows), "value": fmt(mine[1]["value"]), "games": mine[1]["games"]}
     if not rows:
         return "waiting", f"No one qualifies yet (champions need {MIN_CHAMP_GAMES} games).", top, now
     tied_top = mine is not None and mine[1]["value"] == rows[0]["value"]
