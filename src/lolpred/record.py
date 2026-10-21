@@ -123,10 +123,32 @@ def live_p_blue(live: dict, p_pre_blue: float, minutes: float, gold_diff: float,
     return 1 / (1 + math.exp(-z))
 
 
-def make_prediction(data: dict, cfg: dict, a: str, b: str, best_of: int, stage: str, match_id: str, start: str) -> dict:
+def swiss_pool_of(cfg: dict, results: list[dict]) -> dict:
+    """Team -> Swiss draw pool (1 is the highest), with the Play-In winner in its slot."""
+    pools = {t: int(k) for k, v in cfg.get("swiss_pools", {}).items() for t in v}
+    pi = [r for r in sorted(results, key=lambda r: r["start"]) if r["stage"] == "Play-In"]
+    if "PLAY_IN_WINNER" in pools and len(pi) >= PLAY_IN_SERIES:
+        pools[pi[-1]["winner"]] = pools.pop("PLAY_IN_WINNER")
+    return pools
+
+
+def game_chance(data: dict, pool_of: dict, a: str, b: str, best_of: int, stage: str) -> tuple[float, str | None]:
+    """a's chance to win one game, and the side assumption behind it. In Swiss Bo1s
+    the team from the higher draw pool chooses its side and takes blue (same rule
+    as the simulator); otherwise sides are unknown and the chance is side-averaged."""
+    pa, pb = pool_of.get(a), pool_of.get(b)
+    if stage == "Swiss" and best_of == 1 and pa and pb and pa != pb:
+        hi, lo = (a, b) if pa < pb else (b, a)
+        p_blue = float(data["live"]["p_blue"][hi][lo])
+        return (p_blue if hi == a else 1 - p_blue), f"{hi} on blue side (the higher draw pool chooses its side)"
+    return float(data["game_prob"][a][b]), None
+
+
+def make_prediction(data: dict, cfg: dict, a: str, b: str, best_of: int, stage: str, match_id: str, start: str,
+                    pool_of: dict | None = None) -> dict:
     """Same fields as lolpred.ledger.make_entry, from the published site data."""
     from .series import score_distribution, series_win_prob
-    p = float(data["game_prob"][a][b])
+    p, sides = game_chance(data, pool_of or {}, a, b, best_of, stage)
     dist = score_distribution(p, best_of)
     ps = series_win_prob(p, best_of)
     (sa, sb), _ = max(dist.items(), key=lambda kv: kv[1])
@@ -135,7 +157,7 @@ def make_prediction(data: dict, cfg: dict, a: str, b: str, best_of: int, stage: 
             "best_of": best_of, "p_game_a": round(p, 4), "p_series_a": round(ps, 4),
             "score_dist": {f"{x}-{y}": round(v, 4) for (x, y), v in dist.items()},
             "pick": a if ps >= 0.5 else b, "likely_score": f"{sa}-{sb}",
-            "match_id": match_id, "match_start": start, "source": "auto"}
+            "match_id": match_id, "match_start": start, "source": "auto", **({"sides": sides} if sides else {})}
 
 
 def grade(predictions: list[dict], results: list[dict], open_stages: set) -> list[dict]:
@@ -281,8 +303,10 @@ def worlds_events(data: dict) -> list[dict]:
     return [e for e in evs if e.get("type") == "match" and e["startTime"] >= SEASON_FROM]
 
 
-def log_upcoming(data: dict, cfg: dict, events: list[dict], existing: list[dict], now: datetime) -> list[dict]:
+def log_upcoming(data: dict, cfg: dict, events: list[dict], existing: list[dict], now: datetime,
+                 results: list[dict] | None = None) -> list[dict]:
     teams = [t["name"] for t in data["teams"]]
+    pool_of = swiss_pool_of(cfg, results or [])
     have = {(e.get("match_id"), e["data_through"]) for e in existing}
     new = []
     for e in events:
@@ -293,7 +317,7 @@ def log_upcoming(data: dict, cfg: dict, events: list[dict], existing: list[dict]
         if not a or not b or a == b or (e["match"]["id"], data["meta"]["data_through"]) in have:
             continue
         new.append(make_prediction(data, cfg, a, b, e["match"]["strategy"]["count"], stage_name(e.get("blockName")),
-                                   e["match"]["id"], e["startTime"]))
+                                   e["match"]["id"], e["startTime"], pool_of))
     return new
 
 
@@ -455,7 +479,7 @@ def update(log=print) -> dict:
     events = worlds_events(data)
     now = datetime.now(timezone.utc)
 
-    new_preds = log_upcoming(data, cfg, events, read_jsonl(PREDICTIONS), now)
+    new_preds = log_upcoming(data, cfg, events, read_jsonl(PREDICTIONS), now, read_jsonl(RESULTS))
     append_jsonl(PREDICTIONS, new_preds)
     for p in new_preds:
         log(f"logged {p['team_a']} vs {p['team_b']} Bo{p['best_of']} ({p['stage']}): {p['pick']} "

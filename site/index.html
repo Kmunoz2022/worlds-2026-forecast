@@ -584,6 +584,20 @@ function scoreDist(p, bo, kappa = D.meta.kappa) {
 }
 const seriesWin = (p, bo) => scoreDist(p, bo).filter(s => s.a > s.b).reduce((s, x) => s + x.p, 0);
 const gameP = (a, b) => D.game_prob[a][b];
+// A's chance in one game of a scheduled match. In Swiss Bo1s the higher draw pool
+// chooses its side and takes blue (same rule as the simulator and the ledger).
+function matchGameP(a, b, bo, block) {
+  if (block === "Swiss" && bo === 1) {
+    const piWinner = (D.sim.find(r => r.play_in_win != null && r.play_in_win > 0.999) || {}).team;
+    const pool = {};
+    Object.entries(D.swiss_pools).forEach(([k, v]) => v.forEach(t => { pool[t === "PLAY_IN_WINNER" ? piWinner : t] = +k; }));
+    if (pool[a] && pool[b] && pool[a] !== pool[b]) {
+      const hi = pool[a] < pool[b] ? a : b, lo = hi === a ? b : a, pb = D.live.p_blue[hi][lo];
+      return hi === a ? pb : 1 - pb;
+    }
+  }
+  return gameP(a, b);
+}
 
 const statusChip = st => `<span class="status st-${st.replace(/ /g, "-")}">${st[0].toUpperCase() + st.slice(1)}</span>`;
 
@@ -1403,7 +1417,7 @@ function renderHero() {
   if (!el) return;
   if (!heroShowsNext()) { el.innerHTML = ""; return; }
   const e = LIVE.next[0], [ta, tb] = e.match.teams, a = ourTeam(ta), b = ourTeam(tb), bo = e.match.strategy.count;
-  const when = new Date(e.startTime), known = a && b && a !== b, pa = known ? seriesWin(gameP(a, b), bo) : null;
+  const when = new Date(e.startTime), known = a && b && a !== b, pa = known ? seriesWin(matchGameP(a, b, bo, e.blockName), bo) : null;
   const name = (o, t) => o || (t.name && t.name !== "TBD" ? t.name : "To be decided");
   const side = (o, t, cls) => `<div class="hero-team ${cls}">${logo(o)}<span class="hero-code">${esc(o ? short(o) : "TBD")}</span><span class="hero-name">${esc(name(o, t))}</span></div>`;
   el.innerHTML = `<section class="hero" aria-label="Next match"><div class="hero-in">
@@ -1452,7 +1466,7 @@ function renderNext() {
       const [ta, tb] = e.match.teams, a = ourTeam(ta), b = ourTeam(tb), bo = e.match.strategy.count;
       const when = new Date(e.startTime);
       const known = a && b && a !== b;
-      const pa = known ? seriesWin(gameP(a, b), bo) : null;
+      const pa = known ? seriesWin(matchGameP(a, b, bo, e.blockName), bo) : null;
       return `<div class="next-row">
         <div class="when"><b>${when.toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" })}</b>
           <span class="note">${when.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" })}, ${esc(e.blockName || "")}, best of ${bo}</span>

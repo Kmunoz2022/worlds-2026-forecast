@@ -114,3 +114,17 @@ def test_game_time_removes_pauses():
 def test_player_name_drops_team_tag():
     assert record.player_name("KC Canna") == "Canna"
     assert record.player_name("Faker") == "Faker"
+
+
+def test_swiss_bo1_logs_the_higher_pool_on_blue():
+    data = {"game_prob": {"A": {"B": 0.6}, "B": {"A": 0.4}},
+            "live": {"p_blue": {"A": {"B": 0.65}, "B": {"A": 0.45}}}}
+    cfg = {"swiss_pools": {"1": ["A"], "4": ["PLAY_IN_WINNER"]}}
+    play_in = [{"start": f"2026-10-1{i}", "stage": "Play-In", "winner": "B"} for i in range(6)]
+    pools = record.swiss_pool_of(cfg, play_in)
+    assert pools == {"A": 1, "B": 4}
+    assert record.game_chance(data, pools, "A", "B", 1, "Swiss")[0] == pytest.approx(0.65)
+    assert record.game_chance(data, pools, "B", "A", 1, "Swiss")[0] == pytest.approx(0.35)
+    # Bo3s and other stages stay side-averaged
+    assert record.game_chance(data, pools, "A", "B", 3, "Swiss") == (0.6, None)
+    assert record.game_chance(data, pools, "A", "B", 5, "Quarterfinals") == (0.6, None)
