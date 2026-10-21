@@ -53,9 +53,10 @@ def form_posterior(L, games, sd=FORM_SD):
     return resid / prec, np.sqrt(1 / prec)
 
 
-def play(P, a, b, best_of, rng, tally=None):
-    """Returns (winner, loser). Appends (a, b, a_wins, b_wins) to `tally`."""
-    wa, wb = sample_series(P[a, b], best_of, rng)
+def play(P, a, b, best_of, rng, tally=None, p=None):
+    """Returns (winner, loser). Appends (a, b, a_wins, b_wins) to `tally`.
+    p: a's game win chance if it differs from P[a, b] (e.g. sides known)."""
+    wa, wb = sample_series(P[a, b] if p is None else p, best_of, rng)
     if tally is not None:
         tally.append((a, b, wa, wb))
     return (a, b) if wa > wb else (b, a)
@@ -112,13 +113,18 @@ def _cross_pairs(A, B, bad, rng, tries=200):
     return pairs
 
 
-def swiss(P, pools, region, rng, tally=None, round1=None, results=None, known_pairs=None):
+def swiss(P, pools, region, rng, tally=None, round1=None, results=None, known_pairs=None, PB=None):
     """pools: {1: [idx...], 2: ..., 3: ..., 4: ...}. Returns {team: (wins, losses)}.
     round1: the drawn round-1 pairs, if known (else drawn from the pools).
     results: {frozenset((a, b)): (a, b, a_wins, b_wins)} for series already
     played; Swiss never repeats a pairing, so the pair identifies the series.
     known_pairs: {round index: [(a, b), ...]} pairings already set for later
-    rounds (from results); the other teams in that round are paired at random."""
+    rounds (from results); the other teams in that round are paired at random.
+    PB: blue-side win chances (PB[a, b] = a wins on blue vs b). In Bo1s the team
+    from the higher draw pool chooses its side and takes blue (Riot's rule:
+    "the higher pool will receive side selection"); teams from the same pool, and
+    Bo3s (sides alternate), use the side-averaged P."""
+    pool_of = {t: k for k, v in pools.items() for t in v}
     results, known_pairs = results or {}, known_pairs or {}
     wins, losses = defaultdict(int), defaultdict(int)
     played = set()
@@ -137,7 +143,10 @@ def swiss(P, pools, region, rng, tally=None, round1=None, results=None, known_pa
                 w, l = (ka, kb) if wa > wb else (kb, ka)
             else:
                 deciding = wins[a] == 2 or losses[a] == 2
-                w, l = play(P, a, b, 3 if deciding else 1, rng, tally)
+                p = None
+                if PB is not None and not deciding and pool_of[a] != pool_of[b]:
+                    p = PB[a, b] if pool_of[a] < pool_of[b] else 1 - PB[b, a]
+                w, l = play(P, a, b, 3 if deciding else 1, rng, tally, p)
             wins[w] += 1
             losses[l] += 1
             played.add(frozenset((a, b)))
@@ -177,7 +186,7 @@ def knockouts(P, records, region, rng, tally=None):
 
 def simulate(P, play_in_teams, pools, pi_slot, region, n_sims=20000, seed=0, play_in_round1=None,
              game_totals=None, outcomes=None, play_in_played=None, swiss_round1=None, swiss_results=None,
-             swiss_known_pairs=None, form_sd=0.0, form_games=None):
+             swiss_known_pairs=None, form_sd=0.0, form_games=None, PB=None):
     """pools[4] must contain `pi_slot`, a placeholder index replaced each sim by
     the Play-In winner. Returns per-team counts and Swiss-record counts.
     If `game_totals` is a list, appends {stage: games played} for each sim.
@@ -188,16 +197,20 @@ def simulate(P, play_in_teams, pools, pi_slot, region, n_sims=20000, seed=0, pla
     P0 = np.clip(np.asarray(P, float), 1e-6, 1 - 1e-6)
     L = np.log(P0 / (1 - P0))
     mu, sd = form_posterior(L, form_games or [], form_sd) if form_sd > 0 else (np.zeros(len(L)), np.zeros(len(L)))
+    LB = None if PB is None else np.log(np.clip(PB, 1e-6, 1 - 1e-6) / (1 - np.clip(PB, 1e-6, 1 - 1e-6)))
+    PBs = PB
     for _ in range(n_sims):
         if form_sd > 0:   # this tournament's form for every team, then the game odds it implies
             u = mu + sd * rng.standard_normal(len(L))
             P = 1 / (1 + np.exp(-(L + u[:, None] - u[None, :])))
+            if LB is not None:
+                PBs = 1 / (1 + np.exp(-(LB + u[:, None] - u[None, :])))
         t_pi, t_sw, t_ko = [], [], []
         pi_winner = play_in(P, play_in_teams, rng, play_in_round1, t_pi, play_in_played)
         counts[pi_winner]["play_in_win"] += 1
         sim_pools = {k: [pi_winner if t == pi_slot else t for t in v] for k, v in pools.items()}
         r1 = [tuple(pi_winner if t == pi_slot else t for t in pr) for pr in swiss_round1] if swiss_round1 else None
-        rec = swiss(P, sim_pools, region, rng, t_sw, r1, swiss_results, swiss_known_pairs)
+        rec = swiss(P, sim_pools, region, rng, t_sw, r1, swiss_results, swiss_known_pairs, PBs)
         for t, (w, l) in rec.items():
             counts[t][f"{w}-{l}"] += 1
             counts[t]["swiss"] += 1

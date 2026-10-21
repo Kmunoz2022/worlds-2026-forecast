@@ -65,3 +65,13 @@ def test_tournament_form_spreads_the_odds():
     base = simulate(P, **args)[0]["play_in_win"]
     form = simulate(P, **args, form_sd=0.8)[0]["play_in_win"]
     assert form < base
+
+
+def test_swiss_bo1_higher_pool_plays_blue():
+    # Blue always wins, red never: in round-1 Bo1s the higher-pool team (pools 1 and 2) must win.
+    round1 = [(0, 12), (1, 13), (2, 14), (3, 15), (4, 8), (5, 9), (6, 10), (7, 11)]
+    PB = np.full((N + 1, N + 1), 0.999)
+    for seed in range(5):
+        tally = []
+        swiss(P, POOLS, REGION, np.random.default_rng(seed), tally, round1, PB=PB)
+        assert all(t[2] == 1 for t in tally[:8])

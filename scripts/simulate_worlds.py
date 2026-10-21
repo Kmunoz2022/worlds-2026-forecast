@@ -75,6 +75,7 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--sims", type=int, default=20000)
     ap.add_argument("--no-form", action="store_true", help="simulate without tournament form (for comparison)")
+    ap.add_argument("--no-sides", action="store_true", help="ignore side selection in Swiss Bo1s (for comparison)")
     args = ap.parse_args()
 
     cfg = json.loads(CONFIG.read_text())
@@ -87,6 +88,10 @@ def main():
     pred = MatchPredictor()
     print(f"model data through {pred.trained_through}")
     P = pred.prob_matrix([teams[n]["teamid"] for n in names])
+    # Side-specific chances for Swiss Bo1s, where the higher draw pool takes blue side.
+    tid = [teams[n]["teamid"] for n in names]
+    PB = np.array([[pred.game_prob_sided(tid[i], tid[j]) if i != j else 0.5 for j in range(len(names))]
+                   for i in range(len(names))])
 
     info = pd.DataFrame([{**pred.team_info(teams[n]["teamid"]), "team": n, "region": teams[n]["region"]}
                          for n in names]).set_index("team")
@@ -119,7 +124,8 @@ def main():
                           play_in_round1=round1, game_totals=totals,
                           play_in_played=[(idx[a], idx[b], wa, wb) for a, b, wa, wb in played],
                           swiss_round1=st["swiss_round1"], swiss_results=sw_results, swiss_known_pairs=sw_rounds,
-                          form_sd=0.0 if args.no_form else FORM_SD, form_games=unseen)
+                          form_sd=0.0 if args.no_form else FORM_SD, form_games=unseen,
+                          PB=None if args.no_sides else PB)
         rows = []
         for n in names:
             if n in others:
