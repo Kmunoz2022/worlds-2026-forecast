@@ -45,8 +45,12 @@ def test_predictions_ledger_is_well_formed_and_in_time_order():
         assert e["pick"] in (e["team_a"], e["team_b"])
 
 
-@pytest.mark.parametrize("name", ["crystal_ball_locked.json", "crystal_ball_locked_extra.json", "pickem_locked.json"])
-def test_locked_picks_exist(name):
+@pytest.mark.parametrize("name,before", [
+    ("crystal_ball_locked.json", "2026-10-15T18:00:00Z"),        # before Worlds began (Play-In day 1)
+    ("crystal_ball_locked_extra.json", "2026-10-15T18:00:00Z"),
+    ("pickem_locked.json", "2026-10-15T18:00:00Z"),
+    ("pickem_locked_final.json", "2026-10-23T17:00:00Z"),        # before the Swiss stage began
+])
+def test_locked_picks_were_locked_in_time(name, before):
     d = json.loads((LEDGER / name).read_text())
-    # Locked before Worlds began (Play-In day 1, Oct 15 18:00 UTC).
-    assert d["locked_at"] < "2026-10-15T18:00:00Z"
+    assert d["locked_at"] < before

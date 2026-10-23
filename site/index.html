@@ -163,6 +163,9 @@ section.page { display: grid; gap: 1.75rem; }
 .pick .p { font: 700 1.75rem/1.05 var(--display); letter-spacing: -0.022em; }
 .pick .p small { font: 500 0.75rem var(--body); color: var(--muted); margin-left: 0.25rem; letter-spacing: 0; }
 @media (max-width: 820px) { .picks { grid-template-columns: 1fr 1fr; } .pick-group.adv { grid-column: 1 / -1; } }
+.picks.rec { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.picks.rec .pick-group.adv { grid-column: 1 / -1; }
+@media (max-width: 820px) { .picks.rec { grid-template-columns: 1fr; } }
 
 /* tables */
 .tbl-wrap { overflow-x: auto; touch-action: pan-x pan-y; }
@@ -625,15 +628,25 @@ function pagePickem() {
       <td class="sep num">${pct(r.qualify)}</td><td class="num">${pct(r.semis)}</td><td class="num">${pct(r.final)}</td>
       <td><div class="bar-cell"><span class="num">${pct(r.champion, r.champion < 0.1 ? 1 : 0)}</span><span class="track"><span class="fill" style="width:${Math.max(r.champion / 0.45 * 100, r.champion > 0 ? 1.5 : 0)}%"></span></span></div></td>
     </tr>`).join("");
-  return `
-  <section class="page" id="pickem">
-    <div class="lede"><h2>Swiss stage pick'em</h2>
-      <p>Our submitted picks, locked on ${fmtDate(D.pickem_locked_at.slice(0, 10))}: the two teams most likely to go 3-0, the two most likely to go 0-3, and the five most likely to advance from the rest. The percentages below are the latest odds and update as results come in.</p></div>
+  // Riot's format this year: one team each to go 3-0, 3-1 and 3-2, plus the eight that advance.
+  const rec = D.pickem_format === "records";
+  const named = rec ? new Set([pk["3-0"], pk["3-1"], pk["3-2"]]) : new Set();
+  const picksHtml = rec ? `
+    <div class="picks rec">
+      ${["3-0", "3-1", "3-2"].map(k => `<div class="pick-group"><h3>Go ${k}</h3><div class="pick-list">${card(pk[k], k, `chance of ${k}`)}</div></div>`).join("")}
+      <div class="pick-group adv"><h3>Also advance</h3><div class="pick-list">${pk.advance.filter(n => !named.has(n)).map(n => card(n, "qualify", "to advance")).join("")}</div></div>
+    </div>` : `
     <div class="picks">
       <div class="pick-group"><h3>Go 3-0</h3><div class="pick-list">${pk["3-0"].map(n => card(n, "3-0", "chance of 3-0")).join("")}</div></div>
       <div class="pick-group"><h3>Go 0-3</h3><div class="pick-list">${pk["0-3"].map(n => card(n, "0-3", "chance of 0-3")).join("")}</div></div>
       <div class="pick-group adv"><h3>Advance</h3><div class="pick-list">${pk.advance.map(n => card(n, "qualify", "to advance")).join("")}</div></div>
-    </div>
+    </div>`;
+  return `
+  <section class="page" id="pickem">
+    <div class="lede"><h2>Swiss stage pick'em</h2>
+      <p>${rec ? `Our submitted picks, locked on ${new Date(D.pickem_locked_at).toLocaleDateString(undefined, { month: "short", day: "numeric" })}: one team to go 3-0, one to go 3-1, one to go 3-2, and the eight teams that make it through. Each is the model's most likely answer.`
+        : `Our submitted picks, locked on ${fmtDate(D.pickem_locked_at.slice(0, 10))}: the two teams most likely to go 3-0, the two most likely to go 0-3, and the five most likely to advance from the rest.`} The percentages are the latest odds and update as results come in.</p></div>
+    ${picksHtml}
     <div class="panel">
       <div class="panel-head"><h3>Every team's Swiss record and title odds</h3><span class="note">Share of simulations. Darker cells are more likely.</span></div>
       <div class="tbl-wrap"><table>
@@ -643,7 +656,7 @@ function pagePickem() {
         </thead>
         <tbody>${rows}</tbody>
       </table></div>
-      <p class="note">Round 1 uses the official draw. Later rounds are paired by record, as in the real Swiss stage, and every series already played keeps its real result. Karmine Corp won the Play-In. The pick'em format is assumed to be Riot's usual 2 / 2 / 5 picks.</p>
+      <p class="note">Round 1 uses the official draw. Later rounds are paired by record, as in the real Swiss stage, and every series already played keeps its real result. Karmine Corp won the Play-In.</p>
     </div>
   </section>`;
 }
@@ -1668,8 +1681,11 @@ function pageToday() {
       </a>
       <a class="panel link-card" href="#pickem">
         <div class="panel-head"><h3>Pick'em</h3><span class="chev" aria-hidden="true"></span></div>
-        <p class="note">3-0: ${D.pickem["3-0"].map(esc).join(", ")} · 0-3: ${D.pickem["0-3"].map(esc).join(", ")}</p>
-        <p class="note">Advance: ${D.pickem.advance.map(esc).join(", ")}</p>
+        ${D.pickem_format === "records"
+          ? `<p class="note">3-0 ${esc(D.pickem["3-0"])}, 3-1 ${esc(D.pickem["3-1"])}, 3-2 ${esc(D.pickem["3-2"])}</p>
+             <p class="note">Advance: ${D.pickem.advance.map(esc).join(", ")}</p>`
+          : `<p class="note">3-0: ${D.pickem["3-0"].map(esc).join(", ")}, 0-3: ${D.pickem["0-3"].map(esc).join(", ")}</p>
+             <p class="note">Advance: ${D.pickem.advance.map(esc).join(", ")}</p>`}
       </a>
     </div>
   </section>`;

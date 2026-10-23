@@ -27,6 +27,9 @@ CONFIG = ROOT / "config" / "worlds2026.json"
 FINAL = "p_LR full (intl x5) +cal"
 LOCKED_CRYSTAL = ROOT / "ledger" / "crystal_ball_locked.json"
 LOCKED_PICKEM = ROOT / "ledger" / "pickem_locked.json"
+# The pick'em actually submitted (Oct 22, Riot's 3-0 / 3-1 / 3-2 + advance format);
+# pickem_locked.json is the earlier model version, kept as history.
+FINAL_PICKEM = ROOT / "ledger" / "pickem_locked_final.json"
 LOCKED_EXTRA = ROOT / "ledger" / "crystal_ball_locked_extra.json"
 
 
@@ -135,6 +138,7 @@ def main():
     offsets.index = [LEAGUE_ALIAS.get(i, i) for i in offsets.index]
     ingame = json.loads((PROCESSED_DIR / "ingame_eval.json").read_text())
 
+    pickem = json.loads((FINAL_PICKEM if FINAL_PICKEM.exists() else LOCKED_PICKEM).read_text())
     scen_name = cfg["cblol_2nd"][0]
     scen = sim["scenarios"][scen_name]
     data = {
@@ -145,8 +149,9 @@ def main():
         "sim": [{k: (r(v) if isinstance(v, float) else v) for k, v in row.items() if k != "record_given_swiss"}
                 for row in scen["teams"]],
         # Submitted picks are locked (ledger/*_locked.json); live odds above keep updating.
-        "pickem": json.loads(LOCKED_PICKEM.read_text())["pickem"],
-        "pickem_locked_at": json.loads(LOCKED_PICKEM.read_text())["locked_at"],
+        "pickem": pickem["pickem"],
+        "pickem_locked_at": pickem["locked_at"],
+        "pickem_format": pickem.get("format", "2-2-5"),
         "play_in": {"teams": [scen_name if t == "CBLOL_2ND" else t for t in cfg["play_in"]],
                     "round1": [[scen_name if t == "CBLOL_2ND" else t for t in pair]
                                for pair in cfg.get("play_in_round1", [])]},
