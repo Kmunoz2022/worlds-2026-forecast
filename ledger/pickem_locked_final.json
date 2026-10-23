@@ -1,0 +1,37 @@
+{
+  "locked_at": "2026-10-23T02:22:38Z",
+  "note": "Final Swiss pick'em as submitted: one team each to go 3-0, 3-1 and 3-2, and the 8 teams that advance. Supersedes pickem_locked.json (the Oct 14 model version in the assumed 2/2/5 format, kept as history). Never edit.",
+  "format": "records",
+  "data_through": "2026-10-18",
+  "model": "game model + tournament form (SD 0.5) + Swiss side rule, real round-1 draw, 20,000 sims",
+  "pickem": {
+    "3-0": "Gen.G",
+    "3-1": "Hanwha Life Esports",
+    "3-2": "Dplus KIA",
+    "advance": [
+      "Gen.G",
+      "Hanwha Life Esports",
+      "Dplus KIA",
+      "T1",
+      "Bilibili Gaming",
+      "Anyone's Legend",
+      "G2 Esports",
+      "Karmine Corp"
+    ]
+  },
+  "chances": {
+    "3-0": 0.4515,
+    "3-1": 0.3308,
+    "3-2": 0.2495,
+    "advance": {
+      "Gen.G": 0.9379,
+      "Hanwha Life Esports": 0.8286,
+      "Dplus KIA": 0.8173,
+      "T1": 0.8325,
+      "Bilibili Gaming": 0.7559,
+      "Anyone's Legend": 0.5743,
+      "G2 Esports": 0.5082,
+      "Karmine Corp": 0.5004
+    }
+  }
+}
