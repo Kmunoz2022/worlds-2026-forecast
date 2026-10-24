@@ -119,7 +119,7 @@ def model_record(m, preds):
     cal = calibration_table(y[idx], models["Our model"][idx]).reset_index()
     calib = [{"bin": str(b), "n": int(n), "predicted": r(pr), "actual": r(a)}
              for b, n, pr, a in cal.itertuples(index=False)]
-    cl = (m["date"] >= "2023-01-01") & m["cross_league"]
+    cl = (m["date"] >= "2023-01-01") & m["cross_league"] & preds[FINAL].notna().to_numpy()
     cross = [{"model": name, **{k: r(v) for k, v in summarize(y[cl], p[cl.to_numpy()]).items()}}
              for name, p in models.items()]
     return {"by_year": by_year, "overall": overall, "calibration": calib, "cross_league": cross}
@@ -132,8 +132,9 @@ def main():
                                                                         kind="stable").reset_index(drop=True)
     tg = pd.read_parquet(PROCESSED_DIR / "team_games.parquet")
     elo = pd.read_parquet(PROCESSED_DIR / "elo_predictions.parquet")
-    preds = pd.read_parquet(PROCESSED_DIR / "model_predictions.parquet")
-    assert (preds["gameid"].to_numpy() == m["gameid"].to_numpy()).all()
+    # Out-of-sample predictions from the last full training run, lined up with the games
+    # (games added since, with --skip-train, have none; the record only uses past events).
+    preds = m[["gameid"]].merge(pd.read_parquet(PROCESSED_DIR / "model_predictions.parquet"), on="gameid", how="left")
     offsets = pd.read_parquet(PROCESSED_DIR / "elo_league_offsets.parquet")["offset"]
     offsets.index = [LEAGUE_ALIAS.get(i, i) for i in offsets.index]
     ingame = json.loads((PROCESSED_DIR / "ingame_eval.json").read_text())

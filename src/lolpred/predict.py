@@ -31,7 +31,11 @@ class MatchPredictor:
         self.model, self.features = bundle["model"], bundle["features"]
         meta = json.loads((MODELS_DIR / "game_model.json").read_text())
         self.slope = meta["calibration_slope"] if meta.get("calibrated") else 1.0
-        self.trained_through = meta["trained_through"]
+        self.trained_through = meta["trained_through"]   # when the model's weights were fitted
+        # Ratings and form are rebuilt from the current data, so they run to its last game
+        # even when the weights are older (refresh.py --skip-train).
+        self.data_through_ts = m["date"].max()
+        self.data_through = f"{self.data_through_ts:%Y-%m-%d}"
 
         self.form = self._form_snapshot(tg, elo_preds)
         self.names = (tg.sort_values("date").groupby("teamid")["teamname"].last())
