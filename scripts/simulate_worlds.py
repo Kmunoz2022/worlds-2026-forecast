@@ -106,8 +106,11 @@ def main():
     played = [(r["team_a"], r["team_b"], r["a_wins"], r["b_wins"]) for r in results if r["stage"] == "Play-In"]
     sw_results, sw_rounds = swiss_state(results, idx)
     # Games the model hasn't seen yet (played after its data ends) shift each team's form.
+    # The data stamps a game a second or so before the feed's first frame, so a match
+    # only counts as unseen if it started well after the data's last game.
+    after = f"{pred.data_through_ts + pd.Timedelta(minutes=15):%Y-%m-%dT%H:%M:%SZ}"
     unseen = [(idx[g["winner"]], idx[r["team_b"] if g["winner"] == r["team_a"] else r["team_a"]])
-              for r in results if (r.get("first_game_start") or r["start"]) > f"{pred.data_through_ts:%Y-%m-%dT%H:%M:%SZ}"
+              for r in results if (r.get("first_game_start") or r["start"]) > after
               for g in r["games"]]
     print(f"\n== tournament form: SD {0.0 if args.no_form else FORM_SD}, {len(unseen)} games newer than the model's data")
     if results:
