@@ -75,3 +75,14 @@ def test_swiss_bo1_higher_pool_plays_blue():
         tally = []
         swiss(P, POOLS, REGION, np.random.default_rng(seed), tally, round1, PB=PB)
         assert all(t[2] == 1 for t in tally[:8])
+
+
+def test_knockouts_follow_the_drawn_bracket_and_keep_results():
+    from lolpred.tournament import knockouts
+    bracket = [(0, 1), (2, 3), (4, 5), (6, 7)]
+    results = {frozenset((0, 1)): (0, 1, 3, 1), frozenset((2, 3)): (2, 3, 0, 3)}
+    for seed in range(10):
+        tally = []
+        qf_l, sf_l, ru, champ = knockouts(P, {}, REGION, np.random.default_rng(seed), tally, bracket, results)
+        assert 1 in qf_l and 2 in qf_l                       # played quarterfinals kept
+        assert {tuple(sorted(t[:2])) for t in tally[4:5]} == {(0, 3)}   # semifinal 1: winners of QF1 and QF2

@@ -53,3 +53,10 @@ def test_feed_tracker_keeps_official_presence():
 def test_not_started_before_any_game():
     t = feed_tracker(PICKS, [], {}, ["A", "B"], {}, None)
     assert {v["status"] for v in t["model"].values()} == {"not started"}
+
+
+def test_hle_t1_decided_once_one_misses_the_knockouts():
+    from lolpred.crystal_track import score
+    M = {"placements": {"Hanwha Life Esports": 9}, "ko": ["T1", "Gen.G"], "mvp": None}
+    assert score("hle_t1", "T1", M, ["T1", "Hanwha Life Esports"], {}, False)[0] == "won"
+    assert score("hle_t1", "HLE", M, ["T1", "Hanwha Life Esports"], {}, False)[0] == "lost"

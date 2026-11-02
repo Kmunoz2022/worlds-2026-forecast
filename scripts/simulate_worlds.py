@@ -105,6 +105,8 @@ def main():
     results = played_series()
     played = [(r["team_a"], r["team_b"], r["a_wins"], r["b_wins"]) for r in results if r["stage"] == "Play-In"]
     sw_results, sw_rounds = swiss_state(results, idx)
+    ko_results = {frozenset((idx[r["team_a"]], idx[r["team_b"]])): (idx[r["team_a"]], idx[r["team_b"]], r["a_wins"], r["b_wins"])
+                  for r in results if r["stage"] in ("Quarterfinals", "Semifinals", "Finals")}
     # Games the model hasn't seen yet (played after its data ends) shift each team's form.
     # The data stamps a game a second or so before the feed's first frame, so a match
     # only counts as unseen if it started well after the data's last game.
@@ -129,7 +131,7 @@ def main():
                           play_in_played=[(idx[a], idx[b], wa, wb) for a, b, wa, wb in played],
                           swiss_round1=st["swiss_round1"], swiss_results=sw_results, swiss_known_pairs=sw_rounds,
                           form_sd=0.0 if args.no_form else FORM_SD, form_games=unseen,
-                          PB=None if args.no_sides else PB)
+                          PB=None if args.no_sides else PB, ko_bracket=st["ko_bracket"], ko_results=ko_results)
         rows = []
         for n in names:
             if n in others:

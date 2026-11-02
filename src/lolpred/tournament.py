@@ -163,22 +163,40 @@ def swiss(P, pools, region, rng, tally=None, round1=None, results=None, known_pa
     return {t: (wins[t], losses[t]) for pool in pools.values() for t in pool}
 
 
-def knockouts(P, records, region, rng, tally=None):
+def knockouts(P, records, region, rng, tally=None, bracket=None, results=None):
     """records: {team: (3, losses)} for the 8 qualifiers.
+    bracket: the drawn quarterfinals, top to bottom, if known (winners of 1-2 and
+    3-4 meet in the semifinals); else drawn by Swiss record. results: series
+    already played, {frozenset((a, b)): (a, b, a_wins, b_wins)} (single
+    elimination never repeats a pairing).
     Returns (quarterfinal losers, semifinal losers, runner-up, champion)."""
-    by = defaultdict(list)
-    for t, (_, l) in records.items():
-        by[l].append(t)
-    for _ in range(100):
-        s0, s1, s2 = (list(rng.permutation(by[k])) for k in (0, 1, 2))
-        # Half 1: 3-0 vs 3-2, 3-1 vs 3-1. Half 2: 3-0 vs 3-2, 3-1 vs 3-2.
-        qf = [(s0[0], s2[0]), (s1[0], s1[1]), (s0[1], s2[1]), (s1[2], s2[2])]
-        if not any(region[a] == region[b] for a, b in qf):
-            break
-    qf_w = [play(P, a, b, 5, rng, tally)[0] for a, b in qf]
+    results = results or {}
+
+    def match(a, b):
+        known = results.get(frozenset((a, b)))
+        if known:
+            ka, kb, wa, wb = known
+            if tally is not None:
+                tally.append(known)
+            return (ka, kb) if wa > wb else (kb, ka)
+        return play(P, a, b, 5, rng, tally)
+
+    if bracket:
+        qf = [tuple(pr) for pr in bracket]
+    else:
+        by = defaultdict(list)
+        for t, (_, l) in records.items():
+            by[l].append(t)
+        for _ in range(100):
+            s0, s1, s2 = (list(rng.permutation(by[k])) for k in (0, 1, 2))
+            # Half 1: 3-0 vs 3-2, 3-1 vs 3-1. Half 2: 3-0 vs 3-2, 3-1 vs 3-2.
+            qf = [(s0[0], s2[0]), (s1[0], s1[1]), (s0[1], s2[1]), (s1[2], s2[2])]
+            if not any(region[a] == region[b] for a, b in qf):
+                break
+    qf_w = [match(a, b)[0] for a, b in qf]
     sf = [(qf_w[0], qf_w[1]), (qf_w[2], qf_w[3])]
-    sf_w = [play(P, a, b, 5, rng, tally)[0] for a, b in sf]
-    champ, runner_up = play(P, sf_w[0], sf_w[1], 5, rng, tally)
+    sf_w = [match(a, b)[0] for a, b in sf]
+    champ, runner_up = match(sf_w[0], sf_w[1])
     qf_l = [t for pair in qf for t in pair if t not in qf_w]
     sf_l = [t for t in qf_w if t not in sf_w]
     return qf_l, sf_l, runner_up, champ
@@ -186,7 +204,7 @@ def knockouts(P, records, region, rng, tally=None):
 
 def simulate(P, play_in_teams, pools, pi_slot, region, n_sims=20000, seed=0, play_in_round1=None,
              game_totals=None, outcomes=None, play_in_played=None, swiss_round1=None, swiss_results=None,
-             swiss_known_pairs=None, form_sd=0.0, form_games=None, PB=None):
+             swiss_known_pairs=None, form_sd=0.0, form_games=None, PB=None, ko_bracket=None, ko_results=None):
     """pools[4] must contain `pi_slot`, a placeholder index replaced each sim by
     the Play-In winner. Returns per-team counts and Swiss-record counts.
     If `game_totals` is a list, appends {stage: games played} for each sim.
@@ -217,7 +235,8 @@ def simulate(P, play_in_teams, pools, pi_slot, region, n_sims=20000, seed=0, pla
             if w == 3:
                 counts[t]["qualify"] += 1
         quals = {t: r for t, r in rec.items() if r[0] == 3}
-        qf_l, sf_l, ru, champ = knockouts(P, quals, region, rng, t_ko)
+        bracket = ko_bracket if ko_bracket and set(t for pr in ko_bracket for t in pr) == set(quals) else None
+        qf_l, sf_l, ru, champ = knockouts(P, quals, region, rng, t_ko, bracket, ko_results)
         if game_totals is not None:
             game_totals.append({k: sum(s[2] + s[3] for s in v)
                                 for k, v in (("play_in", t_pi), ("swiss", t_sw), ("knockouts", t_ko))})
@@ -270,4 +289,5 @@ def setup_from_config(cfg, cblol_2nd):
         "round1": [tuple(resolve(t) for t in pair) for pair in cfg.get("play_in_round1", [])] or None,
         "swiss_round1": [tuple(pi_slot if t == "PLAY_IN_WINNER" else idx[t] for t in pair)
                          for pair in cfg.get("swiss_round1", [])] or None,
+        "ko_bracket": [tuple(idx[t] for t in pair) for pair in cfg.get("knockout_bracket", [])] or None,
     }

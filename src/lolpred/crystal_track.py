@@ -124,13 +124,18 @@ def score(qid, pick, M, teams, team_regions, finished):
         return ("won" if has == yes else "lost"), ("An LCS team made knockouts." if has else
                                                    "No LCS team made knockouts."), None, None
     if qid == "hle_t1":
-        p = M["placements"]
-        if "T1" not in p or "Hanwha Life Esports" not in p:
-            return "waiting", "Decided when both teams are out (or one wins).", None, None
-        t1, hle = p["T1"], p["Hanwha Life Esports"]
-        actual = "t1" if t1 < hle else "hle" if hle < t1 else "sameplacement"
+        p, ko = M["placements"], set(M["ko"])
         mine = norm(team_name(pick, teams)) if norm(pick) not in ("sameplacement", "same") else "sameplacement"
         mine = {"hanwhalifeesports": "hle"}.get(mine, mine)
+        t1, hle = p.get("T1"), p.get("Hanwha Life Esports")
+        # Out in the Swiss stage (9th or lower) vs still in the top 8: already decided.
+        if hle is not None and t1 is None and "T1" in ko:
+            return ("won" if mine == "t1" else "lost"), f"HLE went out in the Swiss stage ({hle}th or lower); T1 made the knockouts.", None, None
+        if t1 is not None and hle is None and "Hanwha Life Esports" in ko:
+            return ("won" if mine == "hle" else "lost"), f"T1 went out in the Swiss stage ({t1}th or lower); HLE made the knockouts.", None, None
+        if t1 is None or hle is None:
+            return "waiting", "Decided when both teams are out (or one wins).", None, None
+        actual = "t1" if t1 < hle else "hle" if hle < t1 else "sameplacement"
         return ("won" if mine == actual else "lost"), f"T1 placed {t1}, HLE {hle}.", None, None
     if qid == "mvp_role":
         if not M["mvp"]:

@@ -4,8 +4,26 @@
     "knockout_teams: the 8 Swiss qualifiers (config team names). placements: final placement per team, e.g. 1, 2, 3 (semis), 5 (quarters), 9-16 by Swiss record, 17+ Play-In.",
     "finals_mvp: {\"player\": ..., \"role\": \"Top|Jungle|Mid|Bot|Support\"}. finished: true once the final is played."
   ],
-  "knockout_teams": [],
-  "placements": {},
+  "knockout_teams": [
+    "Gen.G",
+    "Dplus KIA",
+    "Invictus Gaming",
+    "Top Esports",
+    "T1",
+    "Bilibili Gaming",
+    "LYON",
+    "Karmine Corp"
+  ],
+  "placements": {
+    "LØS": 9,
+    "Movistar KOI": 9,
+    "Hanwha Life Esports": 9,
+    "CTBC Flying Oyster": 12,
+    "Team Liquid": 12,
+    "G2 Esports": 12,
+    "Team Secret Whales": 15,
+    "Anyone's Legend": 15
+  },
   "finals_mvp": null,
   "finished": false
 }

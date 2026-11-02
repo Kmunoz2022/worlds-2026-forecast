@@ -98,7 +98,7 @@ Where official draw rules weren't published I used stated approximations. I chec
 
 **Pick'em choice.** This year's pick'em asks for one team each to go 3–0, 3–1 and 3–2, plus the eight teams that advance. I picked the eight most likely to advance, then assigned the three record picks together to maximise the expected number right (the 3–1 and 3–2 slots are near ties between several teams, so this matters more than picking each slot on its own). The submitted picks were committed before the Swiss stage started.
 
-**Side selection.** In the Swiss stage the team from the higher draw pool chooses its side, and in a Bo1 teams take blue, which wins about 53% of pro games. Simulated Swiss Bo1s now put the higher-pool team on blue and use the model's side-specific chance; same-pool matches and Bo3s (sides alternate) stay side-averaged. It moves each team's chance to advance by 1–3 points.
+**Side selection, and a correction.** In the Swiss stage the higher-seeded team gets an advantage in Bo1s, so I put the higher-pool team on blue side in simulated Bo1s and in the logged predictions. The actual rule is that the higher seed chooses either side selection or first pick, and the other team gets the other. In the history the model learned from, blue side also had first pick, so "on blue" bundled both advantages and overstated the higher seed's edge by roughly half (about 4–5 points instead of 2–3 per Bo1). The logged Swiss predictions stay as they were, since the ledger is never edited; the knockouts are Bo5s and were always side-averaged.
 
 ## Crystal Ball forecasts
 

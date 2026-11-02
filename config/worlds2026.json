@@ -4,7 +4,8 @@
     "Play-In confirmed 2026-10-13: Cloud9, Karmine Corp, MVK, FURIA. Round 1: C9 vs KC, FURIA vs MVK; grand final = winners' bracket winner vs losers' bracket winner.",
     "Swiss pools confirmed by the official round-1 draw (2026-10-19): swiss_round1 lists the drawn pairs (PLAY_IN_WINNER = Karmine Corp). Later rounds are paired by record; results come from ledger/results.jsonl.",
     "cblol_2nd lists the candidates for the CBLOL #2 slot; the simulator runs one scenario per candidate.",
-    "roster_overrides: Worlds lineup changes the data can't see yet. TES top laner 369 returns (announced; added 2026-10-13); ZUIAN played Apr-Sep."
+    "roster_overrides: Worlds lineup changes the data can't see yet. TES top laner 369 returns (announced; added 2026-10-13); ZUIAN played Apr-Sep.",
+    "knockout_bracket: quarterfinals top to bottom (from the user, 2026-11-02); winners of 1-2 and 3-4 meet in the semifinals, Bo5 throughout."
   ],
   "teams": {
     "Gen.G": {
@@ -184,6 +185,24 @@
     ],
     [
       "Team Secret Whales",
+      "LYON"
+    ]
+  ],
+  "knockout_bracket": [
+    [
+      "Dplus KIA",
+      "Bilibili Gaming"
+    ],
+    [
+      "Karmine Corp",
+      "T1"
+    ],
+    [
+      "Top Esports",
+      "Invictus Gaming"
+    ],
+    [
+      "Gen.G",
       "LYON"
     ]
   ]
