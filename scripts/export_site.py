@@ -157,6 +157,7 @@ def main():
                     "round1": [[scen_name if t == "CBLOL_2ND" else t for t in pair]
                                for pair in cfg.get("play_in_round1", [])]},
         "swiss_pools": {k: v for k, v in cfg["swiss_pools"].items()},
+        "knockout_bracket": cfg.get("knockout_bracket", []),
         "leagues": league_section(m, offsets.to_dict()),
         "model_record": model_record(m, preds),
         "ingame": ingame,

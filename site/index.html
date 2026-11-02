@@ -484,6 +484,24 @@ th.grp { color: var(--ink-2); }
   .rr-pick { grid-column: 1; }
 }
 
+/* Bracket */
+.bracket { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1.25rem; }
+.bk-col { display: flex; flex-direction: column; gap: 0.75rem; }
+.bk-ms { flex: 1; display: flex; flex-direction: column; justify-content: space-around; gap: 0.875rem; }
+.bk-round { font: 650 1.25rem/1.1 var(--display); font-stretch: 75%; }
+.bk-match { display: grid; gap: 0.125rem; background: var(--surface-2); border-radius: var(--radius-s); padding: 0.625rem 0.75rem 0.75rem; }
+.bk-title { display: flex; justify-content: space-between; gap: 0.5rem; font-size: 0.75rem; color: var(--muted); padding-bottom: 0.25rem; }
+.bk-row { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 0.5rem; padding: 0.3125rem 0; font: 650 1.125rem/1.1 var(--display); font-stretch: 75%; }
+.bk-row + .bk-row { box-shadow: inset 0 1px 0 var(--rule); }
+.bk-row.won { color: var(--gold); }
+.bk-row.out { color: var(--muted); }
+.bk-v { font-size: 1.25rem; }
+.bk-row.tbd { grid-template-columns: 1fr; font: 400 0.8125rem var(--body); }
+.bk-cands { display: flex; flex-wrap: wrap; gap: 0.25rem 0.75rem; }
+.bk-cands > span { display: inline-flex; align-items: center; gap: 0.3rem; }
+.bk-match .spoiler-s, .bk-match .link-btn { justify-self: start; margin-top: 0.375rem; }
+@media (max-width: 760px) { .bracket { grid-template-columns: 1fr; } .bk-ms { justify-content: flex-start; } }
+
 /* Accessibility preferences */
 @media (prefers-reduced-motion: reduce) {
   nav a, .seg button, select, details summary::before { transition: none !important; }
@@ -511,7 +529,7 @@ th.grp { color: var(--ink-2); }
         <span class="seg-thumb" id="thumb" aria-hidden="true"></span>
         <a href="#today">Today</a>
         <a href="#pickem">Pick'em</a>
-        <a href="#playin">Play-In</a>
+        <a href="#bracket">Bracket</a>
         <a href="#crystal">Crystal Ball</a>
         <a href="#matchup">Matchup</a>
         <a href="#teams">Teams</a>
@@ -527,7 +545,7 @@ th.grp { color: var(--ink-2); }
 
 <script>
 const REGION_VAR = { LCK: "--s1", LPL: "--s2", LEC: "--s3", LCS: "--s4", LCP: "--s5", CBLOL: "--s6" };
-const PAGES = ["today", "pickem", "playin", "crystal", "matchup", "teams", "record", "about"];
+const PAGES = ["today", "pickem", "bracket", "crystal", "matchup", "teams", "record", "about"];
 let D = null;
 const state = { a: "Gen.G", b: "Bilibili Gaming", bo: 5, team: "Gen.G" };
 
@@ -684,57 +702,80 @@ function seriesBlock(a, b, bo) {
     <p class="note">Chance to win a single game: ${esc(a)} ${pct(p)}, ${esc(b)} ${pct(1 - p)}.</p>` };
 }
 
-function playinBracket() {
-  // Follow our pick in every match: openers, then winners' final, losers' round, losers' final, grand final.
-  const [[a, b], [c, d]] = D.play_in.round1;
-  const match = (x, y) => { const p = seriesWin(gameP(x, y), 5); return { x, y, p, w: p >= 0.5 ? x : y, l: p >= 0.5 ? y : x }; };
-  const m1 = match(a, b), m2 = match(c, d);
-  const ubf = match(m1.w, m2.w), lb1 = match(m1.l, m2.l);
-  const lbf = match(ubf.l, lb1.w), gf = match(ubf.w, lbf.w);
-  return [
-    ["Opening matches", [m1, m2], "Winners go to the winners' final, losers to the elimination match."],
-    ["Winners' final", [ubf], "Winner goes straight to the grand final."],
-    ["Elimination match", [lb1], "Loser is out (4th)."],
-    ["Losers' final", [lbf], "Winners' final loser vs elimination-match winner. Loser is out (3rd)."],
-    ["Grand final", [gf], "Winner joins the Swiss stage."],
-  ];
-}
-function bracketMatch(mt) {
-  const row = (t, p) => `<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;padding:6px 0;${t === mt.w ? "font-weight:600" : "color:var(--ink-2)"}">
-    <span>${teamTag(t, t, "")}${t === mt.w ? '<span class="tag">Pick</span>' : ""}</span><span class="num">${pct(p)}</span></div>`;
-  const fav = mt.w, favIsX = fav === mt.x;
-  const scores = scoreDist(gameP(mt.x, mt.y), 5).filter(d => favIsX ? d.a > d.b : d.b > d.a)
-    .map(d => ({ s: `${Math.max(d.a, d.b)}-${Math.min(d.a, d.b)}`, p: d.p })).sort((u, v) => u.s.localeCompare(v.s));
-  return `<div class="pick" style="gap:0"><span class="note">Chance to win the series</span>${row(mt.x, mt.p)}<div style="border-top:1px solid var(--rule)"></div>${row(mt.y, 1 - mt.p)}
-    <span class="note" style="padding-top:6px">Most likely ways ${esc(fav)} wins: ${scores.map(x => `${x.s} ${pct(x.p)}`).join(" · ")}</span></div>`;
-}
+/* ---------- Bracket: knockouts, title odds, Play-In results ---------- */
+const KO_STAGES = ["Quarterfinals", "Semifinals", "Finals"];
+// A played knockout or Play-In series between two teams, from record.json.
+const playedSeries = (a, b, stages) => (D.results || []).find(r => stages.includes(r.stage)
+  && ((r.team_a === a && r.team_b === b) || (r.team_a === b && r.team_b === a)));
+// The same shape as Today's match rows, so results get the same spoiler handling.
+const asMatch = r => ({ id: r.match_id, A: r.team_a, B: r.team_b, aName: r.team_a, bName: r.team_b, aw: r.a_wins, bw: r.b_wins,
+  start: new Date(r.start), block: r.stage, bo: r.best_of, games: recordGames(r.match_id) });
 
-function pagePlayin() {
+function pageBracket() {
+  const KB = D.knockout_bracket || [];
   const sim = Object.fromEntries(D.sim.map(r => [r.team, r]));
-  const teams = [...D.play_in.teams].sort((x, y) => sim[y].play_in_win - sim[x].play_in_win);
-  const max = Math.max(...teams.map(t => sim[t].play_in_win));
-  const br = playinBracket();
+  // A slot is a known team, or the possible teams from an earlier match.
+  const teamsIn = m => [m.a, m.b].flatMap(x => x.team ? [x.team] : x.cands);
+  const winnerOf = m => {
+    if (!m.a.team || !m.b.team) return { team: null, hidden: false };
+    const r = playedSeries(m.a.team, m.b.team, KO_STAGES);
+    if (!r) return { team: null, hidden: false };
+    return isShown(r.match_id) ? { team: r.winner, hidden: false } : { team: null, hidden: true };
+  };
+  const slot = (m, key) => { const w = winnerOf(m); return w.team ? { team: w.team } : { cands: teamsIn(m), key, hidden: w.hidden || m.hiddenUp }; };
+  const qf = KB.map(([a, b]) => ({ a: { team: a }, b: { team: b } }));
+  const sf = [[0, 1], [2, 3]].map(([i, j]) => {
+    const a = slot(qf[i], "semis"), b = slot(qf[j], "semis");
+    return { a, b, hiddenUp: a.hidden || b.hidden };
+  });
+  const fin = (() => { const a = slot(sf[0], "final"), b = slot(sf[1], "final"); return { a, b }; })();
+
+  // Chance to win a match = chance to reach the next round in the simulation (which
+  // includes tournament form), so every number on this page comes from one source.
+  const card = (m, title, winKey) => {
+    const both = m.a.team && m.b.team;
+    const r = both ? playedSeries(m.a.team, m.b.team, KO_STAGES) : null;
+    const shown = r && isShown(r.match_id);
+    const p = both ? sim[m.a.team][winKey] : null;
+    const wins = t => !r ? null : (r.team_a === t ? r.a_wins : r.b_wins);
+    const row = (s, pa) => {
+      if (s.team) {
+        const won = shown && r.winner === s.team;
+        return `<div class="bk-row${won ? " won" : ""}${shown && !won ? " out" : ""}">${logo(s.team, "s")}<span class="bk-nm">${esc(short(s.team))}</span>
+          <span class="num bk-v">${shown ? wins(s.team) : r ? "" : pct(pa)}</span></div>`;
+      }
+      if (s.hidden) return `<div class="bk-row tbd"><span class="muted">Winner of an earlier match (result hidden)</span></div>`;
+      return `<div class="bk-row tbd"><span class="bk-cands">${s.cands.map(t => `<span>${logo(t, "s")}${esc(short(t))} <span class="num muted">${pct(sim[t][s.key])}</span></span>`).join("")}</span></div>`;
+    };
+    return `<div class="bk-match">
+      <div class="bk-title">${title}${both && !r ? `<span class="muted">chance to win</span>` : ""}${!both ? `<span class="muted">chance to get here</span>` : ""}</div>
+      ${row(m.a, p)}${row(m.b, both ? sim[m.b.team][winKey] : null)}
+      ${r ? (shown ? `<button type="button" class="link-btn" data-hide="${esc(r.match_id)}">${EYE}Hide result</button>` : spoilerBtn(r.match_id, `Show the result of ${m.a.team} vs ${m.b.team}`, true)) : ""}
+    </div>`;
+  };
+
+  const ko = KB.map(pr => pr).flat();
+  const maxC = Math.max(...ko.map(t => sim[t].champion));
+  const piResults = (D.results || []).filter(r => r.stage === "Play-In");
   return `
-  <section class="page" id="playin">
-    <div class="lede"><h2>Play-In</h2>
-      <p>Four teams, double elimination, every match best of five. The winners' bracket winner meets the losers' bracket winner in a grand final, and only the winner joins the Swiss stage.</p></div>
-    <div class="panel">
-      <div class="panel-head"><h3>Predicted bracket</h3><span class="note">Our pick in every match, and each team's chance to win that series</span></div>
-      <div class="grid-2" style="grid-template-columns:repeat(auto-fit,minmax(220px,1fr))">
-        ${br.map(([title, ms, note]) => `<div style="display:grid;gap:8px;align-content:start">
-          <h3 style="font-size:16px;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-2)">${title}</h3>
-          ${ms.map(bracketMatch).join("")}<span class="note">${note}</span></div>`).join("")}
+  <section class="page" id="bracket">
+    <div class="lede"><h2>Bracket</h2>
+      <p>The knockout stage: eight teams, single elimination, every match best of five. Each match shows both teams' chances to win it; later rounds show who could get there.</p></div>
+    ${KB.length ? `<div class="panel bracket-panel">
+      <div class="bracket">
+        <div class="bk-col"><h3 class="bk-round">Quarterfinals</h3><div class="bk-ms">${qf.map((m, i) => card(m, `Quarterfinal ${i + 1}`, "semis")).join("")}</div></div>
+        <div class="bk-col"><h3 class="bk-round">Semifinals</h3><div class="bk-ms">${sf.map((m, i) => card(m, `Semifinal ${i + 1}`, "final")).join("")}</div></div>
+        <div class="bk-col"><h3 class="bk-round">Final</h3><div class="bk-ms">${card(fin, "Final", "champion")}</div></div>
       </div>
-      <p class="note">Each later match assumes our earlier picks came true. If an upset happens, the Matchup tab gives the odds for whoever actually meets.</p>
     </div>
     <div class="panel">
-      <div class="panel-head"><h3>Chance to win the Play-In</h3><span class="note">Over every possible path through the bracket</span></div>
-      <div class="hbars">${teams.map(t => `<div class="hbar">${teamCell(t)}
-        <span class="track"><span class="fill" style="display:block;width:${sim[t].play_in_win / max * 100}%;background:var(--s1)"></span></span>
-        <span class="v">${pct(sim[t].play_in_win)}</span></div>`).join("")}</div>
-    </div>
-    <h3>Opening matches in detail</h3>
-    <div class="grid-2">${D.play_in.round1.map(([a, b]) => `<div class="panel match">${seriesBlock(a, b, 5).html}</div>`).join("")}</div>
+      <div class="panel-head"><h3>Chance to win Worlds</h3><span class="note">Share of 20,000 simulated knockout stages</span></div>
+      <div class="hbars">${[...ko].sort((x, y) => sim[y].champion - sim[x].champion).map(t => `<div class="hbar">${teamCell(t)}
+        <span class="track"><span class="fill" style="display:block;width:${sim[t].champion / maxC * 100}%;background:var(--gold-line)"></span></span>
+        <span class="v">${pct(sim[t].champion, sim[t].champion < 0.1 ? 1 : 0)}</span></div>`).join("")}</div>
+    </div>` : `<p class="muted">The knockout bracket is set when the Swiss stage ends.</p>`}
+    ${piResults.length ? `<div class="sec-row"><h3 class="sec">Play-In results</h3><span class="note">Double elimination, best of five. Karmine Corp went through.</span></div>
+    <div class="panel results">${piResults.map(r => resultRow(asMatch(r))).join("")}</div>` : ""}
   </section>`;
 }
 
@@ -1604,6 +1645,7 @@ function setShown(ids, on) {
   try { localStorage.setItem("shown", JSON.stringify([...SPOIL.shown])); } catch (e) { /* private mode */ }
   renderMatches();
   renderRec26();
+  if (current === "bracket") app.innerHTML = pageBracket();
 }
 const EYE = `<svg class="eye" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M3 3l18 18M10.6 5.1A9.9 9.9 0 0 1 12 5c5 0 8.6 3.6 10 7-.5 1.2-1.3 2.5-2.4 3.6M6.6 6.6C4.6 7.9 3 9.9 2 12c1.4 3.4 5 7 10 7 1.9 0 3.6-.5 5-1.4M9.9 9.9a3 3 0 0 0 4.2 4.2" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
 const spoilerBtn = (id, label, small) => `<button type="button" class="spoiler${small ? " spoiler-s" : ""}" data-reveal="${esc(id)}" aria-label="${esc(label)}">
@@ -1765,9 +1807,10 @@ const appX = makeSpring(0, v => {
 let current = null, enterFrom = null;
 
 /* ---------- router ---------- */
-const RENDER = { today: pageToday, pickem: pagePickem, playin: pagePlayin, crystal: pageCrystal, matchup: pageMatchup, teams: pageTeams, record: pageRecord, about: pageAbout };
+const RENDER = { today: pageToday, pickem: pagePickem, bracket: pageBracket, crystal: pageCrystal, matchup: pageMatchup, teams: pageTeams, record: pageRecord, about: pageAbout };
 function route() {
   let id = location.hash.slice(1);
+  if (id === "playin") id = "bracket";   // old links
   if (!PAGES.includes(id)) id = "today";
   const prev = current;
   current = id;
