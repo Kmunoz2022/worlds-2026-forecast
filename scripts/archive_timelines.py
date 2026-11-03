@@ -43,11 +43,27 @@ def get(url):
 
 
 def events(league, since):
-    d = get(f"{livefeed.API}/getSchedule?hl=en-US&leagueId={LEAGUE_IDS[league]}")
-    evs = (d or {}).get("data", {}).get("schedule", {}).get("events", [])
+    """Matches since `since`, paging back through the schedule (about 80 per page)."""
+    evs, token = [], None
+    for _ in range(40):
+        url = f"{livefeed.API}/getSchedule?hl=en-US&leagueId={LEAGUE_IDS[league]}" + (f"&pageToken={token}" if token else "")
+        sc = ((get(url) or {}).get("data") or {}).get("schedule") or {}
+        page = sc.get("events", [])
+        evs += page
+        token = (sc.get("pages") or {}).get("older")
+        if not token or not page or min(e["startTime"] for e in page) < since:
+            break
     # Matches still being played count too: their finished games are archived.
-    return [e for e in evs if e.get("type") == "match" and e["state"] in ("completed", "inProgress")
-            and e["startTime"] >= since]
+    seen, out = set(), []
+    for e in evs:
+        mid = (e.get("match") or {}).get("id")
+        if e.get("type") == "match" and e["state"] in ("completed", "inProgress") and e["startTime"] >= since and mid not in seen:
+            seen.add(mid)
+            out.append(e)
+    return out
+
+
+LITE = False  # --lite: team totals and the window's player stats only (no items/wards request)
 
 
 def sample(gid, at):
@@ -61,8 +77,14 @@ def sample(gid, at):
              for side in ("blue", "red")}
     teams["blue"]["dragon_types"] = f["blueTeam"]["dragons"]
     teams["red"]["dragon_types"] = f["redTeam"]["dragons"]
-    d = get(f"{livefeed.FEED}/details/{gid}?startingTime={livefeed.ts(at)}")
     players = {}
+    if LITE:
+        for side in ("blue", "red"):
+            for p in f[f"{side}Team"]["participants"]:
+                players[p["participantId"]] = {k: p.get(k) for k in ("totalGold", "level", "kills", "deaths", "assists",
+                                                                     "creepScore", "currentHealth", "maxHealth")}
+        return {"t": f["rfc460Timestamp"], "state": f["gameState"], "teams": teams, "players": players}
+    d = get(f"{livefeed.FEED}/details/{gid}?startingTime={livefeed.ts(at)}")
     if d and d.get("frames"):
         for p in d["frames"][-1]["participants"]:
             players[p["participantId"]] = {k: p.get(k) for k in PLAYER_KEYS} | {"items": p.get("items", [])}
@@ -110,7 +132,13 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--league", nargs="+", default=["worlds"], choices=sorted(LEAGUE_IDS))
     ap.add_argument("--since", default="2026-01-01")
+    ap.add_argument("--lite", action="store_true", help="skip per-player items/wards (half the requests; for backfills)")
+    ap.add_argument("--out", help="save into this folder instead of Data/timelines")
     args = ap.parse_args()
+    global LITE, OUT
+    LITE = args.lite
+    if args.out:
+        OUT = Path(args.out)
     for league in args.league:
         for e in events(league, args.since):
             det = livefeed.event_details(e["match"]["id"])
