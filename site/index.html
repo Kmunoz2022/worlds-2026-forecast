@@ -365,6 +365,9 @@ h3.sec { font-size: 0.8125rem; font-weight: 600; letter-spacing: 0.06em; color: 
 .row-toggle::after { content: ""; width: 0.375rem; height: 0.375rem; border-right: 2px solid currentColor; border-bottom: 2px solid currentColor;
   transform: rotate(45deg) translateY(-2px); transition: transform .2s ease; margin-left: 0.125rem; }
 .row-toggle[aria-expanded="true"]::after { transform: rotate(-135deg) translate(-2px, 0); }
+.calib-pair { display: grid; grid-template-columns: minmax(0, 380px) minmax(0, 1fr); gap: 1.25rem; align-items: center; }
+.calib-fig { display: grid; gap: 0.5rem; }
+@media (max-width: 760px) { .calib-pair { grid-template-columns: 1fr; } }
 tr.detail-row td { background: var(--paper); padding: 0.5rem; white-space: normal; }
 tr.detail-row .games { background: var(--surface-2); }
 .games-dd[open] summary { margin-bottom: 0.5rem; }
@@ -1101,17 +1104,22 @@ function liveRecord() {
       <thead><tr><th class="l">Moment</th><th>Picked the winner</th><th>Games</th></tr></thead>
       <tbody>${L.by_minute.map(r => `<tr><td class="l">${r.minute ? r.minute + " minutes in" : "Before the game"}</td><td>${bar(r.call_accuracy)}</td><td class="num">${r.calls}</td></tr>`).join("")}</tbody>
     </table></div>
+    <div class="calib-pair">
+    <div class="calib-fig"><div class="chart" id="live-calib"></div>
+      <span class="legend"><span><i style="background:var(--s1)"></i>Live model</span><span><i style="background:var(--axis)"></i>Perfect</span></span></div>
     <div class="tbl-wrap"><table>
       <thead><tr><th class="l">Live model gave the favourite</th><th>Its average chance</th><th>Favourite won</th><th>Calls</th></tr></thead>
       <tbody>${L.calibration.map(c => `<tr><td class="l">${Math.round(c.from * 100)}–${Math.round(c.to * 100)}%</td><td class="num">${pct(c.said, 1)}</td><td>${bar(c.won)}</td><td class="num">${c.n.toLocaleString()}</td></tr>`).join("")}</tbody>
     </table></div>
-    <p class="note">If the live model is honest, "Favourite won" matches "Its average chance" in every row. Calls are worked out from the official live feed after each game, with the same model and pre-game odds the site showed, and saved to a public append-only file (ledger/live_calls.jsonl).</p>
+    </div>
+    <p class="note">If the live model is honest, the points sit on the diagonal and "Favourite won" matches "Its average chance" in every row. Points below the line mean the favourite won less often than predicted: the model was overconfident there. Calls within one game are related, so treat each row as worth fewer independent results than its count. Calls are worked out from the official live feed after each game, with the same model and pre-game odds the site showed, and saved to a public append-only file (ledger/live_calls.jsonl).</p>
   </div>`;
 }
 
-function renderCalib() {
-  const el = $("#calib"); if (!el) return;
-  const c = D.model_record.calibration, W = 380, H = 260, m = { l: 44, r: 26, t: 12, b: 34 };
+// Reliability chart: the favourite's predicted chance (x) against how often it won (y).
+// Points on the diagonal mean the percentages were honest.
+function calibChart(el, pts, unit) {
+  const W = 380, H = 260, m = { l: 44, r: 26, t: 12, b: 34 };
   const X = v => m.l + (v - 0.5) / 0.5 * (W - m.l - m.r), Y = v => H - m.b - (v - 0.5) / 0.5 * (H - m.t - m.b);
   const ticks = [0.5, 0.6, 0.7, 0.8, 0.9, 1];
   el.innerHTML = `<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="Calibration: predicted vs actual favourite win rate">
@@ -1119,13 +1127,19 @@ function renderCalib() {
     <line class="base" x1="${m.l}" x2="${W - m.r}" y1="${H - m.b}" y2="${H - m.b}"/>
     <line x1="${X(0.5)}" y1="${Y(0.5)}" x2="${X(1)}" y2="${Y(1)}" stroke="var(--axis)" stroke-width="2"/>
     <text x="${(m.l + W - m.r) / 2}" y="${H - 2}" text-anchor="middle">Predicted chance for the favourite</text>
-    ${c.map(p => `<circle class="pt" cx="${X(p.predicted)}" cy="${Y(Math.max(0.5, p.actual))}" r="5" fill="var(--s1)" stroke="var(--ring)" stroke-width="2" tabindex="0"
-      data-tip="${p.n} games · predicted ${pct(p.predicted, 1)} · won ${pct(p.actual, 1)}"/>`).join("")}
+    ${pts.map(p => `<circle class="pt" cx="${X(p.x)}" cy="${Y(Math.max(0.5, p.y))}" r="5" fill="var(--s1)" stroke="var(--ring)" stroke-width="2" tabindex="0"
+      data-tip="${p.n.toLocaleString()} ${unit} · predicted ${pct(p.x, 1)} · won ${pct(p.y, 1)}"/>`).join("")}
   </svg>`;
   el.querySelectorAll(".pt").forEach(pt => {
     pt.addEventListener("pointerenter", ev => showTip(pt.dataset.tip, ev));
     pt.addEventListener("pointerleave", hideTip);
   });
+}
+function renderCalib() {
+  const el = $("#calib");
+  if (el) calibChart(el, D.model_record.calibration.map(p => ({ x: p.predicted, y: p.actual, n: p.n })), "games");
+  const lv = $("#live-calib");
+  if (lv && D.liveRecord && D.liveRecord.calibration) calibChart(lv, D.liveRecord.calibration.map(c => ({ x: c.said, y: c.won, n: c.n })), "calls");
 }
 
 function pageAbout() {
@@ -1138,7 +1152,6 @@ function pageAbout() {
     <section><h3>Series and tournaments</h3><p>Games in a series aren't independent: sweeps happen far more often than coin-flip maths says. Each series draws a slightly different edge for the matchup, which matches real Bo3 and Bo5 score patterns. The tournament is simulated ${D.meta.sims.toLocaleString()} times: Play-In, then Swiss, then knockouts.</p></section>
     <section><h3>What it doesn't know</h3><ul>
       <li>Roster news after the last game played. Top Esports' top laner 369 returning is not in the data.</li>
-      <li>Knockout seeding rules. The bracket follows last year's structure.</li>
       <li>Scrim results, patch changes for Worlds, and draft. It doesn't use betting odds.</li>
     </ul></section>
     <section><h3>Accuracy</h3><p>On the last four Worlds the model picked ${pct(D.model_record.overall[0].accuracy, 1)} of winners, with well-calibrated probabilities. That's close to the ceiling for pre-game predictions at Worlds, where many matches are near coin flips. See Model record.</p></section>
