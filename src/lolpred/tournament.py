@@ -204,7 +204,8 @@ def knockouts(P, records, region, rng, tally=None, bracket=None, results=None):
 
 def simulate(P, play_in_teams, pools, pi_slot, region, n_sims=20000, seed=0, play_in_round1=None,
              game_totals=None, outcomes=None, play_in_played=None, swiss_round1=None, swiss_results=None,
-             swiss_known_pairs=None, form_sd=0.0, form_games=None, PB=None, ko_bracket=None, ko_results=None):
+             swiss_known_pairs=None, form_sd=0.0, form_games=None, PB=None, ko_bracket=None, ko_results=None,
+             ko_h2h=None):
     """pools[4] must contain `pi_slot`, a placeholder index replaced each sim by
     the Play-In winner. Returns per-team counts and Swiss-record counts.
     If `game_totals` is a list, appends {stage: games played} for each sim.
@@ -237,6 +238,12 @@ def simulate(P, play_in_teams, pools, pi_slot, region, n_sims=20000, seed=0, pla
         quals = {t: r for t, r in rec.items() if r[0] == 3}
         bracket = ko_bracket if ko_bracket and set(t for pr in ko_bracket for t in pr) == set(quals) else None
         qf_l, sf_l, ru, champ = knockouts(P, quals, region, rng, t_ko, bracket, ko_results)
+        if ko_h2h is not None:   # knockout meetings: {(lo, hi): [times met, wins for lo]}
+            for a, b, wa, wb in t_ko:
+                lo, hi = min(a, b), max(a, b)
+                rec = ko_h2h.setdefault((lo, hi), [0, 0])
+                rec[0] += 1
+                rec[1] += int((wa > wb) == (a == lo))
         if game_totals is not None:
             game_totals.append({k: sum(s[2] + s[3] for s in v)
                                 for k, v in (("play_in", t_pi), ("swiss", t_sw), ("knockouts", t_ko))})

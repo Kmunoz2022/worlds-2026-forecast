@@ -158,6 +158,7 @@ def main():
                                for pair in cfg.get("play_in_round1", [])]},
         "swiss_pools": {k: v for k, v in cfg["swiss_pools"].items()},
         "knockout_bracket": cfg.get("knockout_bracket", []),
+        "ko_h2h": scen.get("ko_h2h", {}),
         "leagues": league_section(m, offsets.to_dict()),
         "model_record": model_record(m, preds),
         "ingame": ingame,

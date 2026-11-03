@@ -500,6 +500,15 @@ th.grp { color: var(--ink-2); }
 .bk-row.out { color: var(--muted); }
 .bk-v { font-size: 1.25rem; }
 .bk-row.tbd { grid-template-columns: 1fr; font: 400 0.8125rem var(--body); }
+.bk-row.pred .bk-nm { color: var(--ink-2); }
+.bk-nm { display: inline-flex; align-items: center; gap: 0.5rem; }
+.pick-tag { font: 600 0.625rem var(--body); color: var(--gold); background: var(--gold-soft); border-radius: 4px; padding: 0.125rem 0.375rem; letter-spacing: 0; }
+.bk-match.predicted { background: transparent; box-shadow: inset 0 0 0 1px var(--rule); }
+.bk-reach { display: flex; flex-wrap: wrap; gap: 0.125rem 0.625rem; font-size: 0.75rem; color: var(--muted); padding-top: 0.375rem; }
+.bk-champ { display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem; border-radius: var(--radius-s); box-shadow: inset 0 0 0 1px var(--gold-line); }
+.bk-champ .logo { width: 2.5rem; height: 2.5rem; }
+.bk-champ > span { display: grid; font-size: 0.75rem; }
+.bk-champ b { font: 700 1.5rem/1.1 var(--display); font-stretch: 75%; color: var(--gold); }
 .bk-cands { display: flex; flex-wrap: wrap; gap: 0.25rem 0.75rem; }
 .bk-cands > span { display: inline-flex; align-items: center; gap: 0.3rem; }
 .bk-match .spoiler-s, .bk-match .link-btn { justify-self: start; margin-top: 0.375rem; }
@@ -717,58 +726,71 @@ const asMatch = r => ({ id: r.match_id, A: r.team_a, B: r.team_b, aName: r.team_
 function pageBracket() {
   const KB = D.knockout_bracket || [];
   const sim = Object.fromEntries(D.sim.map(r => [r.team, r]));
-  // A slot is a known team, or the possible teams from an earlier match.
-  const teamsIn = m => [m.a, m.b].flatMap(x => x.team ? [x.team] : x.cands);
-  const winnerOf = m => {
-    if (!m.a.team || !m.b.team) return { team: null, hidden: false };
-    const r = playedSeries(m.a.team, m.b.team, KO_STAGES);
-    if (!r) return { team: null, hidden: false };
-    return isShown(r.match_id) ? { team: r.winner, hidden: false } : { team: null, hidden: true };
+  // A's chance to beat B if they meet in the knockouts: counted from the simulated
+  // tournaments where they did meet (includes tournament form), else the series maths.
+  const h2h = (a, b) => {
+    const ab = (D.ko_h2h || {})[`${a}|${b}`], ba = (D.ko_h2h || {})[`${b}|${a}`];
+    if (ab && ab[0] >= 200) return ab[1] / ab[0];
+    if (ba && ba[0] >= 200) return 1 - ba[1] / ba[0];
+    return seriesWin(gameP(a, b), 5);
   };
-  const slot = (m, key) => { const w = winnerOf(m); return w.team ? { team: w.team } : { cands: teamsIn(m), key, hidden: w.hidden || m.hiddenUp }; };
-  const qf = KB.map(([a, b]) => ({ a: { team: a }, b: { team: b } }));
-  const sf = [[0, 1], [2, 3]].map(([i, j]) => {
-    const a = slot(qf[i], "semis"), b = slot(qf[j], "semis");
-    return { a, b, hiddenUp: a.hidden || b.hidden };
-  });
-  const fin = (() => { const a = slot(sf[0], "final"), b = slot(sf[1], "final"); return { a, b }; })();
+  // Who comes out of a match: the real winner once revealed; otherwise our pick
+  // (the favourite of that match), marked as predicted.
+  const outOf = (m, key) => {
+    const real = m.a.team && m.b.team && !m.a.predicted && !m.b.predicted ? playedSeries(m.a.team, m.b.team, KO_STAGES) : null;
+    if (real && isShown(real.match_id)) return { team: real.winner, cands: [real.winner], key };
+    if (real) return { hidden: true, cands: m.cands, key };
+    if (m.a.hidden || m.b.hidden) return { hidden: true, cands: m.cands, key };
+    const pick = m.pA >= 0.5 ? m.a.team : m.b.team;
+    return { team: pick, predicted: true, cands: m.cands, key };
+  };
+  const build = (a, b) => {
+    const m = { a, b, cands: [...(a.cands || [a.team]), ...(b.cands || [b.team])] };
+    m.pA = a.team && b.team ? h2h(a.team, b.team) : null;
+    return m;
+  };
+  const qf = KB.map(([a, b]) => build({ team: a, cands: [a] }, { team: b, cands: [b] }));
+  const sf = [[0, 1], [2, 3]].map(([i, j]) => build(outOf(qf[i], "semis"), outOf(qf[j], "semis")));
+  const fin = build(outOf(sf[0], "final"), outOf(sf[1], "final"));
+  const champ = outOf(fin, "champion");
 
-  // Chance to win a match = chance to reach the next round in the simulation (which
-  // includes tournament form), so every number on this page comes from one source.
   const card = (m, title, winKey) => {
-    const both = m.a.team && m.b.team;
-    const r = both ? playedSeries(m.a.team, m.b.team, KO_STAGES) : null;
+    const real = !m.a.predicted && !m.b.predicted && m.a.team && m.b.team;
+    const r = real ? playedSeries(m.a.team, m.b.team, KO_STAGES) : null;
     const shown = r && isShown(r.match_id);
-    const p = both ? sim[m.a.team][winKey] : null;
+    const predicted = m.a.predicted || m.b.predicted;
+    // Both teams known for real: chance to win = chance to reach the next round.
+    const pa = real ? sim[m.a.team][winKey] : m.pA, pb = real ? sim[m.b.team][winKey] : (m.pA == null ? null : 1 - m.pA);
     const wins = t => !r ? null : (r.team_a === t ? r.a_wins : r.b_wins);
-    const row = (s, pa) => {
-      if (s.team) {
-        const won = shown && r.winner === s.team;
-        return `<div class="bk-row${won ? " won" : ""}${shown && !won ? " out" : ""}">${logo(s.team, "s")}<span class="bk-nm">${esc(short(s.team))}</span>
-          <span class="num bk-v">${shown ? wins(s.team) : r ? "" : pct(pa)}</span></div>`;
-      }
+    const row = (s, pp) => {
       if (s.hidden) return `<div class="bk-row tbd"><span class="muted">Winner of an earlier match (result hidden)</span></div>`;
-      return `<div class="bk-row tbd"><span class="bk-cands">${s.cands.map(t => `<span>${logo(t, "s")}${esc(short(t))} <span class="num muted">${pct(sim[t][s.key])}</span></span>`).join("")}</span></div>`;
+      const won = shown && r.winner === s.team;
+      return `<div class="bk-row${won ? " won" : ""}${shown && !won ? " out" : ""}${s.predicted ? " pred" : ""}">${logo(s.team, "s")}
+        <span class="bk-nm">${esc(short(s.team))}${s.predicted ? `<span class="pick-tag">our pick</span>` : ""}</span>
+        <span class="num bk-v">${shown ? wins(s.team) : r ? "" : pp == null ? "" : pct(pp)}</span></div>`;
     };
-    return `<div class="bk-match">
-      <div class="bk-title">${title}${both && !r ? `<span class="muted">chance to win</span>` : ""}${!both ? `<span class="muted">chance to get here</span>` : ""}</div>
-      ${row(m.a, p)}${row(m.b, both ? sim[m.b.team][winKey] : null)}
+    // Everyone who could still be in this match, with their chance to get here.
+    const others = predicted ? m.cands : [], reachKey = winKey === "final" ? "semis" : "final";
+    return `<div class="bk-match${predicted ? " predicted" : ""}">
+      <div class="bk-title">${title}<span class="muted">${r ? "" : predicted ? "if they meet" : "chance to win"}</span></div>
+      ${row(m.a, pa)}${row(m.b, pb)}
+      ${predicted ? `<div class="bk-reach">Chance to get here: ${others.map(t => `<span>${esc(short(t))} <span class="num">${pct(sim[t][reachKey])}</span></span>`).join("")}</div>` : ""}
       ${r ? (shown ? `<button type="button" class="link-btn" data-hide="${esc(r.match_id)}">${EYE}Hide result</button>` : spoilerBtn(r.match_id, `Show the result of ${m.a.team} vs ${m.b.team}`, true)) : ""}
     </div>`;
   };
-
   const ko = KB.map(pr => pr).flat();
   const maxC = Math.max(...ko.map(t => sim[t].champion));
   const piResults = (D.results || []).filter(r => r.stage === "Play-In");
   return `
   <section class="page" id="bracket">
     <div class="lede"><h2>Bracket</h2>
-      <p>The knockout stage: eight teams, single elimination, every match best of five. Each match shows both teams' chances to win it; later rounds show who could get there.</p></div>
+      <p>The knockout stage: eight teams, single elimination, every match best of five. Later rounds play forward with our pick from each earlier match, with the chance to win if those two teams meet; real winners replace our picks as results are revealed.</p></div>
     ${KB.length ? `<div class="panel bracket-panel">
       <div class="bracket">
         <div class="bk-col"><h3 class="bk-round">Quarterfinals</h3><div class="bk-ms">${qf.map((m, i) => card(m, `Quarterfinal ${i + 1}`, "semis")).join("")}</div></div>
         <div class="bk-col"><h3 class="bk-round">Semifinals</h3><div class="bk-ms">${sf.map((m, i) => card(m, `Semifinal ${i + 1}`, "final")).join("")}</div></div>
-        <div class="bk-col"><h3 class="bk-round">Final</h3><div class="bk-ms">${card(fin, "Final", "champion")}</div></div>
+        <div class="bk-col"><h3 class="bk-round">Final</h3><div class="bk-ms">${card(fin, "Final", "champion")}
+          ${champ.team ? `<div class="bk-champ">${logo(champ.team)}<span><span class="muted">${champ.predicted ? "Our pick to win Worlds" : "World champion"}</span><b>${esc(champ.team)}</b></span></div>` : ""}</div></div>
       </div>
     </div>
     <div class="panel">

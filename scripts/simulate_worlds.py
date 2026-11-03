@@ -125,13 +125,14 @@ def main():
         others = [c for c in cfg["cblol_2nd"] if c != cand]
         st = setup_from_config(cfg, cand)
         play_in, pools, round1 = st["play_in"], st["pools"], st["round1"]
-        totals = []
+        totals, h2h = [], {}
         counts = simulate(P, play_in, pools, pi_slot, region, n_sims=args.sims, seed=0,
                           play_in_round1=round1, game_totals=totals,
                           play_in_played=[(idx[a], idx[b], wa, wb) for a, b, wa, wb in played],
                           swiss_round1=st["swiss_round1"], swiss_results=sw_results, swiss_known_pairs=sw_rounds,
                           form_sd=0.0 if args.no_form else FORM_SD, form_games=unseen,
-                          PB=None if args.no_sides else PB, ko_bracket=st["ko_bracket"], ko_results=ko_results)
+                          PB=None if args.no_sides else PB, ko_bracket=st["ko_bracket"], ko_results=ko_results,
+                          ko_h2h=h2h)
         rows = []
         for n in names:
             if n in others:
@@ -150,7 +151,9 @@ def main():
         picks = pickem({n: {"3-0": r["3-0"], "0-3": r["0-3"], "qualify": r["qualify"]}
                         for n, r in df.iterrows() if r["reach_swiss"] > 0.99})
         scenarios[cand] = {"table": df, "pickem": picks,
-                           "games": {k: [t[k] for t in totals] for k in ("play_in", "swiss", "knockouts")}}
+                           "games": {k: [t[k] for t in totals] for k in ("play_in", "swiss", "knockouts")},
+                           # knockout matchups: how often each pair met, and how often the first-named won
+                           "ko_h2h": {f"{names[a]}|{names[b]}": v for (a, b), v in h2h.items()}}
         show = df.drop(columns=["record_given_swiss"]).copy()
         pct = show.columns.drop("region")
         show[pct] = (show[pct].astype(float) * 100).round(1)
@@ -179,7 +182,7 @@ def main():
                          "strength": float(info.loc[n, "strength"]),
                          "avg_game_win": float(info.loc[n, "avg_game_win%"]) / 100} for n in names},
            "game_prob": {a: {b: float(P[idx[a], idx[b]]) for b in names if b != a} for a in names},
-           "scenarios": {k: {"pickem": v["pickem"], "games_per_sim": v["games"],
+           "scenarios": {k: {"pickem": v["pickem"], "games_per_sim": v["games"], "ko_h2h": v["ko_h2h"],
                              "teams": json.loads(v["table"].reset_index().to_json(orient="records"))}
                          for k, v in scenarios.items()}}
     OUT_JSON.write_text(json.dumps(out, indent=2, ensure_ascii=False))
