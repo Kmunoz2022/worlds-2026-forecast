@@ -20,7 +20,7 @@ This module only needs the standard library (numpy only to make a prediction).
 import json
 import math
 import re
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 from . import livefeed
 from .config import ROOT
@@ -68,11 +68,11 @@ def append_jsonl(path, entries: list[dict]) -> None:
 
 
 def now_utc() -> str:
-    return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+    return datetime.now(UTC).strftime("%Y-%m-%dT%H:%M:%SZ")
 
 
 def iso(dt: datetime) -> str:
-    return dt.astimezone(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+    return dt.astimezone(UTC).strftime("%Y-%m-%dT%H:%M:%SZ")
 
 
 # ---------- pure helpers (tested) ----------
@@ -258,6 +258,11 @@ def build_record(open_stages: set | None = None) -> dict:
             "crystal": crystal()}
 
 
+def _side(stats: dict, side: str) -> list[dict]:
+    """One side's players in a game_stats row."""
+    return [p for p in stats["players"] if p["side"] == side]
+
+
 def with_game_details(results: list[dict], stats: list[dict]) -> list[dict]:
     """Copies of the results with each game's champions, kills (blue, red) and
     length added from the game stats, for the site's game-by-game lists."""
@@ -268,10 +273,9 @@ def with_game_details(results: list[dict], stats: list[dict]) -> list[dict]:
         for g in r["games"]:
             st, g = by_id.get(g["game_id"]), dict(g)
             if st:
-                side = lambda s: [p for p in st["players"] if p["side"] == s]  # noqa: E731
                 g.update(minutes=round(st["duration_s"] / 60, 1),
-                         champs=[[p["champion"] for p in side(s)] for s in ("blue", "red")],
-                         kills=[sum(p["kills"] for p in side(s)) for s in ("blue", "red")])
+                         champs=[[p["champion"] for p in _side(st, s)] for s in ("blue", "red")],
+                         kills=[sum(p["kills"] for p in _side(st, s)) for s in ("blue", "red")])
             games.append(g)
         out.append(dict(r, games=games))
     return out
@@ -332,7 +336,7 @@ def match_result(data: dict, e: dict) -> dict | None:
     if not A or not B:
         return None
     aw, bw = (ta.get("result") or {}).get("gameWins", 0), (tb.get("result") or {}).get("gameWins", 0)
-    after = datetime.now(timezone.utc) - timedelta(seconds=90)
+    after = datetime.now(UTC) - timedelta(seconds=90)
     games = []
     for g in sorted((g for g in det["match"]["games"] if g["state"] == "completed"), key=lambda g: g["number"]):
         w = livefeed.final_frames(g["id"], after)
@@ -450,7 +454,7 @@ def game_live_calls(data: dict, result: dict, game: dict, scan: dict) -> dict:
 def game_stats(result: dict, game: dict, scan: dict) -> dict | None:
     """End-of-game player stats for the Crystal Ball tracker."""
     end = livefeed.parse_ts(game["end"])
-    w = livefeed.final_frames(game["game_id"], datetime.now(timezone.utc) - timedelta(seconds=90))
+    w = livefeed.final_frames(game["game_id"], datetime.now(UTC) - timedelta(seconds=90))
     d = livefeed._get(f"{livefeed.FEED}/details/{game['game_id']}?startingTime={livefeed.ts(end - timedelta(seconds=20))}")
     if not w or not d or not d.get("frames"):
         return None
@@ -477,7 +481,7 @@ def update(log=print) -> dict:
     data = json.loads(SITE_DATA.read_text())
     cfg = json.loads(CONFIG.read_text())
     events = worlds_events(data)
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
 
     new_preds = log_upcoming(data, cfg, events, read_jsonl(PREDICTIONS), now, read_jsonl(RESULTS))
     append_jsonl(PREDICTIONS, new_preds)

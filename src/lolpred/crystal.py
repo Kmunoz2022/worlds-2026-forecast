@@ -185,7 +185,7 @@ def simulate_players(outcomes, names, pools, P, length_model, seed=0):
                             for j, pos in enumerate(POSITIONS):
                                 final_line[pos] = final_line.get(pos, np.zeros(3)) + sw[j, [K, D, A]]
                         else:
-                            for j, pos in enumerate(POSITIONS):
+                            for pos in POSITIONS:
                                 final_line.setdefault(pos, np.zeros(3))
         played = games > 0
         kda = np.where(played, (tot[:, K] + tot[:, A]) / np.maximum(tot[:, D], 1), -1)

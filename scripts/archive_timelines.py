@@ -20,7 +20,7 @@ import gzip
 import json
 import sys
 import time
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -96,7 +96,7 @@ def archive_game(event, game):
     path = OUT / f"{gid}.json.gz"
     if path.exists():
         return "skip"
-    end_w = livefeed.final_frames(gid, datetime.now(timezone.utc) - timedelta(seconds=90))
+    end_w = livefeed.final_frames(gid, datetime.now(UTC) - timedelta(seconds=90))
     if not end_w:
         return "no stats"
     meta = end_w["gameMetadata"]

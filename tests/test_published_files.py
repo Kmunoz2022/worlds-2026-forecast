@@ -23,8 +23,8 @@ def test_game_probabilities_are_complementary():
 
 
 def test_sided_probabilities_are_valid():
-    for a, row in DATA["live"]["p_blue"].items():
-        for b, p in row.items():
+    for row in DATA["live"]["p_blue"].values():
+        for p in row.values():
             assert 0 < p < 1
 
 
@@ -34,7 +34,7 @@ def test_live_model_shape():
 
 
 def test_predictions_ledger_is_well_formed_and_in_time_order():
-    lines = [json.loads(l) for l in (LEDGER / "predictions.jsonl").read_text().splitlines() if l.strip()]
+    lines = [json.loads(line) for line in (LEDGER / "predictions.jsonl").read_text().splitlines() if line.strip()]
     assert lines
     times = [e["predicted_at"] for e in lines]
     assert times == sorted(times)  # append-only: never back-dated

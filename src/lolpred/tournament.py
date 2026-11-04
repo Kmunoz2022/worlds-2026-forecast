@@ -43,12 +43,12 @@ def form_posterior(L, games, sd=FORM_SD):
     L: log-odds matrix; games: [(winner, loser), ...] as team indices."""
     n = L.shape[0]
     resid, info = np.zeros(n), np.zeros(n)
-    for w, l in games:
-        p = 1 / (1 + np.exp(-L[w, l]))
+    for w, lose in games:
+        p = 1 / (1 + np.exp(-L[w, lose]))
         resid[w] += 1 - p
-        resid[l] -= 1 - p
+        resid[lose] -= 1 - p
         info[w] += p * (1 - p)
-        info[l] += p * (1 - p)
+        info[lose] += p * (1 - p)
     prec = 1 / sd ** 2 + info
     return resid / prec, np.sqrt(1 / prec)
 
@@ -140,15 +140,15 @@ def swiss(P, pools, region, rng, tally=None, round1=None, results=None, known_pa
                 ka, kb, wa, wb = known
                 if tally is not None:
                     tally.append(known)
-                w, l = (ka, kb) if wa > wb else (kb, ka)
+                w, lose = (ka, kb) if wa > wb else (kb, ka)
             else:
                 deciding = wins[a] == 2 or losses[a] == 2
                 p = None
                 if PB is not None and not deciding and pool_of[a] != pool_of[b]:
                     p = PB[a, b] if pool_of[a] < pool_of[b] else 1 - PB[b, a]
-                w, l = play(P, a, b, 3 if deciding else 1, rng, tally, p)
+                w, lose = play(P, a, b, 3 if deciding else 1, rng, tally, p)
             wins[w] += 1
-            losses[l] += 1
+            losses[lose] += 1
             played.add(frozenset((a, b)))
         active = [t for pool in pools.values() for t in pool if wins[t] < 3 and losses[t] < 3]
         if not active:
@@ -185,8 +185,8 @@ def knockouts(P, records, region, rng, tally=None, bracket=None, results=None):
         qf = [tuple(pr) for pr in bracket]
     else:
         by = defaultdict(list)
-        for t, (_, l) in records.items():
-            by[l].append(t)
+        for t, (_, lost) in records.items():
+            by[lost].append(t)
         for _ in range(100):
             s0, s1, s2 = (list(rng.permutation(by[k])) for k in (0, 1, 2))
             # Half 1: 3-0 vs 3-2, 3-1 vs 3-1. Half 2: 3-0 vs 3-2, 3-1 vs 3-2.
@@ -230,8 +230,8 @@ def simulate(P, play_in_teams, pools, pi_slot, region, n_sims=20000, seed=0, pla
         sim_pools = {k: [pi_winner if t == pi_slot else t for t in v] for k, v in pools.items()}
         r1 = [tuple(pi_winner if t == pi_slot else t for t in pr) for pr in swiss_round1] if swiss_round1 else None
         rec = swiss(P, sim_pools, region, rng, t_sw, r1, swiss_results, swiss_known_pairs, PBs)
-        for t, (w, l) in rec.items():
-            counts[t][f"{w}-{l}"] += 1
+        for t, (w, lost) in rec.items():
+            counts[t][f"{w}-{lost}"] += 1
             counts[t]["swiss"] += 1
             if w == 3:
                 counts[t]["qualify"] += 1

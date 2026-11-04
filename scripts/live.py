@@ -19,7 +19,7 @@ import json
 import sys
 import threading
 import time
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -103,7 +103,7 @@ class LiveTracker:
             self.logged.add((gid, int(minute)))
             LIVE_LOG.parent.mkdir(exist_ok=True)
             with LIVE_LOG.open("a") as f:
-                f.write(json.dumps({"logged_at": livefeed.ts(datetime.now(timezone.utc)), "game_id": gid,
+                f.write(json.dumps({"logged_at": livefeed.ts(datetime.now(UTC)), "game_id": gid,
                                     "match_id": event["match"]["id"], "league": event["league"]["slug"],
                                     "blue": g["blue"], "red": g["red"], "minute": int(minute),
                                     "p_blue": round(p, 4), "p_pre_blue": round(g["p_pre_blue"], 4),
@@ -133,7 +133,7 @@ class LiveTracker:
 
 def write_live(states):
     LIVE_DIR.mkdir(parents=True, exist_ok=True)
-    out = {"updated": livefeed.ts(datetime.now(timezone.utc)), "games": states}
+    out = {"updated": livefeed.ts(datetime.now(UTC)), "games": states}
     tmp = LIVE_DIR / "live.json.tmp"
     tmp.write_text(json.dumps(out, ensure_ascii=False))
     tmp.replace(LIVE_DIR / "live.json")
@@ -166,7 +166,7 @@ def run_live(leagues, interval, port):
                 detail = livefeed.event_details(ev["match"]["id"])
                 for game in (detail or {}).get("match", {}).get("games", []):
                     if game["state"] == "inProgress":
-                        s = tracker.game_state(detail, game, datetime.now(timezone.utc))
+                        s = tracker.game_state(detail, game, datetime.now(UTC))
                         if s:
                             states.append(s)
                             print_state(s)

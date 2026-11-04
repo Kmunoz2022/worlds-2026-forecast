@@ -30,7 +30,7 @@ def test_swiss_uses_drawn_round_one_and_known_results():
         rec = swiss(P, POOLS, REGION, np.random.default_rng(seed), tally, round1, results)
         assert [tuple(t[:2]) for t in tally[:8]] == round1
         assert all(rec[t][0] >= 1 for t in range(8)) and all(rec[t][1] >= 1 for t in range(8, 16))
-        assert all(w == 3 or l == 3 for w, l in rec.values())
+        assert all(w == 3 or lost == 3 for w, lost in rec.values())
 
 
 def test_swiss_round_two_keeps_known_pairs():

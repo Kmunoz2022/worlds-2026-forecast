@@ -26,8 +26,8 @@ sys.path.insert(0, str(ROOT / "src"))
 import pandas as pd  # noqa: E402
 
 from lolpred.config import PROCESSED_DIR  # noqa: E402
-from lolpred.crystal_track import norm, results_facts, score_all, tally  # noqa: E402
 from lolpred.crystal import load_player_games  # noqa: E402
+from lolpred.crystal_track import norm, results_facts, score_all, tally  # noqa: E402
 from lolpred.draft import load_draft_events  # noqa: E402
 from lolpred.splits import worlds_start  # noqa: E402
 

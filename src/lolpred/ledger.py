@@ -8,7 +8,7 @@ played series is graded against the most recent unused prediction made
 before it started.
 """
 import json
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 import numpy as np
 import pandas as pd
@@ -20,7 +20,7 @@ LEDGER = ROOT / "ledger" / "predictions.jsonl"
 
 
 def now_utc() -> str:
-    return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+    return datetime.now(UTC).strftime("%Y-%m-%dT%H:%M:%SZ")
 
 
 def load() -> list[dict]:

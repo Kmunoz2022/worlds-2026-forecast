@@ -11,7 +11,7 @@ import os
 import time
 import urllib.error
 import urllib.request
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 from .config import ROOT
 
@@ -58,7 +58,7 @@ def _get(url, tries=3):
 
 def ts(dt: datetime) -> str:
     """Feed timestamps must be whole multiples of 10 seconds."""
-    dt = dt.astimezone(timezone.utc).replace(microsecond=0)
+    dt = dt.astimezone(UTC).replace(microsecond=0)
     return dt.replace(second=dt.second // 10 * 10).strftime("%Y-%m-%dT%H:%M:%SZ")
 
 

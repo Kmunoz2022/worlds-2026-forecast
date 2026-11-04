@@ -19,8 +19,8 @@ import pandas as pd  # noqa: E402
 
 from lolpred.config import PROCESSED_DIR  # noqa: E402
 from lolpred.predict import MatchPredictor  # noqa: E402
-from lolpred.series import KAPPA, score_distribution, series_win_prob  # noqa: E402
 from lolpred.record import RESULTS, read_jsonl  # noqa: E402
+from lolpred.series import KAPPA, score_distribution, series_win_prob  # noqa: E402
 from lolpred.tournament import FORM_SD, RECORDS, pickem, setup_from_config, simulate  # noqa: E402
 
 CONFIG = ROOT / "config" / "worlds2026.json"

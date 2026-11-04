@@ -52,7 +52,6 @@ def live_section(cfg, tg):
     names = list(cfg["teams"])
     ids = {n: cfg["teams"][n]["teamid"] for n in names}
     p_blue = {b: {r: round(pred.game_prob_sided(ids[b], ids[r]), 4) for r in names if r != b} for b in names}
-    recent = tg[(tg["season"] == tg["season"].max()) & tg["teamid"].isin(ids.values())]
     by_id = {v: k for k, v in ids.items()}
     pl = pd.read_parquet(PROCESSED_DIR / "player_games.parquet", columns=["playername", "teamid", "date"])
     pl = pl[(pl["date"] >= "2026-01-01") & pl["teamid"].isin(ids.values())].sort_values("date")

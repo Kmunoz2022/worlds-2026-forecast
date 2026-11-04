@@ -1,0 +1,11 @@
+# Code checks (run in CI next to the tests): .venv/bin/ruff check .
+line-length = 120
+target-version = "py312"
+extend-exclude = ["notes", ".venv"]
+
+[lint]
+# pyflakes, pycodestyle, import order, bugbear, pyupgrade
+select = ["E", "F", "W", "I", "B", "UP"]
+# Long lines are allowed (tables of numbers and messages read better unwrapped);
+# zip() without strict= is fine where lengths are equal by construction.
+ignore = ["E501", "B905"]

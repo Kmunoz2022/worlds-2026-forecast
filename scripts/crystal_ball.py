@@ -18,10 +18,21 @@ import numpy as np  # noqa: E402
 import pandas as pd  # noqa: E402
 
 from lolpred.config import PROCESSED_DIR  # noqa: E402
-from lolpred.crystal import (INTL_EVENTS, POSITIONS, LengthModel, TeamPools, champion_pick_history,  # noqa: E402
-                             champion_sim, current_rosters, load_player_games, p_at_least_one,
-                             rare_event_rate, simulate_players, unique_champions_model,
-                             worlds_like_games)
+from lolpred.crystal import (  # noqa: E402
+    INTL_EVENTS,
+    POSITIONS,
+    LengthModel,
+    TeamPools,
+    champion_pick_history,
+    champion_sim,
+    current_rosters,
+    load_player_games,
+    p_at_least_one,
+    rare_event_rate,
+    simulate_players,
+    unique_champions_model,
+    worlds_like_games,
+)
 from lolpred.draft import champion_rates, load_draft_events, simulate_leaders  # noqa: E402
 from lolpred.predict import MatchPredictor  # noqa: E402
 from lolpred.splits import worlds_start  # noqa: E402
@@ -299,7 +310,7 @@ def main():
             (115, 120, "115-119"), (120, 999, "120+")]
     Q.append(question("unique", "How many unique champions will be picked?",
                       [{"label": lab, "p": round(float(np.mean((draws >= lo) & (draws < hi))), 4)} for lo, hi, lab in bins],
-                      f"Fit on Fearless-draft-era international events (games vs unique champions): "
+                      "Fit on Fearless-draft-era international events (games vs unique champions): "
                       + ", ".join(f"{e} {r['games']} games/{r['unique']}" for e, r in uev.iterrows())
                       + f". Median forecast {np.median(draws):.0f} over ~{n_games.mean():.0f} games.",
                       extra={"median": round(float(np.median(draws)), 1)}))

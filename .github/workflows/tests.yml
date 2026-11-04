@@ -21,6 +21,8 @@ jobs:
           python-version: "3.13"
           cache: pip
       - run: pip install -r requirements.txt -r requirements-dev.txt
+      - name: Code checks (ruff)
+        run: ruff check .
       - name: Unit tests
         run: python -m pytest -q
       - name: Ledger is append-only, locked picks unchanged
