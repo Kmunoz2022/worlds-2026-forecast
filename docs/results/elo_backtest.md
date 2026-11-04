@@ -100,7 +100,7 @@ bin
 6                         T1         LCK    2015.0    833
 8        Hanwha Life Esports         LCK    1988.0    667
 9               French Flair         LFL    1963.0     40
-10           Invictus Gaming         LPL    1957.0    529
+10           Invictus Gaming         LPL    1962.0    533
 12                KT Rolster         LCK    1937.0    600
 13    KT Rolster Challengers        LCKC    1933.0    574
 14                 BNK FEARX         LCK    1926.0    373
