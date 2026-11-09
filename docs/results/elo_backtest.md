@@ -67,11 +67,11 @@ worlds_all         Elo (cross-region)   430     0.628     0.622  0.217
                    Stronger region      430     0.656     0.614  0.213
                    Blue-side rate       430     0.549     0.689  0.248
                    Always 50%           430     0.549     0.693  0.250
-cross_league_2023+ Elo (cross-region)  4333     0.676     0.606  0.208
-                   Elo (plain)         4333     0.584     0.671  0.239
-                   Stronger region     4333     0.647     0.627  0.218
-                   Blue-side rate      4333     0.539     0.690  0.249
-                   Always 50%          4333     0.539     0.693  0.250
+cross_league_2023+ Elo (cross-region)  4340     0.676     0.606  0.207
+                   Elo (plain)         4340     0.585     0.670  0.239
+                   Stronger region     4340     0.647     0.627  0.218
+                   Blue-side rate      4340     0.539     0.690  0.249
+                   Always 50%          4340     0.539     0.693  0.250
 ```
 
 ## Calibration (Worlds 2022-2025 pooled, cross-region Elo)
@@ -91,34 +91,34 @@ bin
 
 ```
                     teamname home_league  strength  games
-0            Bilibili Gaming         LPL    2211.0    798
-1                    Galions         LFL    2157.0    230
-2                      Gen.G         LCK    2113.0    697
+0            Bilibili Gaming         LPL    2210.0    802
+1                      Gen.G         LCK    2186.0    700
+2                    Galions         LFL    2157.0    230
 3                     Solary         LFL    2105.0    331
 4         T1 Esports Academy        LCKC    2100.0    598
-6                         T1         LCK    2005.0    837
-7            Invictus Gaming         LPL    2004.0    533
-8                  Dplus Kia         LCK    1980.0    681
-9        Hanwha Life Esports         LCK    1969.0    667
-10              French Flair         LFL    1963.0     40
-13    KT Rolster Challengers        LCKC    1933.0    574
-14         Ninjas in Pyjamas         LPL    1927.0    426
+6                         T1         LCK    2006.0    841
+7                  Dplus Kia         LCK    1999.0    681
+8        Hanwha Life Esports         LCK    1988.0    667
+9               French Flair         LFL    1963.0     40
+11                KT Rolster         LCK    1937.0    600
+12    KT Rolster Challengers        LCKC    1933.0    574
+13           Invictus Gaming         LPL    1930.0    536
+14                 BNK FEARX         LCK    1926.0    373
 15             Anubis Gaming          AL    1924.0    263
-16                   Team WE         LPL    1922.0    538
-17                KT Rolster         LCK    1918.0    600
-18                 BNK FEARX         LCK    1907.0    373
-19     Dplus Kia Challengers        LCKC    1906.0    580
+17         Ninjas in Pyjamas         LPL    1908.0    426
+18     Dplus Kia Challengers        LCKC    1906.0    580
+19                   Team WE         LPL    1903.0    538
 20  Nongshim Esports Academy        LCKC    1903.0    549
-21               Top Esports         LPL    1897.0    703
+21                DN SOOPers         LCK    1893.0    486
 22            BK ROG Esports         LFL    1888.0    300
 ```
 
 ## League offsets (top 15)
 
 ```
-LCK       422.0
+LCK       441.0
 LFL       400.0
-LPL       351.0
+LPL       332.0
 LCKC      327.0
 PRM       249.0
 LVP SL    242.0
