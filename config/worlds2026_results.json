@@ -28,8 +28,13 @@
     "Top Esports": 5,
     "LYON": 5,
     "Dplus KIA": 5,
-    "Karmine Corp": 5
+    "Karmine Corp": 5,
+    "Bilibili Gaming": 1,
+    "Gen.G": 2
   },
-  "finals_mvp": null,
-  "finished": false
+  "finals_mvp": {
+    "player": "Knight",
+    "role": "Mid"
+  },
+  "finished": true
 }
